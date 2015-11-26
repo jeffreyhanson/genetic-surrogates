@@ -1,0 +1,196 @@
+---
+title: "Are environmental and geographic effective surrogates for genetic variation in conservation planning?"
+author: |
+  | Jeffrey O. Hanson$^1$, Jonathan R. Rhodes$^2$, Cynthia Riginos$^2$, Hugh P. Possingham$^1$, Richard A. Fuller$^1$
+  | $^1$School of Biological Sciences, The University of Queensland, Brisbane, QLD, Australia
+  | $^2$School of Geography, Planning and Environmental Management, The University of Queensland, Brisbane, QLD, Australia
+  | Correspondance should be addressed to jeffrey.hanson@uqconnect.edu.au
+date: "`r format(Sys.time(), '%d %B %Y')`"
+tags: ["conservation", "biodiversity", "AFLP", "reserve-selection"]
+abstract: "Insert abstract here."
+output:
+  rmarkdown::pdf_document:
+    toc: true
+    toc_depth: 5
+    keep_tex: yes
+    fig_caption: yes
+    includes:
+      in_header: preamble-latex.tex
+fontsize: 11pt
+documentclass: article
+bibliography: Endnote_lib.bib
+csl: reference-style.csl
+vignette: >
+  %\VignetteIndexEntry{rapr}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+```{r, iclude=FALSE}
+# set global cache
+knitr::opts_chunk$set(cache=FALSE)
+
+# set seed for reproducibility
+set.seed(500)
+```
+ 
+## Introduction
+
+
+## Methods
+
+
+### Study area
+To address the aims of this study, we obtained species distribution and genomic (AFLP) from [@r451]. This dataset was chosen because it provides genomic data for a multitude of species at a high spatial resolution (approx. $20$km$^{2} \times 22$km$^{2}$).
+
+
+```{r}
+## compile spatial data
+# load grid cells
+grid.DF <- fread(
+	'inst/extdata/Data Meirmans et al IntrabioDiv/ReadMe.txt',
+	data.table=FALSE,
+	skip='cell\tLong\tLat'
+) %>% rename(
+		grid.longitude=Long,
+		grid.latitude=Lat
+)
+
+# load in distribution data
+spp.loc.files <- dir(
+	'inst/extdata/Data Meirmans et al IntrabioDiv',
+	'^.*locations\\.txt$',
+	full.names=TRUE)
+
+spp.loc.DF <- ldply(
+	spp.loc.files,
+	.fun=function(x) {
+		mutate(
+			fread(x, data.table=FALSE),
+			species=gsub('_', '', gsub('_locations.txt', '', basename(x), fixed=TRUE), fixed=TRUE),
+			presence='present'
+		) %>% rename(
+			cell=population,
+			sample.longitude=longitude,
+			sample.latitude=latitude
+		)
+	}
+)
+
+# make presence-absence data
+spp.loc.DF <- ddply(spp.loc.DF, 'species', .fun=function(x) {
+	# merge presences with grid data
+	x %>% full_join(
+		grid.DF,
+		by='cell',
+		all=TRUE
+	) %>% mutate(
+		species=replace(species, is.na(species),
+			first(na.omit(species))),
+		presence=replace(presence, is.na(presence),
+			'absent')
+	) %>% arrange(
+		cell
+	)
+})
+
+```
+
+```{r}
+## plot map of species distributions'
+# download basemap
+data(countriesHigh)
+countries.PL <- countriesHigh[
+	countriesHigh$ADMIN %in% c(
+		'Italy', 'Switzerland', 'France', 'Austria',
+		'Germany', 'Slovenia', 'Croatia', 'Hungary',
+		'Monaco', 'Germany'
+	)
+,]
+
+# plot species data
+ggplot() +
+	geom_polygon(data=countries.PL, aes(x=long, y=lat, group=group)) +
+	geom_point(
+		data=spp.loc.DF, 
+		aes(x=grid.longitude, y=grid.latitude, color=presence),
+		size=2.5
+	) +
+	scale_color_manual(
+		name='presence',
+		values=c('present'='red', 'absent'='transparent')
+	) +
+	theme_classic() +
+	theme(axis.ticks=element_blank(), axis.text=element_blank()) +
+	coord_cartesian(
+		xlim=buffered.range(spp.loc.DF$grid.longitude, 0.05),
+		ylim=buffered.range(spp.loc.DF$grid.latitude, 0.05)
+	) +
+	xlab('') +
+	ylab('') +
+	facet_wrap(~ species, ncol=5)
+
+```
+
+```{r}
+# calculate species richness for each planning unit
+rich.loc.DF <- spp.loc.DF %>% filter (
+	presence=='present'
+) %>% group_by(
+	cell
+) %>% summarise(
+	grid.longitude=first(grid.longitude),
+	grid.latitude=first(grid.latitude),
+	richness=n_distinct(species)
+)
+
+# plot map of species richness
+ggplot() +
+	geom_polygon(data=countries.PL, aes(x=long, y=lat, group=group), color='gray20') +
+	geom_point(
+		data=rich.loc.DF, 
+		aes(x=grid.longitude, y=grid.latitude, color=richness),
+		size=4
+	) +
+	theme_classic() +
+	theme(axis.ticks=element_blank(), axis.text=element_blank()) +
+	coord_cartesian(
+		xlim=buffered.range(spp.loc.DF$grid.longitude, 0.05),
+		ylim=buffered.range(spp.loc.DF$grid.latitude, 0.05)
+	) +
+	xlab('') +
+	ylab('')
+
+```
+
+
+### Genomic data
+
+
+### Surrogate data
+
+```{r}
+# compile spatial data
+
+```
+
+```{r}
+# plot map of averages per quadrat
+
+```
+
+### Prioritisations
+
+
+
+## Results
+
+## Discussion
+
+##
+
+## Acknowledgements
+JOH is funded by an Australian Postgraduate Award (APA) scholarship. RAF has an Australian Research Council Future Fellowship. This work was supported by the Centre of Excellence for Environmental Decisions (CEED) and the Landscape Ecology and Conservation Group (LEC) at The University of Queensland.
+
+## References
+<span style="color:white">blank</span>
