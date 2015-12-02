@@ -1,3 +1,3 @@
 library(testthat)
-library(geneticsurrogates)
-test_check("geneticsurrogates")
+library(genetic.surrogates)
+test_check("genetic.surrogates")
