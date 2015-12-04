@@ -39,4 +39,8 @@ Collate:
     'BayeScanOpts.R'
     'BayeScan.R'
     'data.R'
+    'make.multi.species.AttributeSpace.R'
+    'make.single.species.AttributeSpace.R'
+    'make.targets.R'
+    'species.prioritisations.R'
 RoxygenNote: 5.0.1

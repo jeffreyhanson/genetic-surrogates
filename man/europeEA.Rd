@@ -3,16 +3,16 @@
 \docType{data}
 \name{europeEA}
 \alias{europeEA}
-\title{Europe Albers Equal Area Conic CRS}
+\title{Europe Lambert Conformal Conic CRS}
 \format{An object of class \code{CRS} of length 1.}
 \usage{
 europeEA
 }
 \description{
-This object stores the coordinate reference system (CRS) for latitude/longitude data (WGS1984).
+This object stores the coordinate reference system (CRS) for the Europe Lambert Conformal Conic projection.
 }
 \examples{
-europeEA <- CRS('+init=esri:102013')
+europeEA <- CRS('+init=esri:102014')
 }
 \seealso{
 \code{\link[sp]{CRS}}

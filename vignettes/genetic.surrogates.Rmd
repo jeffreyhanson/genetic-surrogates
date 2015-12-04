@@ -35,6 +35,8 @@ library(genetic.surrogates)
 library(data.table)
 library(rgeos)
 library(ggplot2)
+library(grid)
+library(gridExtra)
 library(plyr)
 library(dplyr)
 library(pander)
@@ -47,6 +49,9 @@ select <- dplyr::select
 
 ### set parameters
 ## debugging parameters
+# number of species
+n.spp <- 3
+# BayeScan parameters
 bs.threshold <- 0.5
 bs.threads <- 1
 bs.n <- 50
@@ -54,20 +59,34 @@ bs.thin <- 1
 bs.nbp <- 10
 bs.pilot <- 50
 bs.burn <- 10
+# MDS parameters
 mds.k <- 2
 mds.trymax <- 2
-n.spp <- 3
+# Gurobi parameters
+gb.Threads <- 1L
+gb.MIPGap <- 0.9
+# targets
+rapr.amount.target <- 0.2
+rapr.surrogate.target <- 0.9
+rapr.genetic.target <- 0.9
 
 ## analysis parameters
+## number of species
+## n.spp <- 27
+## BayeScan parameters
 # bs.threshold <- 0.95
 # bs.threads <- 10
 # bs.n <- 5000
 # bs.thin <- 10
 # bs.nbp <- 20
-# bs.pilot <- 5000
+# bs.pilot <- 50000
 # bs.burn <- 50000
+# MDS parameters
 # mds.k <- 2
 # mds.trymax <- 100
+## Gurobi parameters
+# gb.Threads <- 10
+# gb.MIPGap <- 0.05
 
 # set seed for reproducibility
 set.seed(500)
@@ -119,7 +138,6 @@ spp.loc.paths <- dir(
 	'^.*locations\\.txt$',
 	full.names=TRUE
 )[seq_len(n.spp)]
-
 spp.samples.DF <- ldply(
 	seq_along(spp.loc.paths),
 	.fun=function(i) {
@@ -144,31 +162,6 @@ for (i in unique(spp.samples.DF$species))
 		which(grid.DF$cell %in% filter(spp.samples.DF, species==i)$cell),
 		1
 	)
-```
-
-```{r}
-## create spatial data
-# grid data as SpatialPolygonsDataFrame
-grid.PTS <- SpatialPoints(as.matrix(grid.DF[,2:3]))
-grid.PLY <- grid.PTS %>%
-	points2grid(tolerance=0.05) %>%
-	as('SpatialPolygons')
-grid.PLY <- grid.PLY[sapply(gIntersects(grid.PTS, grid.PLY, byid=TRUE, returnDense=FALSE), `[[`, 1),] %>%
-	spChFIDs(
-		as.character(seq_len(nrow(grid.DF)))
-	) %>% 
-	SpatialPolygonsDataFrame(
-		data=grid.DF
-	)
-grid.PLY@proj4string <- wgs1984
-grid.PPLY <- spTransform(grid.PLY, europeEA)
-# sample data as SpatialPoints
-spp.sample.PTS <- SpatialPointsDataFrame(
-	coords=as.matrix(spp.samples.DF[,5:6]),
-	data=spp.samples.DF,
-	proj4string=wgs1984
-)
-spp.sample.PPTS <- spTransform(spp.sample.PTS, europeEA)
 ```
 
 ### Genomic data
@@ -250,27 +243,225 @@ for (i in seq_along(unique(spp.samples.DF$species))) {
 }
 ```
 ### Surrogate data
+
 ```{r}
-
-
+## create spatial data
+# grid data as SpatialPolygonsDataFrame
+grid.PTS <- SpatialPoints(as.matrix(grid.DF[,2:3]))
+grid.PLY <- grid.PTS %>%
+	points2grid(tolerance=0.05) %>%
+	as('SpatialPolygons')
+grid.PLY <- grid.PLY[sapply(gIntersects(grid.PTS, grid.PLY, byid=TRUE, returnDense=FALSE), `[[`, 1),] %>%
+	spChFIDs(
+		as.character(seq_len(nrow(grid.DF)))
+	) %>% 
+	SpatialPolygonsDataFrame(
+		data=grid.DF
+	)
+grid.PLY@proj4string <- wgs1984
+grid.PPLY <- spTransform(grid.PLY, europeEA)
+# sample data as SpatialPoints
+spp.sample.PTS <- SpatialPointsDataFrame(
+	coords=as.matrix(spp.samples.DF[,5:6]),
+	data=spp.samples.DF,
+	proj4string=wgs1984
+)
+spp.sample.PPTS <- spTransform(spp.sample.PTS, europeEA)
+## extract geographic data
+centroids.DF <- gCentroid(grid.PPLY, byid=TRUE) %>% slot('coords') %>%
+	as.data.frame() %>% `names<-`(paste0('geo_d',1:2))
+grid.DF <- cbind(grid.DF, centroids.DF)
+## extract climatic data
+# load climatic data
+bioclim.STK <- stack('extdata/BioClim_variables/bioclim_pca.tif')
+# extract mean for each cell for each principle component
+extract.DF <- grid.PPLY %>% rasterize(bioclim.STK, field='id') %>% 
+	zonal(x=bioclim.STK) %>% as.data.frame() %>% select(-1) %>%
+	`names<-`(paste0('env_d',seq_len(nlayers(bioclim.STK))))
+# merge with grid.DF
+grid.DF <- cbind(grid.DF, extract.DF)
+## update spatial objects
+grid.PLY@data <- grid.DF
+grid.PPLY@data <- grid.DF
 ```
 
 ### Prioritisations
 
+```{r}
+# generate attribute spaces for geographic and environmental data
+surrogate.ASL <- llply(
+	list(grep('^env.*$', names(grid.DF)),grep('^geo.*$', names(grid.DF))),
+	.fun=function(x) {
+		make.multi.species.AttributeSpace(
+			site.data=grid.DF[,x,drop=FALSE],
+			species.data=grid.DF[,unique(spp.samples.DF$species),drop=FALSE]
+		)
+	}
+)
+# generate attribute spaces for genetic data
+adaptive.ASL <- llply(
+	seq_along(unique(spp.samples.DF$species)),
+	function(i) {
+		make.single.species.AttributeSpace(
+			site.data=select(grid.DF, contains(paste0(unique(spp.samples.DF$species)[i], '_adaptive'))),
+			species.data=select(filter(spp.samples.DF, species==unique(spp.samples.DF$species)[i]), contains('adaptive')),
+			spp.pos=i,
+			n.species=n_distinct(spp.samples.DF$species)
+		)
+	}
+)
+neutral.ASL <- llply(
+	seq_along(unique(spp.samples.DF$species)),
+	function(i) {
+		make.single.species.AttributeSpace(
+			site.data=select(grid.DF, contains(paste0(unique(spp.samples.DF$species)[i], '_neutral'))),
+			species.data=select(filter(spp.samples.DF, species==unique(spp.samples.DF$species)[i]), contains('neutral')),
+			spp.pos=i,
+			n.species=n_distinct(spp.samples.DF$species)
+		)
+	}
+)
+# make table with targets
+target.DF <- make.targets(
+	species=unique(spp.samples.DF$species),
+	environmental.space=as1[[1]], geographic.space=as1[[2]],
+	adaptive.spaces=adaptive.ASL, neutral.spaces=neutral.ASL,
+	amount.target=0.2, space.target=0.2
+)
+# make Rap objects
+rd <- RapData(
+	polygon=SpatialPolygons2PolySet(grid.PLY),
+	pu=data.frame(
+		cost=rep(1, nrow(grid.DF)),
+		area=rep(1, nrow(grid.DF)),
+		status=rep(0L, nrow(grid.DF))
+	),
+	species=data.frame(name=unique(spp.samples.DF$species)),
+	target=target.DF,
+	attribute.spaces=append(as1, as2),
+	pu.species.probabilities=ldply(
+		seq_along(unique(spp.samples.DF$species)),
+		.fun=function(i) {
+			data.frame(
+				species=i,
+				pu=which(grid.DF[[unique(spp.samples.DF$species)[i]]]==1),
+				value=1
+			)
+		}
+	),
+	boundary=calcBoundaryData(grid.PLY)
+)
+ru <- RapUnsolved(RapUnreliableOpts(), rd)
+```
+
+```{r}
+## single species analysis
+# generate RapSolved objects
+single.spp.prioritisations <- llply(
+	seq_along(unique(spp.samples.DF$species)),
+	spp.subset,
+	x=ru
+)
+single.spp.prioritisations <- llply(
+	single.spp.prioritisations,
+	function(x) {
+		llply(
+			list(
+				c(rapr.amount.target,0,0), c(rapr.amount.target,rapr.surrogate.target,0), 
+					c(rapr.amount.target,0,rapr.genetic.target,0)
+			), 
+			function(y) {
+				species.prioritisation(
+					x=x,
+					amount.targets=y[1],
+					surrogate.targets=y[2],
+					genetic.targets=y[3],
+					Threads=gb.Threads,
+					MIPGap=gb.MIPGap
+				)
+			}
+		)
+	}
+)
+# generate results table
+single.spp.DF <- ldply(
+	seq_along(unique(spp.samples.DF$species)),
+	function(i) {
+		data.frame(
+			Species=rep(unique(spp.samples.DF$species)[i], 15),
+			Metric=rep(c('Habitat secured (%)', 'Geographic range secured (%)', 'Environmental variation secured (%)', 'Neutral genetic variation (%)', 'Adaptive genetic variation (%)'), 3),
+			Prioritisation=rep(c('Amount-based prioritisations', 'Surrogate-based prioritisations', 'Genetic-based prioritisations'), each=5),
+			Value=sapply(single.spp.prioritisations[[i]], function(rs) {
+				c(rs@results@amount.held[1,1,1], rs@results@space.held[1,1,1], rs@results@space.held[2,1,1]
+				rs@results@space.held[i+2,1,1], rs@results@space.held[i+n_distinct(spp.samples.DF$species)+2,1,1])
+			})
+		)
+	}
+)
+```
+
+```{r}
+## multispecies analysis
+# make prioritisations
+multi.spp.prioritisations <- species.prioritisations(
+	x=ru,
+	amount.targets=rapr.amount.target,
+	surrogate.targets=rapr.surrogate.targets,
+	genetic.targets=rapr.genetic.targets
+)
+# generate results table
+```
+
+```{r}
+## pareto frontier analysis
+# generate prioritistions
+pareto.prioritisations <- llply(
+	rapr.pareto.surrogate.targets,
+	species.prioritisations,
+	x=ru,
+	amount.targets=0,
+	genetic.targets=0
+)
+# extract results
+```
 
 
 ## Results
 
+```{r, fig.width=, fig.height=, fig.cap='Summary of single species prioritisations. Single species prioritisations were generated using amount-based targets, amount-based and surrogate-based targets, and amount-based and genetic-based targets for each species. Data shows the performance of prioritisations generated using these three sets of targets. Bars denote means and standard errors.'}
+# make plot
+
+```
+
+```{r, fig.width=, fig.height=, fig.cap='Multi-species prioritisations. Panel (a) shows the prioritisation generated for using just amount-based targets. Panel (b) shows the prioritisation generated using amount-based and surrogate based targets. Panel (c) shows the prioritisation generated using amount-based and genetic-based targets'}
+# make maps
+
+```
+
+```{r, fig.width=, fig.height=, fig.cap='Summary of multi-species prioritisations. Single species prioritisations were generated using amount-based targets, amount-based and surrogate-based targets, and amount-based and genetic-based targets for each species. Data shows the performance of prioritisations generated using these three sets of targets. Bars denote means and standard errors.'}
+# make plot
+
+```
+
+```{r, fig.width=, fig.height=, fig.cap=''}
+
 ## Discussion
 
+
+## Acknowledgements
+JOH is funded by an Australian Postgraduate Award (APA) scholarship. RAF has an Australian Research Council Future Fellowship. This work was supported by the Centre of Excellence for Environmental Decisions (CEED) and the Landscape Ecology and Conservation Group (LEC) at The University of Queensland.
+
+## References
+
+
 ## Supporting Information
-# Appendix S1: Species distributions
+### Appendix S1: Species distributions
 
 ```{r, fig.width=9.5, fig.height=10, out.width='7.5in', out.height='8.5in', fig.cap='Species distributions. Squares represent planning units. For a given species, planning units that were found to be inhabited are denoted with bright blue.'}
 ## plot map of species distributions
 # download basemap
 data(countriesHigh)
-countries.FPL <- countriesHigh[
+countries.FPLY <- countriesHigh[
 	countriesHigh$ADMIN %in% c(
 		'Italy', 'Switzerland', 'France', 'Austria',
 		'Germany', 'Slovenia', 'Croatia', 'Hungary',
@@ -279,7 +470,7 @@ countries.FPL <- countriesHigh[
 ,] %>% spFortify
 # fortify data
 grid.FPLY <- spFortify(grid.PLY)
-grid.FPLY <- ldply(unique(spp.samples.DF$species), function(x) {
+spp.grid.FPLY <- ldply(unique(spp.samples.DF$species), function(x) {
 		z <- grid.FPLY[,c('long', 'lat', 'group', x),drop=FALSE]
 		names(z)[4] <- 'presence'
 		z$species <- gsub('\\_', ' ', x)
@@ -288,9 +479,9 @@ grid.FPLY <- ldply(unique(spp.samples.DF$species), function(x) {
 )
 # plot species data
 ggplot() +
-	geom_polygon(data=countries.FPL, aes(x=long, y=lat, group=group),
+	geom_polygon(data=countries.FPLY, aes(x=long, y=lat, group=group),
 		fill='grey20', color='grey80') +
-	geom_polygon(data=grid.FPLY, aes(x=long, y=lat, 
+	geom_polygon(data=spp.grid.FPLY, aes(x=long, y=lat, 
 		group=group, fill=presence), alpha=0.8, color='grey10') +
 	theme_classic() +
 	guides(fill=guide_legend(title='Presence')) +
@@ -311,7 +502,7 @@ grid.PLY$Species_richness <- grid.PLY@data %>%
 
 # plot species richness
 ggplot() +
-	geom_polygon(data=countries.FPL, aes(x=long, y=lat, group=group),
+	geom_polygon(data=countries.FPLY, aes(x=long, y=lat, group=group),
 		fill='grey20', color='grey80') +
 	geom_polygon(data=spFortify(grid.PLY), aes(x=long, y=lat, 
 		group=group, fill=Species_richness), alpha=0.8, color='grey10') +
@@ -327,9 +518,9 @@ ggplot() +
 	ggtitle('Species richness')
 ```
 
-## Appendix S2: Genomic MDS 
+### Appendix S2: Genomic MDS 
 ```{r}
-pandoc.table(
+knitr::kable(
 	ldply(
 		seq_along(unique(spp.samples.DF$species)), 
 		function(i) {
@@ -337,23 +528,104 @@ pandoc.table(
 				seq_along(spp.mds.LST[[i]]),
 				function(j) {
 				data.frame(
-					species=gsub('\\_', ' ', unique(spp.samples.DF$species)[i]),
-					type=names(spp.mds.LST[[i]])[j],
-					stress=spp.mds.LST[[i]][[j]]$stress,
-					converged=spp.mds.LST[[i]][[j]]$converged
+					Species=paste0('\\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[i]),'}'),
+					Loci=names(spp.mds.LST[[i]])[j],
+					Stress=spp.mds.LST[[i]][[j]]$stress,
+					Converged=spp.mds.LST[[i]][[j]]$converged
 				)
 			})
 		}
 	),
-	caption='Summary of metric-dimensional scaling analysis.'
+	digits=2,
+	caption='Summary of nonmetric-dimensional scaling (MDS) analyses on genetic variation for each species.'
 )
 ```
 
-## Appendix S3: Distribution maps of intra-specific variation
+### Appendix S3: Distribution maps of intra-specific variation
+```{r}
+plot.spp.mds <- function(i) {
+	do.call(
+		grid.arrange,
+		append(
+			unlist(llply(c('adaptive','neutral'), function(g) {
+				llply(seq_len(mds.k), function(k) {
+					ggplot() +
+						geom_polygon(data=countries.FPLY, aes(x=long, y=lat, group=group),
+							fill='grey20', color='grey80') +
+						geom_polygon(data=grid.FPLY, aes_string(x='long', y='lat', 
+							group='group', fill=paste0(unique(spp.samples.DF$species)[i], '_', j, '_d',k)),
+							alpha=0.8, color='grey10') +
+						guides(fill=guide_legend(title=' ')) +
+						theme_classic() +
+						theme(axis.ticks=element_blank(), axis.text=element_blank(),
+							plot.margin=unit(c(0,0,0,0),'cm')) +
+						coord_cartesian(
+							xlim=buffered.range(grid.FPLY$long, 0.05),
+							ylim=buffered.range(grid.FPLY$lat, 0.05)
+						) +
+						xlab('') +
+						ylab('') +
+						ggtitle(paste0(g,' (',k,')'))
+				})
+			}),recursive=FALSE),
+			list(ncol=2)
+		)
+	)
+}
+```
 
+```{r, fig.width=6.5, fig.height=4.5, fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[1]),'}. Each square represents a planning unit. The color of each planning unit panel corresponds to ordination values. Planning units with similar colors contain individiduals with similar genetic variation.')}
+plot.spp.mds(1)
+```
 
+```{r, fig.width=6.5, fig.height=4.5, fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[2]),'}. See Figure XX caption for conventions.')}
+plot.spp.mds(2)
+```
 
-## Acknowledgements
-JOH is funded by an Australian Postgraduate Award (APA) scholarship. RAF has an Australian Research Council Future Fellowship. This work was supported by the Centre of Excellence for Environmental Decisions (CEED) and the Landscape Ecology and Conservation Group (LEC) at The University of Queensland.
+```{r, fig.width=6.5, fig.height=4.5, fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[3]),'}. See Figure XX caption for conventions.')}
+plot.spp.mds(3)
+```
 
-## References
+### Appendix S4: Principle components analysis on climatic variation
+```{r}
+## load pca summary
+pca.DF <- read.table('extdata/BioClim_variables/pca.TXT', skip=80) %>% `names<-`(
+	c('Principle Component', 'Eigen Value', 'Variation explained (%)',
+	'Accumulative variation explained (%)')
+)
+## make results table showing Eigen values
+knitr::kable(
+	pca.DF,
+	digits=2,
+	caption='Summary of priciniple components analysis (PCA) on bioclimatic variation across the study area. The first two principle components (PCs) were used for subsequent analysis.'
+)
+```
+
+### Appendix S5: Maps of climatic variation
+```{r, width=6.5, height=4.5, fig.cap='Climatic variation. Each panel depicts variation based on a different principle component (PC). Sqaures represent planning units. The color of each planning unit denotes the average priciniple component value of pixels inside it. Planning units with more similar colors have more similar climates regimes.'}
+do.call(
+	grid.arrange,
+		append(
+		llply(grep('^env\\_.*$', names(grid.DF), value=TRUE), function(x) {
+			ggplot() +
+				geom_polygon(data=countries.FPLY, aes(x=long, y=lat, group=group),
+					fill='grey20', color='grey80') +
+				geom_polygon(data=grid.FPLY, aes_string(x='long', y='lat', 
+					group='group', fill=x),
+					alpha=0.8, color='grey10') +
+				guides(fill=guide_legend(title=' ')) +
+				theme_classic() +
+				theme(axis.ticks=element_blank(), axis.text=element_blank(),
+					plot.margin=unit(c(0,0,0,0),'cm')) +
+				coord_cartesian(
+					xlim=buffered.range(grid.FPLY$long, 0.05),
+					ylim=buffered.range(grid.FPLY$lat, 0.05)
+				) +
+				xlab('') +
+				ylab('') +
+				ggtitle(paste0('PC ', substr(x, nchar(x), nchar(x))))
+		}),
+		list(ncol=2)
+	)
+)
+```

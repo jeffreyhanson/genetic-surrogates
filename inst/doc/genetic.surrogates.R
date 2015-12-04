@@ -7,6 +7,8 @@ library(genetic.surrogates)
 library(data.table)
 library(rgeos)
 library(ggplot2)
+library(grid)
+library(gridExtra)
 library(plyr)
 library(dplyr)
 library(pander)
@@ -78,7 +80,6 @@ spp.loc.paths <- dir(
 	'^.*locations\\.txt$',
 	full.names=TRUE
 )[seq_len(n.spp)]
-
 spp.samples.DF <- ldply(
 	seq_along(spp.loc.paths),
 	.fun=function(i) {
@@ -103,30 +104,6 @@ for (i in unique(spp.samples.DF$species))
 		which(grid.DF$cell %in% filter(spp.samples.DF, species==i)$cell),
 		1
 	)
-
-## ------------------------------------------------------------------------
-## create spatial data
-# grid data as SpatialPolygonsDataFrame
-grid.PTS <- SpatialPoints(as.matrix(grid.DF[,2:3]))
-grid.PLY <- grid.PTS %>%
-	points2grid(tolerance=0.05) %>%
-	as('SpatialPolygons')
-grid.PLY <- grid.PLY[sapply(gIntersects(grid.PTS, grid.PLY, byid=TRUE, returnDense=FALSE), `[[`, 1),] %>%
-	spChFIDs(
-		as.character(seq_len(nrow(grid.DF)))
-	) %>% 
-	SpatialPolygonsDataFrame(
-		data=grid.DF
-	)
-grid.PLY@proj4string <- wgs1984
-grid.PPLY <- spTransform(grid.PLY, europeEA)
-# sample data as SpatialPoints
-spp.sample.PTS <- SpatialPointsDataFrame(
-	coords=as.matrix(spp.samples.DF[,5:6]),
-	data=spp.samples.DF,
-	proj4string=wgs1984
-)
-spp.sample.PPTS <- spTransform(spp.sample.PTS, europeEA)
 
 ## ------------------------------------------------------------------------
 # assign cells as populations
@@ -204,14 +181,50 @@ for (i in seq_along(unique(spp.samples.DF$species))) {
 }
 
 ## ------------------------------------------------------------------------
-
-
+## create spatial data
+# grid data as SpatialPolygonsDataFrame
+grid.PTS <- SpatialPoints(as.matrix(grid.DF[,2:3]))
+grid.PLY <- grid.PTS %>%
+	points2grid(tolerance=0.05) %>%
+	as('SpatialPolygons')
+grid.PLY <- grid.PLY[sapply(gIntersects(grid.PTS, grid.PLY, byid=TRUE, returnDense=FALSE), `[[`, 1),] %>%
+	spChFIDs(
+		as.character(seq_len(nrow(grid.DF)))
+	) %>% 
+	SpatialPolygonsDataFrame(
+		data=grid.DF
+	)
+grid.PLY@proj4string <- wgs1984
+grid.PPLY <- spTransform(grid.PLY, europeEA)
+# sample data as SpatialPoints
+spp.sample.PTS <- SpatialPointsDataFrame(
+	coords=as.matrix(spp.samples.DF[,5:6]),
+	data=spp.samples.DF,
+	proj4string=wgs1984
+)
+spp.sample.PPTS <- spTransform(spp.sample.PTS, europeEA)
+## extract geographic data
+centroids.DF <- gCentroid(grid.PPLY, byid=TRUE) %>% slot('coords') %>%
+	as.data.frame() %>% `names<-`(paste0('geo_d',1:2))
+grid.DF <- cbind(grid.DF, centroids.DF)
+## extract climatic data
+# load climatic data
+bioclim.STK <- stack('extdata/BioClim_variables/bioclim_pca.tif')
+# extract mean for each cell for each principle component
+extract.DF <- grid.PPLY %>% rasterize(bioclim.STK, field='id') %>% 
+	zonal(x=bioclim.STK) %>% as.data.frame() %>% select(-1) %>%
+	`names<-`(paste0('env_d',seq_len(nlayers(bioclim.STK))))
+# merge with grid.DF
+grid.DF <- cbind(grid.DF, extract.DF)
+## update spatial objects
+grid.PLY@data <- grid.DF
+grid.PPLY@data <- grid.DF
 
 ## ---- fig.width=9.5, fig.height=10, out.width='7.5in', out.height='8.5in', fig.cap='Species distributions. Squares represent planning units. For a given species, planning units that were found to be inhabited are denoted with bright blue.'----
 ## plot map of species distributions
 # download basemap
 data(countriesHigh)
-countries.FPL <- countriesHigh[
+countries.FPLY <- countriesHigh[
 	countriesHigh$ADMIN %in% c(
 		'Italy', 'Switzerland', 'France', 'Austria',
 		'Germany', 'Slovenia', 'Croatia', 'Hungary',
@@ -220,7 +233,7 @@ countries.FPL <- countriesHigh[
 ,] %>% spFortify
 # fortify data
 grid.FPLY <- spFortify(grid.PLY)
-grid.FPLY <- ldply(unique(spp.samples.DF$species), function(x) {
+spp.grid.FPLY <- ldply(unique(spp.samples.DF$species), function(x) {
 		z <- grid.FPLY[,c('long', 'lat', 'group', x),drop=FALSE]
 		names(z)[4] <- 'presence'
 		z$species <- gsub('\\_', ' ', x)
@@ -229,9 +242,9 @@ grid.FPLY <- ldply(unique(spp.samples.DF$species), function(x) {
 )
 # plot species data
 ggplot() +
-	geom_polygon(data=countries.FPL, aes(x=long, y=lat, group=group),
+	geom_polygon(data=countries.FPLY, aes(x=long, y=lat, group=group),
 		fill='grey20', color='grey80') +
-	geom_polygon(data=grid.FPLY, aes(x=long, y=lat, 
+	geom_polygon(data=spp.grid.FPLY, aes(x=long, y=lat, 
 		group=group, fill=presence), alpha=0.8, color='grey10') +
 	theme_classic() +
 	guides(fill=guide_legend(title='Presence')) +
@@ -251,7 +264,7 @@ grid.PLY$Species_richness <- grid.PLY@data %>%
 
 # plot species richness
 ggplot() +
-	geom_polygon(data=countries.FPL, aes(x=long, y=lat, group=group),
+	geom_polygon(data=countries.FPLY, aes(x=long, y=lat, group=group),
 		fill='grey20', color='grey80') +
 	geom_polygon(data=spFortify(grid.PLY), aes(x=long, y=lat, 
 		group=group, fill=Species_richness), alpha=0.8, color='grey10') +
@@ -267,7 +280,7 @@ ggplot() +
 	ggtitle('Species richness')
 
 ## ------------------------------------------------------------------------
-pandoc.table(
+knitr::kable(
 	ldply(
 		seq_along(unique(spp.samples.DF$species)), 
 		function(i) {
@@ -275,14 +288,95 @@ pandoc.table(
 				seq_along(spp.mds.LST[[i]]),
 				function(j) {
 				data.frame(
-					species=gsub('\\_', ' ', unique(spp.samples.DF$species)[i]),
-					type=names(spp.mds.LST[[i]])[j],
-					stress=spp.mds.LST[[i]][[j]]$stress,
-					converged=spp.mds.LST[[i]][[j]]$converged
+					Species=paste0('\\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[i]),'}'),
+					Loci=names(spp.mds.LST[[i]])[j],
+					Stress=spp.mds.LST[[i]][[j]]$stress,
+					Converged=spp.mds.LST[[i]][[j]]$converged
 				)
 			})
 		}
 	),
-	caption='Summary of metric-dimensional scaling analysis.'
+	digits=2,
+	caption='Summary of nonmetric-dimensional scaling (MDS) analyses on genetic variation for each species.'
+)
+
+## ------------------------------------------------------------------------
+plot.spp.mds <- function(i) {
+	do.call(
+		grid.arrange,
+		append(
+			unlist(llply(c('adaptive','neutral'), function(g) {
+				llply(seq_len(mds.k), function(k) {
+					ggplot() +
+						geom_polygon(data=countries.FPLY, aes(x=long, y=lat, group=group),
+							fill='grey20', color='grey80') +
+						geom_polygon(data=grid.FPLY, aes_string(x='long', y='lat', 
+							group='group', fill=paste0(unique(spp.samples.DF$species)[i], '_', j, '_d',k)),
+							alpha=0.8, color='grey10') +
+						guides(fill=guide_legend(title=' ')) +
+						theme_classic() +
+						theme(axis.ticks=element_blank(), axis.text=element_blank(),
+							plot.margin=unit(c(0,0,0,0),'cm')) +
+						coord_cartesian(
+							xlim=buffered.range(grid.FPLY$long, 0.05),
+							ylim=buffered.range(grid.FPLY$lat, 0.05)
+						) +
+						xlab('') +
+						ylab('') +
+						ggtitle(paste0(g,' (',k,')'))
+				})
+			}),recursive=FALSE),
+			list(ncol=2)
+		)
+	)
+}
+
+## ---- fig.width=6.5, fig.height=4.5, fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[1]),'}. Each square represents a planning unit. The color of each planning unit panel corresponds to ordination values. Planning units with similar colors contain individiduals with similar genetic variation.')----
+plot.spp.mds(1)
+
+## ---- fig.width=6.5, fig.height=4.5, fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[2]),'}. See Figure XX caption for conventions.')----
+plot.spp.mds(2)
+
+## ---- fig.width=6.5, fig.height=4.5, fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[3]),'}. See Figure XX caption for conventions.')----
+plot.spp.mds(3)
+
+## ------------------------------------------------------------------------
+## load pca summary
+pca.DF <- read.table('extdata/BioClim_variables/pca.TXT', skip=80) %>% `names<-`(
+	c('Principle Component', 'Eigen Value', 'Variation explained (%)',
+	'Accumulative variation explained (%)')
+)
+## make results table showing Eigen values
+knitr::kable(
+	pca.DF,
+	digits=2,
+	caption='Summary of priciniple components analysis (PCA) on bioclimatic variation across the study area. The first two principle components (PCs) were used for subsequent analysis.'
+)
+
+## ---- width=6.5, height=4.5, fig.cap='Climatic variation. Each panel depicts variation based on a different principle component (PC). Sqaures represent planning units. The color of each planning unit denotes the average priciniple component value of pixels inside it. Planning units with more similar colors have more similar climates regimes.'----
+do.call(
+	grid.arrange,
+		append(
+		llply(grep('^env\\_.*$', names(grid.DF), value=TRUE), function(x) {
+			ggplot() +
+				geom_polygon(data=countries.FPLY, aes(x=long, y=lat, group=group),
+					fill='grey20', color='grey80') +
+				geom_polygon(data=grid.FPLY, aes_string(x='long', y='lat', 
+					group='group', fill=x),
+					alpha=0.8, color='grey10') +
+				guides(fill=guide_legend(title=' ')) +
+				theme_classic() +
+				theme(axis.ticks=element_blank(), axis.text=element_blank(),
+					plot.margin=unit(c(0,0,0,0),'cm')) +
+				coord_cartesian(
+					xlim=buffered.range(grid.FPLY$long, 0.05),
+					ylim=buffered.range(grid.FPLY$lat, 0.05)
+				) +
+				xlab('') +
+				ylab('') +
+				ggtitle(paste0('PC ', substr(x, nchar(x), nchar(x))))
+		}),
+		list(ncol=2)
+	)
 )
 

@@ -19,10 +19,10 @@ mds(x, metric, type, ...)
 
 \item{type}{\code{character} type of loci to analyse. Valid arguments are 'all', 'adaptive', or 'neutral'. Defaults to 'all'.}
 
-\item{...}{arguments passed to \code{link[vegan]{monoMDS}}.}
+\item{...}{arguments passed to \code{link[vegan]{metaMDS}}.}
 }
 \value{
-\code{\link[vegan]{monoMDS}} object.
+\code{\link[vegan]{metaMDS}} object.
 }
 \description{
 This function performs nonmetric multidimensional scaling analysis on the loci in a \code{BayeScan} object.
@@ -37,6 +37,6 @@ x <- run.BayeScan(x, threads=1, n=50, thin=1, nbp=10, pilot=10, burn=10)
 z <- mds(x, metric='gower' k=2)
 }
 \seealso{
-\code{link[cluster]{daisy}}, \code{link[vegan]{monoMDS}}.
+\code{link[cluster]{daisy}}, \code{link[vegan]{metaMDS}}.
 }
 
