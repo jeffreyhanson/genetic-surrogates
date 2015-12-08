@@ -21,16 +21,16 @@ make.targets <- function(
 	amount.targets.DF <- data.frame(
 		species=seq_along(species),
 		target=rep(0, length(species)),
-		proportion=rep(amount.target, length(species))
+		proportion=rep(amount.target, length(species)),
+		name=paste0('amount_',species)
 	)
-	row.names(amount.targets.DF) <- paste0('amount_',species)
 	# surrogate.spaces
 	surrogate.targets.DF <- data.frame(
 		species=rep(seq_along(species), 2),
 		target=c(rep(1, length(species)), rep(2, length(species))),
-		proportion=rep(space.target, length(species)*2)
+		proportion=rep(space.target, length(species)*2),
+		name=c(paste0('env_',species), paste0('geo_',species))
 	)
-	row.names(surrogate.targets.DF) <- c(paste0('env_',species), paste0('geo_',species))
 	# adaptive spaces
 	adaptive.targets.DF <- ldply(seq_along(adaptive.spaces), .fun=function(i) {
 		# get species position
@@ -45,7 +45,7 @@ make.targets <- function(
 				space.target
 			),
 			name=replace(
-				paste0('nulla_',i,'_',species),
+				rep('null',length(species)),
 				spp.pos,
 				paste0('adaptive_',species[spp.pos])
 			)
@@ -66,19 +66,16 @@ make.targets <- function(
 				space.target
 			),
 			name=replace(
-				paste0('nulln_',i,'_',species),
+				rep('null',length(species)),
 				spp.pos,
 				paste0('neutral_',species[spp.pos])
 			)
 		)
 		return(spp.DF)
 	})
-	# assign rownames
-	row.names(adaptive.targets.DF) <- as.character(adaptive.targets.DF$name)
-	row.names(neutral.targets.DF) <- as.character(neutral.targets.DF$name)
 	# return
-	mutate(do.call(rbind, list(
+	return(mutate(do.call(rbind, list(
 		amount.targets.DF, surrogate.targets.DF,
-		select(adaptive.targets.DF, -name), select(neutral.targets.DF, -name)
-	)), target=as.integer(target), species=as.integer(species))
+		adaptive.targets.DF, neutral.targets.DF)
+	), target=as.integer(target), species=as.integer(species)))
 }
