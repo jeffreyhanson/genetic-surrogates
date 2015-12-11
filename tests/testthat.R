@@ -1,3 +1,2 @@
 library(testthat)
-library(genetic.surrogates)
-test_check("genetic.surrogates")
+testthat::source_dir('R/functions', env=globalenv(), chdir=FALSE)
