@@ -13,6 +13,10 @@ surrogate.ASL <- llply(
 adaptive.ASL <- llply(
 	seq_along(unique(spp.samples.DF$species)),
 	function(i) {
+		# if no adaptive space for this species then return null
+		if (ncol(select(grid.DF, contains(paste0(unique(spp.samples.DF$species)[i], '_adaptive'))))==0)
+			return(NULL)
+		# else return attribute space
 		make.single.species.AttributeSpace(
 			site.data=select(grid.DF, contains(paste0(unique(spp.samples.DF$species)[i], '_adaptive'))),
 			species.data=select(filter(spp.samples.DF, species==unique(spp.samples.DF$species)[i]), contains('adaptive')),
@@ -21,9 +25,15 @@ adaptive.ASL <- llply(
 		)
 	}
 )
+adaptive.ASL <- adaptive.ASL[!sapply(adaptive.ASL, is.null)]
+
 neutral.ASL <- llply(
 	seq_along(unique(spp.samples.DF$species)),
 	function(i) {
+		# if no adaptive space for this species then return null
+		if (ncol(select(grid.DF, contains(paste0(unique(spp.samples.DF$species)[i], '_neutral'))))==0)
+			return(NULL)
+		# else return attribute space
 		make.single.species.AttributeSpace(
 			site.data=select(grid.DF, contains(paste0(unique(spp.samples.DF$species)[i], '_neutral'))),
 			species.data=select(filter(spp.samples.DF, species==unique(spp.samples.DF$species)[i]), contains('neutral')),
@@ -32,11 +42,12 @@ neutral.ASL <- llply(
 		)
 	}
 )
+neutral.ASL <- neutral.ASL[!sapply(neutral.ASL, is.null)]
 
 # make table with targets
 target.DF <- make.targets(
 	species=unique(spp.samples.DF$species),
-	environmental.space=as1[[1]], geographic.space=as1[[2]],
+	environmental.space=surrogate.ASL[[1]], geographic.space=surrogate.ASL[[2]],
 	adaptive.spaces=adaptive.ASL, neutral.spaces=neutral.ASL,
 	amount.target=0.2, space.target=0.2
 )

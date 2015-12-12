@@ -1,5 +1,8 @@
 ### Structure analyses
 ## run analyses
+clust <- makeCluster(st.threads, type='SOCK')
+clusterEvalQ(clust, {library(structurer)})
+registerDoParallel(clust)
 spp.StructureCollection.LST <- llply(
 	spp.StructureData.LST,
 	run.Structure,
@@ -8,20 +11,24 @@ spp.StructureCollection.LST <- llply(
 	BURNIN=st.burnin,
 	NUMREPS=st.numreps,
 	NOADMIX=st.noadmix,
-	ADMBURNIN=st.admburnin
+	ADMBURNIN=st.admburnin,
+	.parallel=TRUE
 )
+clust <- stopCluster(clust)
 
 ## assign populations
-for (i in seq_along(spp.BayeScanData.LST)) {
-	# get population identities
-	ids <- sample.membership(spp.StructureCollection.LST[[i]], threshold=st.probthresh)
-	validPos <- which(!is.na(ids))
-	# remove individuals below threshold
-	curr.spp <- spp.BayeScanData.LST[[i]]
-	curr.spp <- sample.subset(curr.spp, validPos)
-	sample.labels(curr.spp) <- sample.pops(curr.spp)
-	sample.pops(curr.spp) <- as.character(ids)
-	spp.BayeScanData.LST[[i]] <- curr.spp
-}
-
+spp.BayeScanData.sample.subset.LST <- llply(
+	seq_along(spp.BayeScanData.LST),
+	.fun=function(i) {
+		# get population identities
+		ids <- sample.membership(spp.StructureCollection.LST[[i]], threshold=st.probthresh)
+		validPos <- which(!is.na(ids))
+		# remove individuals below threshold
+		curr.spp <- spp.BayeScanData.LST[[i]]
+		curr.spp <- bayescanr:::sample.subset.BayeScanData(curr.spp, validPos)
+		curr.spp@labels <- filter(spp.samples.DF, species==unique(spp.samples.DF$species)[i])$cell[validPos]
+		curr.spp@populations <- as.character(ids[validPos])
+		return(curr.spp)
+	}
+)
 

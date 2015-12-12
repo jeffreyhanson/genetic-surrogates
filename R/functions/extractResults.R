@@ -20,11 +20,17 @@ extractResults <- function(x) {
 	# extract space held
 	space.held.MTX <- space.held(x)
 	space.held.DF <- ldply(x@data@species$name, function(y) {
+		# init
+		adaptive.held <- extract.held(x, y, 'adaptive')
+		if (length(adaptive.held)==0) adaptive.held <- NA_real_
+		neutral.held <- extract.held(x, y, 'neutral')
+		if (length(neutral.held)==0) neutral.held <- NA_real_
+		# make data.frame
 		data.frame(
 			environmental.held = extract.held(x, y, 'env'),
 			geographic.held = extract.held(x, y, 'geo'),
-			adaptive.held = extract.held(x, y, 'adaptive'),
-			neutral.held = extract.held(x, y, 'neutral')
+			adaptive.held = adaptive.held,
+			neutral.held = neutral.held
 		)
 	})
 	# return data.frame

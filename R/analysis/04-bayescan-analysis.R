@@ -1,29 +1,18 @@
-# assign cells as labels
-spp.BayeScanData.LST <- llply(
-	seq_along(unique(spp.samples.DF$species)),
-	function(i) {
-		bd <- spp.BayeScanData.LST[[i]]
-		sample.labels(bd) <- filter(spp.samples.DF, species==unique(spp.samples.DF$species)[i])$cell
-		return(bd)
-	}
-)
-
-# subset out polymorphisms with really low or really high frequency
-spp.BayeScanData.LST <- llply(
-	spp.BayeScanData.LST,
+# subset out loci with polymorphisms that have really low or really high frequency
+spp.BayeScanData.sample.loci.subset.LST <- llply(
+	spp.BayeScanData.sample.subset.LST,
 	function(x) {
 		freqs <- colMeans(x@matrix)
 		valid.loci <- which(freqs <= 1-(bs.freq) | freqs >= bs.freq)
-		return(subset.loci(x, valid.loci))
+		return(bayescanr:::loci.subset(x, valid.loci))
 	}
 )
 
-
-# run BayeScan
-spp.BayeScan.LST <- llply(
-	spp.BayeScanData.LST,
+# run BayeScan over subsetted objects
+spp.BayeScan.sample.loci.subset.LST <- llply(
+	spp.BayeScanData.sample.loci.subset.LST,
 	run.BayeScan,
-	threshold=bs.threshold,
+	fdr=bs.fdr,
 	threads=bs.threads,
 	n=bs.n,
 	thin=bs.thin,
@@ -32,23 +21,34 @@ spp.BayeScan.LST <- llply(
 	burn=bs.burn
 )
 
-# run MDS
+# run mds
 spp.mds.LST <- llply(
-	spp.BayeScan.LST,
-	function(i) {
-		`names<-`(llply(c('adaptive', 'neutral'), function(j) {
-			if (sum(i@results@fst==j)==0)
+	seq_along(spp.BayeScanData.LST),
+	.fun=function(i) {
+		# subset loci for species
+		curr.spp <- bayescanr:::loci.subset(
+			spp.BayeScanData.LST[[i]],
+			which(spp.BayeScanData.LST[[i]]@primers %in% spp.BayeScan.sample.loci.subset.LST[[i]]@data@primers)
+		)
+		# manually classify loci as neutral or adaptive
+		curr.spp.type <- replace(
+			rep('neutral', bayescanr:::n.loci(curr.spp)),
+			spp.BayeScan.sample.loci.subset.LST[[i]]@results@summary$type=='adaptive',
+			'adaptive'
+		)
+		# run mds over neutral and/or adaptive loci
+		return(`names<-`(llply(c('adaptive', 'neutral'), function(j) {
+			if (sum(curr.spp.type==j)==0)
 				return(NULL)
 			return(
 				mds(
-					i,
+					bayescanr:::loci.subset(curr.spp, curr.spp.type==j),
 					metric='gower',
-					type=j,
 					k=mds.k,
 					trymax=mds.trymax
 				)
 			)
-		}), c('adaptive','neutral'))
+		}), c('adaptive','neutral')))
 	}
 )
 

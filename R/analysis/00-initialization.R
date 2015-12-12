@@ -16,6 +16,8 @@ suppressMessages(library(testthat))
 suppressMessages(library(parallel))
 suppressMessages(library(cluster))
 suppressMessages(library(rworldxtra))
+suppressMessages(library(snow))
+suppressMessages(library(doParallel))
 
 ## load github packages
 # devtools::install_github('paleo13/raspr')
@@ -61,6 +63,7 @@ if (MODE=='debug') {
 	# number of species
 	n.spp <- 3
 	# structure parameters
+	st.threads <- 1
 	st.numruns <- 4
 	st.k <- 1:3
 	st.numreps <- 10
@@ -70,7 +73,7 @@ if (MODE=='debug') {
 	st.probthresh <- 0.75
 	# BayeScan parameters
 	bs.reps <- 2
-	bs.threshold <- 0.5
+	bs.fdr <- 0.5
 	bs.threads <- 1
 	bs.n <- 10
 	bs.thin <- 1
@@ -96,6 +99,7 @@ if (MODE=='release') {
 	# number of species
 	n.spp <- 27
 	# structure parameters
+	st.threads <- 10
 	st.numruns <- 20
 	st.k <- 1:10
 	st.numreps <- 100000
@@ -105,7 +109,7 @@ if (MODE=='release') {
 	st.probthresh <- 0.75
 	# BayeScan parameters
 	bs.reps <- 4
-	bs.threshold <- 0.95
+	bs.fdr <- 0.1
 	bs.threads <- 10
 	bs.n <- 5000
 	bs.thin <- 10
