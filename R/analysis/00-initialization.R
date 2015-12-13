@@ -18,6 +18,7 @@ suppressMessages(library(cluster))
 suppressMessages(library(rworldxtra))
 suppressMessages(library(snow))
 suppressMessages(library(doParallel))
+suppressMessages(library(english))
 
 ## load github packages
 # devtools::install_github('paleo13/raspr')

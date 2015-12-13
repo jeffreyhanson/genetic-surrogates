@@ -52,6 +52,8 @@ spp.mds.LST <- llply(
 	}
 )
 
+# remove NULL entries from MDS list
+
 # store mds rotations for each sample
 spp.samples.DF <- ldply(seq_along(unique(spp.samples.DF$species)), .fun=function(i) {
 	x <- filter(spp.samples.DF, species==unique(spp.samples.DF$species)[i])
@@ -87,3 +89,5 @@ for (i in seq_along(unique(spp.samples.DF$species))) {
 	}
 }
 
+# update grid.PLY with additional attributes
+grid.PLY@data <- grid.DF

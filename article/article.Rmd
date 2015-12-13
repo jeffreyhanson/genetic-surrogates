@@ -31,7 +31,7 @@ vignette: >
 setwd('..')
 
 # load packages
-source('R/analysis/0-initialization.R')
+source('R/analysis/00-initialization.R')
 
 # load .rda files
 load('results/results.rda')
@@ -42,19 +42,19 @@ load('results/results.rda')
 
 ## Methods
 ### Study area
-To address the aims of this study, we utilized species distribution and genomic data collected by the IntraBioDiv project [@r452]. As part of this project, data for 27 Alpine plant species were collected across the European Alps using a regular grid (22.3 km \times 25 km; see @452 for methodological details). In every second cell, plant samples were collected from three individiduals for each species present inside the cell . Samples were genotyped using amplified fragment length polymorphisms (AFLP; r453). Matrices denoting the presence/absence of polymorphisms at loci were consutrcted independently for each species. This dataset was ideal for our purposes, because it contains genomic data for a multitude of species collected at a high spatial resolution. Additionally, the data were collected across broad-scale environmental gradients that are suitable for exploring broad-scale surrogates for genetic variation.
+To address the aims of this study, we utilized species distribution and genomic data collected by the IntraBioDiv project [Figure S1; @r451]. As part of this project, data for 27 alpine plant species were collected across the European Alps using a regular grid [22.3 km $\times$ 25 km; see @r452 for methodological details]. In every second cell, plant samples were collected from three individiduals for each species present inside the cell. Samples were genotyped using amplified fragment length polymorphisms [AFLP; @r453]. Matrices denoting the presence/absence of polymorphisms at loci were consutrcted independently for each species. This dataset was well suited for the purposes of this study, because it provides spatially explicit genomic data for a multitude of species. Additionally, the study area spans across broad-scale environmental gradients--ranging from lowlands to snow-caped peaks--that have been found to correlate with genetic variation for some of these species [].
 
 ### Surrogate data
-We used explored the effectiveness of environmental and geographic surrogates. To describe variation in the location of each grid, we projected the grids to ESRI:XXXX and calculated the centroid of each cell. To describe the climatic variation among each cell, we obtained 21 bioclimatic variables (Hijmans et al. XXXX). These layers were clipped to the extent of the grid, and layers were subject to a principle components analysis. The first two principle components were used to generate two new layers that described broad-scale climatic variation among the layers. The average value of each PC component in each grid was used to characterise a different dimension of climatic variation in the grid cell.
+We explored the effectiveness of environmental and geographic surrogates. To describe variation in the location of each grid, we projected the grids to an equal-area coordinate system (ESRI:102014) and determined the centroid of each cell. To describe the climatic variation among each cell, we obtained twenty-one bioclimatic variables [@r33]. These layers were clipped to the extent of the grid and subject to a principle components analysis (PCA; Table S1). The first two principle components (PCs) cumulatively explained `r round(pca.DF[[4]][2],1)`% of the variation and were used to generate two new layers. The average value of each PC layer in each grid was used to characterise the climatic conditions in the grid cell (Figure S2).
 
 ### Outlier locus detection
-The environmental and geographic surrogates are expected to have different levels of effectiveness for adaptive and neutral genetic variation. To investigate the effectiveness of these surrogates, we identified the loci under selection for each species. We used outlier locus detection methods [reviewed in @r453] to avoid circularity issues. The basic premise underpinning these methods is that neutral loci are expected to have a specific level of variation among populations ($F_{st}$), and loci that deviate from this expectation are under selection. Previously, XXXX _et al._ (XXXX) utilised this dataset and applied such detection methods to _Getiana nivalis_. Here, we applied their methods to each of the 27 species in the dataset. 
+To investigate the effectiveness of the surrogates for adaptive and neutral genetic variation, we first identifed which of the sampled loci for each species for each species were under selection. We used an outlier locus detection method [evaluated in @r454] to avoid circularity issues. The basic premise underpinning this method is that neutral loci are expected to have a specific level of variation among populations ($F_{st}$), and loci that deviate from this expectation are under selection. Previously, Bothwell _et al._ [-@r455] applied such detection methods to one of the species (_Getiana nivalis_) in this dataset. Here, we applied their methods to each of the twenty-seven species in the dataset.
 
-Breifly, we grouped individuals into genetic lineages (Figure XXX). The purposes of this step was to avoid confounding effects of genetic history between populations when identifying loci under selection. We used the Bayesian clustering method implemented in STRUCTURE (version XXXX) assuming admixture and an independent alleles model. For each species, we identified the most plausible number of populations (K = 1--10; five replicates for each K; model with lowest mean posterior negative log likelihood), and estimated the probability that each individual belonged to each population (200,000 burn-in; 1,000,000 iterations). Individuals with $\geq 0.75$ probability of belonging to a single population were assigned accordingly, and used for subsequent analysis (see Appendix XXX for STRUCTURE results for each species).
+Breifly, we grouped individuals into genetic lineages (Figure S2). The purpose of this step was to avoid confounding variation between populations with due to genetic history with variation attributed to selection pressures. We used the Bayesian clustering method implemented in Structure (version 2.3.4) assuming admixture and an independent alleles model. For each species, we identified the most plausible number of populations (K = `r st.k[1]`--`r st.k[2]`; `r st.numruns` runs for each K; model with lowest mean posterior negative log likelihood; Figure S3), and estimated the probability that each individual belonged to each population (`r st.burnin` burn-in; `r st.numreps` iterations). Individuals with $\geq `r st.probthresh`$ probability of belonging to a single population were assigned accordingly (Figure S4), and used for subseqent detection methods.
 
-We used BAYESCAN [@rXX] to identify loci under selection for each species (Figure XXX). For each species, BAYESCAN was run using the population memberships identied in the STRUCTURE analysis (using 1:1 prior odds, `r bs.nbp` pilot runs, and `r bs.n` iterations thinned by `r bs.thin` iterations with a `bs.burn` burn-in). Following recomendations in the BAYESCAN manual, we omitted loci where the global frequency of the minor allele was <0.05 to avoid false-positives. To ensure convergence of results, we ran four replicates of BAYESCAN per species using a false discovery rate (FDR) < 0.1 (see Appendix XXX for BAYESCAN results for each species). 
+We used Bayescan [version 2.1; @r456] to identify the sampled loci under selection for each species (Table S2). For each species, Bayescan was run using the population memberships identified using Structure (1:1 prior odds, `r bs.nbp` pilot runs, and `r bs.n` iterations thinned by `r bs.thin` iterations with a `r bs.burn` burn-in). Following guidelines in the Bayescan manual, we omitted loci where the global frequency of the minor allele was $\geq$ 0.05 to avoid false-positives. To ensure convergence, we ran `r as.english(bs.reps)` replicates per species using a false discovery rate (FDR) $\leq `r bs.fdr`$. 
 
-After classifying the loci as adaptive or neutral for each species, we used non-metric multi-dimensional scaling (NMDS) to derive new variables to describe the main themes of variation in the adaptive and/or neutral loci for each species. Specifically, we calculated Gower distances between the adaptive and/or neutral polymorphisms using the cluster R package (XXXX) to accomodate missing data. These distance matrices were then subject to XXXX as implemented in the vegan R package (XXX; K=2, 100 runs). The resulting ordinations were then associated with the grid cells such that each grid cell where as species was detected with individuals that were assigned to a population was associated a coordinate in adaptive and neutral space.
+After classifying the loci as adaptive or neutral for each species, we mapped the main gradients of adaptive and/or neutral genetic variation for each species (Figures S4--S29). For each species, we used Gower distances to express the difference in adaptive and/or neutral polymorphisms between individuals [using the cluster R package; @r457]. These distances were subject to a non metric multi-dimensional scaling analysis [implemented in the vegan R package using K=`r mds.k` and `r mds.trymax` random starts; Table S3; @r458]. The ordinated variables were then associated with the grid cells were each species was sampled. 
 
 ### Prioritisations
 
@@ -63,8 +63,6 @@ After classifying the loci as adaptive or neutral for each species, we used non-
 
 
 ## Results
-
-
 ### Single species prioritisations
 
 ```{r, fig.width=6, fig.height=3, fig.cap='Summary of single species prioritisations. Single species prioritisations were generated using amount-based targets, amount-based and surrogate-based targets, and amount-based and genetic-based targets for each species. Data shows the performance of prioritisations generated using these three sets of targets. Bars denote means and standard errors.'}
@@ -204,9 +202,16 @@ JOH is funded by an Australian Postgraduate Award (APA) scholarship. RAF has an 
 ## References
 
 
-## Supporting Information
-### Appendix S1: Species distributions
+## Figures
 
+
+
+## Tables
+
+
+## Supporting Information
+
+### Figure S1: Species distributions
 ```{r, fig.width=9.5, fig.height=10, out.width='7.5in', out.height='8.5in', fig.cap='Species distributions. Squares represent planning units. For a given species, planning units that were found to be inhabited are denoted with bright blue.'}
 ## plot map of species distributions
 # fortify data
@@ -261,142 +266,7 @@ ggplot() +
 	ggtitle('Species richness')
 ```
 
-### Appendix S2: BayeScan Results
-
-```{r}
-knitr::kable(
-	format.table(
-		ldply(
-			seq_along(unique(spp.samples.DF$species)), 
-			function(i) {
-				data.frame(
-					Species=paste0('\\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[i]),'}'),
-					Individuals=nrow(spp.BayeScanData.LST[[i]]@matrix),
-					Total_Loci=ncol(spp.BayeScanData.LST[[i]]@matrix),
-					Neutral_Loci=sum(spp.BayeScan.LST[[i]]@results@fst[[7]]=='neutral'),
-					Adpative_Loci=sum(spp.BayeScan.LST[[i]]@results@fst[[7]]=='adaptive'),
-					Proportion_adaptive=sum(spp.BayeScan.LST[[i]]@results@fst[[7]]=='adaptive')/ nrow(spp.BayeScan.LST[[i]]@results@fst)
-				)
-			}
-		)
-	),
-	digits=2,
-	col.names=c('Species','Individuals (#)', 'Total Loci (#)', 'Neutral Loci (#)', 'Adaptive Loci (#)', 'Proportion Adaptive (%)'),
-	align=c('l', 'c', 'c', 'c', 'c', 'c')
-)
-```
-
-
-```{r}
-knitr::kable(
-	format.table(
-		ldply(
-			seq_along(unique(spp.samples.DF$species)), 
-			function(i) {
-				data.frame(
-					Species=paste0('\\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[i]),'}'),
-					Primer=spp.BayeScanData.LST[[i]]@primers,
-					Probability=spp.BayeScan.LST[[i]]@results@fst[[2]],
-					qval=spp.BayeScan.LST[[i]]@results@fst[[4]],
-					alpha=spp.BayeScan.LST[[i]]@results@fst[[5]],
-					fst=spp.BayeScan.LST[[i]]@results@fst[[6]],
-					Type=spp.BayeScan.LST[[i]]@results@fst[[7]]
-				)
-			}
-		),
-		omit='Type'
-	),
-	digits=2,
-	col.names=c('Species', 'Primer', 'Probability', 'q-value', '$\\alpha$', '$F_{ST}$', 'Type'),
-	align=c('l', 'c', 'c', 'c', 'c', 'c', 'c')
-)
-```
-
-### Appendix S3: Genomic MDS 
-```{r}
-knitr::kable(
-	format.table(
-		ldply(
-			seq_along(unique(spp.samples.DF$species)), 
-			function(i) {
-				ldply(
-					seq_along(spp.mds.LST[[i]]),
-					function(j) {
-					data.frame(
-						Species=paste0('\\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[i]),'}'),
-						Loci=names(spp.mds.LST[[i]])[j],
-						Stress=spp.mds.LST[[i]][[j]]$stress,
-						Converged=spp.mds.LST[[i]][[j]]$converged
-					)
-				})
-			}
-		),
-		omit='Converged'
-	),
-	digits=2,
-	caption='Summary of non-metric multi-dimensional scaling (MDS) analyses on genetic variation for each species.',
-	col.names=c('Species', 'Loci Type', 'NMDS Stress', 'Converged'),
-	align=c('l', 'c', 'c', 'c')
-)
-```
-
-### Appendix S4: Distribution maps of intra-specific variation
-```{r}
-plot.spp.mds <- function(i) {
-	do.call(
-		grid.arrange,
-		append(
-			unlist(llply(c('adaptive','neutral'), function(g) {
-				llply(seq_len(mds.k), function(k) {
-					ggplot() +
-						geom_polygon(data=countries.FPLY, aes(x=long, y=lat, group=group),
-							fill='grey20', color='grey80') +
-						geom_polygon(data=grid.FPLY, aes_string(x='long', y='lat', 
-							group='group', fill=paste0(unique(spp.samples.DF$species)[i], '_', j, '_d',k)),
-							alpha=0.8, color='grey10') +
-						guides(fill=guide_legend(title=' ')) +
-						theme_classic() +
-						theme(axis.ticks=element_blank(), axis.text=element_blank(),
-							plot.margin=unit(c(0,0,0,0),'cm'), axis.line=element_blank()) +
-						coord_cartesian(
-							xlim=buffered.range(grid.FPLY$long, 0.05),
-							ylim=buffered.range(grid.FPLY$lat, 0.05)
-						) +
-						xlab('') +
-						ylab('') +
-						ggtitle(paste0(g,' (',k,')'))
-				})
-			}),recursive=FALSE),
-			list(ncol=2)
-		)
-	)
-}
-```
-
-```{r, fig.width=6.5, fig.height=4.5, fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[1]),'}. Each square represents a planning unit. The color of each planning unit panel corresponds to ordination values. Planning units with similar colors contain individiduals with similar genetic variation.')}
-plot.spp.mds(1)
-```
-
-```{r, fig.width=6.5, fig.height=4.5, fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[2]),'}. See Figure XX caption for conventions.')}
-plot.spp.mds(2)
-```
-
-```{r, fig.width=6.5, fig.height=4.5, fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[3]),'}. See Figure XX caption for conventions.')}
-plot.spp.mds(3)
-```
-
-### Appendix S5: Principle components analysis on climatic variation
-```{r}
-## make results table showing Eigen values
-knitr::kable(
-	pca.DF,
-	digits=2,
-	caption='Summary of priciniple components analysis (PCA) on bioclimatic variation across the study area. The first two principle components (PCs) were used for subsequent analysis.',
-	align=c('l', 'c', 'c', 'c')
-)
-```
-
-### Appendix S6: Maps of climatic variation
+### Figure S2: Maps of climatic variation
 ```{r, width=6.5, height=4.5, fig.cap='Climatic variation. Each panel depicts variation based on a different principle component (PC). Sqaures represent planning units. The color of each planning unit denotes the average priciniple component value of pixels inside it. Planning units with more similar colors have more similar climates regimes.'}
 do.call(
 	grid.arrange,
@@ -424,4 +294,141 @@ do.call(
 	)
 )
 ```
+
+### Figure S3. Number populations in each species.
+```{r}
+```
+
+
+### Figure S4. Distribution of populations for each species.
+```{r}
+```
+
+```{r}
+plot.spp.mds <- function(i) {
+	# define function
+	make.mds.plot <- function(j,k) {
+		ggplot() +
+			geom_polygon(data=countries.FPLY, aes(x=long, y=lat, group=group),
+				fill='grey20', color='grey80') +
+			geom_polygon(data=grid.FPLY, aes_string(x='long', y='lat', 
+				group='group', fill=paste0(unique(spp.samples.DF$species)[i], '_', j, '_d',k)),
+				alpha=0.8, color='grey10') +
+			guides(fill=guide_legend(title=' ')) +
+			theme_classic() +
+			theme(axis.ticks=element_blank(), axis.text=element_blank(),
+				plot.margin=unit(c(0,0,0,0),'cm'), axis.line=element_blank()) +
+			coord_cartesian(
+				xlim=buffered.range(grid.FPLY$long, 0.05),
+				ylim=buffered.range(grid.FPLY$lat, 0.05)
+			) +
+			xlab('') +
+			ylab('') +
+			ggtitle(paste0(j,' (',k,')'))
+	}
+	# init
+	adapt.col <- paste0(unique(spp.samples.DF$species)[i], '_adaptive_d1')
+	neutral.col <- paste0(unique(spp.samples.DF$species)[i], '_neutral_d1')
+	plotLST <- list()
+	# make adaptive plot
+	if (adapt.col %in% names(grid.FPLY)) {
+		for (k in seq_len(mds.k))
+			plotLST <- append(plotLST, list(make.mds.plot('adaptive', k)))
+	} 
+	# make neutral plot
+	if (neutral.col %in% names(grid.FPLY)) {
+		for (k in seq_len(mds.k))
+			plotLST <- append(plotLST, list(make.mds.plot('neutral', k)))
+	} 
+	# make plot
+	do.call(
+		grid.arrange,
+		append(
+			plotLST,
+			list(ncol=6)
+		)
+	)
+}
+```
+
+### Figures S
+```{r, fig.width=6.5, fig.height=4.5, fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[1]),'}. Each square represents a planning unit. The color of each planning unit panel corresponds to ordination values. Planning units with similar colors contain individiduals with similar genetic variation.')}
+plot.spp.mds(1)
+```
+
+```{r, fig.width=6.5, fig.height=4.5, fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[2]),'}. See Figure XX caption for conventions.')}
+plot.spp.mds(2)
+```
+
+```{r, fig.width=6.5, fig.height=4.5, fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[3]),'}. See Figure XX caption for conventions.')}
+plot.spp.mds(3)
+```
+
+### Table S1: Principle components analysis on climatic variation
+```{r}
+## make results table showing Eigen values
+knitr::kable(
+	pca.DF,
+	digits=2,
+	caption='Summary of principle components analysis (PCA) on bioclimatic variation across the study area. The first two principle components (PCs) were used for subsequent analysis.',
+	align=c('l', 'c', 'c', 'c')
+)
+```
+
+### Table S2: BayeScan Results
+```{r}
+knitr::kable(
+	format.table(
+		ldply(
+			seq_along(unique(spp.samples.DF$species)), 
+			function(i) {
+				data.frame(
+					Species=paste0('\\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[i]),'}'),
+					Primer=spp.BayeScan.sample.loci.subset.LST[[i]]@data@primers,
+					Probability=spp.BayeScan.sample.loci.subset.LST[[i]]@results@summary[[2]],
+					qval=spp.BayeScan.sample.loci.subset.LST[[i]]@results@summary[[4]],
+					alpha=spp.BayeScan.sample.loci.subset.LST[[i]]@results@summary[[5]],
+					fst=spp.BayeScan.sample.loci.subset.LST[[i]]@results@summary[[6]],
+					Type=spp.BayeScan.sample.loci.subset.LST[[i]]@results@summary[[7]]
+				)
+			}
+		),
+		omit='Type'
+	),
+	digits=2,
+	col.names=c('Species', 'Primer', 'Probability', 'q-value', '$\\alpha$', '$F_{ST}$', 'Type'),
+	align=c('l', 'c', 'c', 'c', 'c', 'c', 'c')
+)
+```
+### Table S3: Genomic MDS results
+```{r}
+knitr::kable(
+	format.table(
+		filter(
+			ldply(
+				seq_along(unique(spp.samples.DF$species)), 
+				function(i) {
+					ldply(
+						seq_along(spp.mds.LST[[i]]),
+						function(j) {
+						data.frame(
+							Species=paste0('\\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[i]),'}'),
+							Loci=names(spp.mds.LST[[i]])[j],
+							Stress=ifelse(is.null(spp.mds.LST[[i]][[j]]), NA_real_, spp.mds.LST[[i]][[j]]$stress),
+							Converged=ifelse(is.null(spp.mds.LST[[i]][[j]]), NA_real_, spp.mds.LST[[i]][[j]]$converged)
+						)
+					})
+				}
+			),
+			!is.na(Stress)
+		),
+		omit=c('Loci','Converged')
+	),
+	digits=2,
+	caption='Summary of non-metric multi-dimensional scaling (MDS) analyses on genetic variation for each species.',
+	col.names=c('Species', 'Loci Type', 'NMDS Stress', 'Converged'),
+	align=c('l', 'c', 'c', 'c')
+)
+```
+
 
