@@ -1,3 +1,9 @@
+#### set default error message
+options(error=function(){
+  save.image(paste0('results-error-',as.character(Sys.time()),'.rda'))
+  traceback()
+})
+
 #### Load pacakges
 # load CRAN packages
 suppressMessages(library(data.table))
