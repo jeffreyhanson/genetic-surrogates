@@ -48,9 +48,9 @@ To address the aims of this study, we utilized species distribution and genomic 
 We explored the effectiveness of environmental and geographic surrogates. To describe variation in the location of each grid, we projected the grids to an equal-area coordinate system (ESRI:102014) and determined the centroid of each cell. To describe the climatic variation among each cell, we obtained twenty-one bioclimatic variables [@r33]. These layers were clipped to the extent of the grid and subject to a principle components analysis (PCA; Table S1). The first two principle components (PCs) cumulatively explained `r round(pca.DF[[4]][2],1)`% of the variation and were used to generate two new layers. The average value of each PC layer in each grid was used to characterise the climatic conditions in the grid cell (Figure S2).
 
 ### Outlier locus detection
-To investigate the effectiveness of the surrogates for adaptive and neutral genetic variation, we first identifed which of the sampled loci for each species for each species were under selection. We used an outlier locus detection method [evaluated in @r454] to avoid circularity issues. The basic premise underpinning this method is that neutral loci are expected to have a specific level of variation among populations ($F_{st}$), and loci that deviate from this expectation are under selection. Previously, Bothwell _et al._ [-@r455] applied such detection methods to one of the species (_Getiana nivalis_) in this dataset. Here, we applied their methods to each of the twenty-seven species in the dataset.
+To investigate the effectiveness of the surrogates for adaptive and neutral genetic variation, we first identifed which of the sampled loci for each species for each species were under selection. We used an outlier locus detection method [evaluated in @r454] to avoid circularity issues. The basic premise underpinning this method is that neutral loci are expected to have a specific level of variation among populations ($F_{st}$), and loci that deviate from this expectation are under selection. Previously, Bothwell _et al._ [-@r455] applied such detection methods to one of the species (_Getiana nivalis_) in this dataset. Here, we applied similar methods to each of the twenty-seven species in the dataset.
 
-Breifly, we grouped individuals into genetic lineages (Figure S2). The purpose of this step was to avoid confounding variation between populations with due to genetic history with variation attributed to selection pressures. We used the Bayesian clustering method implemented in Structure (version 2.3.4) assuming admixture and an independent alleles model. For each species, we identified the most plausible number of populations (K = `r st.k[1]`--`r st.k[2]`; `r st.numruns` runs for each K; model with lowest mean posterior negative log likelihood; Figure S3), and estimated the probability that each individual belonged to each population (`r st.burnin` burn-in; `r st.numreps` iterations). Individuals with $\geq `r st.probthresh`$ probability of belonging to a single population were assigned accordingly (Figure S4), and used for subseqent detection methods.
+Breifly, we grouped individuals into genetic lineages (Figure S2). The purpose of this step was to avoid confounding variation between populations with due to genetic history with variation attributed to selection pressures. We used the Bayesian clustering method implemented in Structure (version 2.3.4) assuming admixture and an independent alleles model. For each species, we identified the most plausible number of populations (K = `r st.k[1]`--`r st.k[2]`; `r st.numruns` runs per K; `r st.burnin` burn-in; `r st.numreps` iterations) using the delta-K method [Figure S3; @r460]. Population membership probabilities from replicate runs were aligned using CLUMPP [version 1.1.2; `r cl.numreps` runs of the greedy search method with random starts per K per species; @r459], and averaged to estimate the probability that each individual belonged to each population (Figure S4). Individuals with a reasonably high probability of belonging to a single population ($\geq `r st.probthresh`$) were assigned accordingly (Figure S5), and used for subseqent locus detection methods.
 
 We used Bayescan [version 2.1; @r456] to identify the sampled loci under selection for each species (Table S2). For each species, Bayescan was run using the population memberships identified using Structure (1:1 prior odds, `r bs.nbp` pilot runs, and `r bs.n` iterations thinned by `r bs.thin` iterations with a `r bs.burn` burn-in). Following guidelines in the Bayescan manual, we omitted loci where the global frequency of the minor allele was $\geq$ 0.05 to avoid false-positives. To ensure convergence, we ran `r as.english(bs.reps)` replicates per species using a false discovery rate (FDR) $\leq `r bs.fdr`$. 
 
@@ -297,11 +297,44 @@ do.call(
 
 ### Figure S3. Number populations in each species.
 ```{r}
+# format data
+deltak.DF <- ldply(
+	seq_along(unique(spp.samples.DF$species)),
+	.fun=function(i) {
+		mutate(
+			spp.StructureCollection.LST[[i]]@summary,
+			Species=gsub('_', ' ', unique(spp.samples.DF$species), fixed=TRUE)
+		)
+	}
+)
+# make plot
+ggplot() +
+	geom_point(aes(y=delta.k, x=k)) +
+	geom_line(aes(y=delta.k, x=k)) +
+	theme_classic() +
+	xlab('Number of populations') +
+	ylab('Relative support (delta-K)') +
+	facet_wrap(~ Species, ncol=6)
+```
+
+### Figure S4. Population memberships for each species.
+```{r}
+# prepare data
+
+
+# make plot
+
+
 ```
 
 
-### Figure S4. Distribution of populations for each species.
+### Figure S5. Distribution of populations for each species.
 ```{r}
+# prepare data
+
+# make plot
+
+
 ```
 
 ```{r}

@@ -72,6 +72,10 @@ if (MODE=='debug') {
 	st.noadmix  <- FALSE
 	st.admburnin  <- 10
 	st.probthresh <- 0.75
+	# clumpp parameters
+	cl.repeats <- 1000
+	cl.s <- FALSE
+	cl.m <- 'LargeKGreedy'
 	# BayeScan parameters
 	bs.reps <- 2
 	bs.fdr <- 0.5
@@ -108,6 +112,10 @@ if (MODE=='release') {
 	st.noadmix  <- FALSE
 	st.admburnin  <- 500
 	st.probthresh <- 0.75
+	# clumpp parameters
+	cl.repeats <- 1000
+	cl.s <- FALSE
+	cl.m <- 'LargeKGreedy'
 	# BayeScan parameters
 	bs.reps <- 4
 	bs.fdr <- 0.1
