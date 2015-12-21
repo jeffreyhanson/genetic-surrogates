@@ -1,0 +1,354 @@
+
+R version 3.2.2 (2015-08-14) -- "Fire Safety"
+Copyright (C) 2015 The R Foundation for Statistical Computing
+Platform: x86_64-pc-linux-gnu (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+Revolution R Open 3.2.2
+The enhanced R distribution from Revolution Analytics
+[Previously saved workspace restored]
+
+> ## load .rda
+> session::restore.session('results/.cache/07-multi-species-prioritisations.rda')
+Loading all data...
+Loading packages...
+
+Attaching package: ‘dplyr’
+
+The following objects are masked from ‘package:plyr’:
+
+    arrange, count, desc, failwith, id, mutate, rename, summarise,
+    summarize
+
+The following objects are masked from ‘package:data.table’:
+
+    between, last
+
+The following objects are masked from ‘package:stats’:
+
+    filter, lag
+
+The following objects are masked from ‘package:base’:
+
+    intersect, setdiff, setequal, union
+
+This is vegan 2.3-2
+rgeos version: 0.3-15, (SVN revision 515)
+ GEOS runtime version: 3.4.2-CAPI-1.8.2 r3921 
+ Linking to sp version: 1.2-1 
+ Polygon checking: TRUE 
+
+
+Attaching package: ‘snow’
+
+The following objects are masked from ‘package:parallel’:
+
+    clusterApply, clusterApplyLB, clusterCall, clusterEvalQ,
+    clusterExport, clusterMap, clusterSplit, makeCluster, parApply,
+    parCapply, parLapply, parRapply, parSapply, splitIndices,
+    stopCluster
+
+rgdal: version: 1.1-1, (SVN revision 572)
+ Geospatial Data Abstraction Library extensions to R successfully loaded
+ Loaded GDAL runtime: GDAL 1.10.1, released 2013/08/26
+ Path to GDAL shared files: /usr/share/gdal/1.10
+ Loaded PROJ.4 runtime: Rel. 4.8.0, 6 March 2012, [PJ_VERSION: 480]
+ Path to PROJ.4 shared files: (autodetected)
+ Linking to sp version: 1.2-1 
+
+Attaching package: ‘raster’
+
+The following object is masked _by_ ‘.GlobalEnv’:
+
+    select
+
+The following object is masked from ‘package:tidyr’:
+
+    extract
+
+The following object is masked from ‘package:dplyr’:
+
+    select
+
+The following object is masked from ‘package:data.table’:
+
+    shift
+
+
+Attaching package: ‘structurer’
+
+The following objects are masked from ‘package:bayescanr’:
+
+    loci.subset, n.loci, n.pop, n.samples, sample.subset
+
+Restoring search path...
+Done.
+> 
+> ## pareto frontier analysis
+> # generate prioritistions
+> env.pareto.prioritisations <- llply(
++ 	rapr.pareto.surrogate.targets,
++ 	species.prioritisation,
++ 	x=ru,
++ 	amount.targets=0,
++ 	geo.surrogate.targets=0,
++ 	adaptive.genetic.targets=0,
++ 	neutral.genetic.targets=0
++ )
+Optimize a model with 29766 rows, 29870 columns and 118206 nonzeros
+Coefficient statistics:
+  Matrix range    [1e-05, 2e+03]
+  Objective range [1e+00, 1e+00]
+  Bounds range    [1e+00, 1e+00]
+  RHS range       [1e+00, 2e+05]
+Found heuristic solution: objective 118
+Presolve removed 3 rows and 242 columns
+Presolve time: 4.80s
+Presolved: 29763 rows, 29628 columns, 117928 nonzeros
+Variable types: 0 continuous, 29628 integer (29628 binary)
+Presolved: 29763 rows, 29628 columns, 117928 nonzeros
+
+Presolve removed 29482 rows and 146 columns
+
+Root simplex log...
+
+Iteration    Objective       Primal Inf.    Dual Inf.      Time
+       0    0.0000000e+00   2.530709e-01   9.212604e+07      6s
+    5544    1.0000000e+00   0.000000e+00   0.000000e+00     10s
+    5544    1.0000000e+00   0.000000e+00   0.000000e+00     10s
+
+Root relaxation: objective 1.000000e+00, 5544 iterations, 5.14 seconds
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+*    0     0               0       1.0000000    1.00000  0.00%     -   10s
+
+Explored 0 nodes (5544 simplex iterations) in 10.05 seconds
+Thread count was 1 (of 2 available processors)
+
+Optimal solution found (tolerance 5.00e-02)
+Best objective 1.000000000000e+00, best bound 1.000000000000e+00, gap 0.0%
+Optimize a model with 29766 rows, 29870 columns and 118206 nonzeros
+Coefficient statistics:
+  Matrix range    [1e-05, 2e+03]
+  Objective range [1e+00, 1e+00]
+  Bounds range    [1e+00, 1e+00]
+  RHS range       [1e+00, 8e+04]
+Found heuristic solution: objective 118
+Presolve removed 3 rows and 242 columns
+Presolve time: 4.66s
+Presolved: 29763 rows, 29628 columns, 117928 nonzeros
+Variable types: 0 continuous, 29628 integer (29628 binary)
+Presolved: 29763 rows, 29628 columns, 117928 nonzeros
+
+Presolve removed 29482 rows and 146 columns
+
+Root simplex log...
+
+Iteration    Objective       Primal Inf.    Dual Inf.      Time
+       0    0.0000000e+00   2.368537e+01   1.976974e+09      6s
+   16180    1.9931902e+00   0.000000e+00   2.430000e+02     10s
+   24782    1.0000000e+00   0.000000e+00   0.000000e+00     14s
+   24782    1.0000000e+00   0.000000e+00   0.000000e+00     14s
+
+Root relaxation: objective 1.000000e+00, 24782 iterations, 9.75 seconds
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0    1.00000    0  558  118.00000    1.00000  99.2%     -   14s
+H    0     0                       1.0000000    1.00000  0.00%     -   15s
+
+Explored 0 nodes (28177 simplex iterations) in 15.18 seconds
+Thread count was 1 (of 2 available processors)
+
+Optimal solution found (tolerance 5.00e-02)
+Best objective 1.000000000000e+00, best bound 1.000000000000e+00, gap 0.0%
+Optimize a model with 29766 rows, 29870 columns and 118206 nonzeros
+Coefficient statistics:
+  Matrix range    [1e-05, 2e+03]
+  Objective range [1e+00, 1e+00]
+  Bounds range    [1e+00, 1e+00]
+  RHS range       [5e-04, 1e+00]
+Found heuristic solution: objective 146
+Presolve removed 29766 rows and 29870 columns
+Presolve time: 0.06s
+Presolve: All rows and columns removed
+
+Explored 0 nodes (0 simplex iterations) in 0.08 seconds
+Thread count was 1 (of 2 available processors)
+
+Optimal solution found (tolerance 5.00e-02)
+Best objective 1.460000000000e+02, best bound 1.460000000000e+02, gap 0.0%
+> geo.pareto.prioritisations <- llply(
++ 	rapr.pareto.surrogate.targets,
++ 	species.prioritisation,
++ 	x=ru,
++ 	amount.targets=0,
++ 	env.surrogate.targets=0,
++ 	adaptive.genetic.targets=0,
++ 	neutral.genetic.targets=0
++ )
+Optimize a model with 29766 rows, 29870 columns and 118206 nonzeros
+Coefficient statistics:
+  Matrix range    [1e-05, 9e+05]
+  Objective range [1e+00, 1e+00]
+  Bounds range    [1e+00, 1e+00]
+  RHS range       [1e+00, 6e+07]
+Found heuristic solution: objective 118
+Presolve removed 3 rows and 242 columns
+Presolve time: 4.75s
+Presolved: 29763 rows, 29628 columns, 117928 nonzeros
+Variable types: 0 continuous, 29628 integer (29628 binary)
+Presolved: 29763 rows, 29628 columns, 117928 nonzeros
+
+Presolve removed 29482 rows and 3717 columns
+
+Root simplex log...
+
+Iteration    Objective       Primal Inf.    Dual Inf.      Time
+       0    0.0000000e+00   1.897425e-01   2.726995e+08      6s
+    5655    1.0129373e+00   0.000000e+00   4.300000e+01     10s
+    5754    1.0000000e+00   0.000000e+00   0.000000e+00     10s
+    5754    1.0000000e+00   0.000000e+00   0.000000e+00     10s
+
+Root relaxation: objective 1.000000e+00, 5754 iterations, 5.33 seconds
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+*    0     0               0       1.0000000    1.00000  0.00%     -   10s
+
+Explored 0 nodes (5754 simplex iterations) in 10.18 seconds
+Thread count was 1 (of 2 available processors)
+
+Optimal solution found (tolerance 5.00e-02)
+Best objective 1.000000000000e+00, best bound 1.000000000000e+00, gap 0.0%
+Optimize a model with 29766 rows, 29870 columns and 118206 nonzeros
+Coefficient statistics:
+  Matrix range    [1e-05, 9e+05]
+  Objective range [1e+00, 1e+00]
+  Bounds range    [1e+00, 1e+00]
+  RHS range       [1e+00, 3e+07]
+Found heuristic solution: objective 124
+Presolve removed 3 rows and 242 columns
+Presolve time: 4.79s
+Presolved: 29763 rows, 29628 columns, 117928 nonzeros
+Variable types: 0 continuous, 29628 integer (29628 binary)
+Presolved: 29763 rows, 29628 columns, 117928 nonzeros
+
+Presolve removed 29482 rows and 3717 columns
+
+Root simplex log...
+
+Iteration    Objective       Primal Inf.    Dual Inf.      Time
+       0    0.0000000e+00   3.367941e+01   3.315739e+09      6s
+   11511    3.2519777e+00   0.000000e+00   1.688364e+03     10s
+   15567    3.0654929e+00   0.000000e+00   5.864860e+02     15s
+   19207    2.9096354e+00   0.000000e+00   1.370918e+03     20s
+   22743    2.7675660e+00   0.000000e+00   3.268172e+02     25s
+   26071    2.6087491e+00   0.000000e+00   5.108918e+02     30s
+   29295    2.4718945e+00   0.000000e+00   9.140545e+02     35s
+   30751    2.4236436e+00   0.000000e+00   1.051887e+03     40s
+   31999    2.3569882e+00   0.000000e+00   9.253939e+02     45s
+   33247    2.2653304e+00   0.000000e+00   3.147342e+02     50s
+   34495    2.1878866e+00   0.000000e+00   2.282329e+03     55s
+   35743    2.1103710e+00   0.000000e+00   3.129811e+03     60s
+   36887    2.0486928e+00   0.000000e+00   1.191018e+03     65s
+   38031    2.0030586e+00   0.000000e+00   3.705689e+03     70s
+   39175    1.9586187e+00   0.000000e+00   7.786053e+02     75s
+   40215    1.9180643e+00   0.000000e+00   2.087861e+03     80s
+   41359    1.8773615e+00   0.000000e+00   1.548576e+03     85s
+   42503    1.8252004e+00   0.000000e+00   4.844450e+02     90s
+   43543    1.7688525e+00   0.000000e+00   2.936946e+03     95s
+   44583    1.7163138e+00   0.000000e+00   8.540346e+02    100s
+   45623    1.6717608e+00   0.000000e+00   8.126352e+02    106s
+   46559    1.6281545e+00   0.000000e+00   5.520428e+03    110s
+   47599    1.5982983e+00   0.000000e+00   7.552670e+02    115s
+   48639    1.5786421e+00   0.000000e+00   3.844284e+02    120s
+   49679    1.5667358e+00   0.000000e+00   5.431260e+02    125s
+   50823    1.5546769e+00   0.000000e+00   3.152132e+02    130s
+   51863    1.5459101e+00   0.000000e+00   1.069567e+03    135s
+   52903    1.5410078e+00   0.000000e+00   4.231634e+02    140s
+   53943    1.5350957e+00   0.000000e+00   5.944636e+02    146s
+   54775    1.5293048e+00   0.000000e+00   5.075302e+02    150s
+   55711    1.5179598e+00   0.000000e+00   1.158771e+03    155s
+   56751    1.4967839e+00   0.000000e+00   3.591956e+02    160s
+   57687    1.4761381e+00   0.000000e+00   1.042508e+03    165s
+   58623    1.4601025e+00   0.000000e+00   8.783462e+03    170s
+   59559    1.4373565e+00   0.000000e+00   4.775128e+02    176s
+   60391    1.4196615e+00   0.000000e+00   5.999321e+02    180s
+   61327    1.3938299e+00   0.000000e+00   2.683023e+03    185s
+   62263    1.3581694e+00   0.000000e+00   1.728300e+03    190s
+   63303    1.2257268e+00   0.000000e+00   1.914514e+04    195s
+   65071    1.0082359e+00   0.000000e+00   1.257858e+03    200s
+   67107    1.0000000e+00   0.000000e+00   0.000000e+00    204s
+   67107    1.0000000e+00   0.000000e+00   0.000000e+00    204s
+
+Root relaxation: objective 1.000000e+00, 67107 iterations, 199.41 seconds
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+*    0     0               0       1.0000000    1.00000  0.00%     -  204s
+
+Explored 0 nodes (67107 simplex iterations) in 204.31 seconds
+Thread count was 1 (of 2 available processors)
+
+Optimal solution found (tolerance 5.00e-02)
+Best objective 1.000000000000e+00, best bound 1.000000000000e+00, gap 0.0%
+Optimize a model with 29766 rows, 29870 columns and 118206 nonzeros
+Coefficient statistics:
+  Matrix range    [1e-05, 9e+05]
+  Objective range [1e+00, 1e+00]
+  Bounds range    [1e+00, 1e+00]
+  RHS range       [5e-04, 1e+00]
+Found heuristic solution: objective 146
+Presolve removed 29766 rows and 29870 columns
+Presolve time: 0.05s
+Presolve: All rows and columns removed
+
+Explored 0 nodes (0 simplex iterations) in 0.07 seconds
+Thread count was 1 (of 2 available processors)
+
+Optimal solution found (tolerance 5.00e-02)
+Best objective 1.460000000000e+02, best bound 1.460000000000e+02, gap 0.0%
+> 
+> # extract results
+> env.pareto.DF <- ldply(seq_along(env.pareto.prioritisations), function(i) {
++ 	mutate(
++ 		extractResults(env.pareto.prioritisations[[i]]),
++ 		Surrogate.target=rapr.pareto.surrogate.targets[i]
++ 	)
++ })
+> geo.pareto.DF <- ldply(seq_along(geo.pareto.prioritisations), function(i) {
++ 	mutate(
++ 		extractResults(geo.pareto.prioritisations[[i]]),
++ 		Surrogate.target=rapr.pareto.surrogate.targets[i]
++ 	)
++ })
+> 
+> ## save .rda
+> save.session('results/.cache/08-pareto-frontier-analysis.rda')
+Saving search path..
+Saving list of loaded packages..
+Saving all data...
+Done.
+> 
+> proc.time()
+   user  system elapsed 
+256.981   1.353 259.220 

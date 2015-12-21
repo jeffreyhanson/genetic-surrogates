@@ -1,0 +1,188 @@
+
+R version 3.2.2 (2015-08-14) -- "Fire Safety"
+Copyright (C) 2015 The R Foundation for Statistical Computing
+Platform: x86_64-pc-linux-gnu (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+Revolution R Open 3.2.2
+The enhanced R distribution from Revolution Analytics
+[Previously saved workspace restored]
+
+> ## load .rda
+> session::restore.session('results/.cache/04-bayescan-analysis.rda')
+Loading all data...
+Loading packages...
+
+Attaching package: ‘dplyr’
+
+The following objects are masked from ‘package:plyr’:
+
+    arrange, count, desc, failwith, id, mutate, rename, summarise,
+    summarize
+
+The following objects are masked from ‘package:data.table’:
+
+    between, last
+
+The following objects are masked from ‘package:stats’:
+
+    filter, lag
+
+The following objects are masked from ‘package:base’:
+
+    intersect, setdiff, setequal, union
+
+This is vegan 2.3-2
+rgeos version: 0.3-15, (SVN revision 515)
+ GEOS runtime version: 3.4.2-CAPI-1.8.2 r3921 
+ Linking to sp version: 1.2-1 
+ Polygon checking: TRUE 
+
+
+Attaching package: ‘snow’
+
+The following objects are masked from ‘package:parallel’:
+
+    clusterApply, clusterApplyLB, clusterCall, clusterEvalQ,
+    clusterExport, clusterMap, clusterSplit, makeCluster, parApply,
+    parCapply, parLapply, parRapply, parSapply, splitIndices,
+    stopCluster
+
+rgdal: version: 1.1-1, (SVN revision 572)
+ Geospatial Data Abstraction Library extensions to R successfully loaded
+ Loaded GDAL runtime: GDAL 1.10.1, released 2013/08/26
+ Path to GDAL shared files: /usr/share/gdal/1.10
+ Loaded PROJ.4 runtime: Rel. 4.8.0, 6 March 2012, [PJ_VERSION: 480]
+ Path to PROJ.4 shared files: (autodetected)
+ Linking to sp version: 1.2-1 
+
+Attaching package: ‘raster’
+
+The following object is masked _by_ ‘.GlobalEnv’:
+
+    select
+
+The following object is masked from ‘package:tidyr’:
+
+    extract
+
+The following object is masked from ‘package:dplyr’:
+
+    select
+
+The following object is masked from ‘package:data.table’:
+
+    shift
+
+
+Attaching package: ‘structurer’
+
+The following objects are masked from ‘package:bayescanr’:
+
+    loci.subset, n.loci, n.pop, n.samples, sample.subset
+
+Restoring search path...
+Done.
+> 
+> # generate attribute spaces for geographic and environmental data
+> surrogate.ASL <- llply(
++ 	list(grep('^env.*$', names(grid.DF)),grep('^geo.*$', names(grid.DF))),
++ 	.fun=function(x) {
++ 		make.multi.species.AttributeSpace(
++ 			site.data=grid.DF[,x,drop=FALSE],
++ 			species.data=grid.DF[,unique(spp.samples.DF$species),drop=FALSE]
++ 		)
++ 	}
++ )
+> 
+> # generate attribute spaces for genetic data
+> adaptive.ASL <- llply(
++ 	seq_along(unique(spp.samples.DF$species)),
++ 	function(i) {
++ 		# if no adaptive space for this species then return null
++ 		if (ncol(select(grid.DF, contains(paste0(unique(spp.samples.DF$species)[i], '_adaptive'))))==0)
++ 			return(NULL)
++ 		# else return attribute space
++ 		make.single.species.AttributeSpace(
++ 			site.data=select(grid.DF, contains(paste0(unique(spp.samples.DF$species)[i], '_adaptive'))),
++ 			species.data=select(filter(spp.samples.DF, species==unique(spp.samples.DF$species)[i]), contains('adaptive')),
++ 			spp.pos=i,
++ 			n.species=n_distinct(spp.samples.DF$species)
++ 		)
++ 	}
++ )
+> adaptive.ASL <- adaptive.ASL[!sapply(adaptive.ASL, is.null)]
+> 
+> neutral.ASL <- llply(
++ 	seq_along(unique(spp.samples.DF$species)),
++ 	function(i) {
++ 		# if no adaptive space for this species then return null
++ 		if (ncol(select(grid.DF, contains(paste0(unique(spp.samples.DF$species)[i], '_neutral'))))==0)
++ 			return(NULL)
++ 		# else return attribute space
++ 		make.single.species.AttributeSpace(
++ 			site.data=select(grid.DF, contains(paste0(unique(spp.samples.DF$species)[i], '_neutral'))),
++ 			species.data=select(filter(spp.samples.DF, species==unique(spp.samples.DF$species)[i]), contains('neutral')),
++ 			spp.pos=i,
++ 			n.species=n_distinct(spp.samples.DF$species)
++ 		)
++ 	}
++ )
+> neutral.ASL <- neutral.ASL[!sapply(neutral.ASL, is.null)]
+> 
+> # make table with targets
+> target.DF <- make.targets(
++ 	species=unique(spp.samples.DF$species),
++ 	environmental.space=surrogate.ASL[[1]], geographic.space=surrogate.ASL[[2]],
++ 	adaptive.spaces=adaptive.ASL, neutral.spaces=neutral.ASL,
++ 	amount.target=0.2, space.target=0.2
++ )
+> 
+> # make Rap objects
+> rd <- RapData(
++ 	polygon=SpatialPolygons2PolySet(grid.PLY),
++ 	pu=data.frame(
++ 		cost=rep(1, nrow(grid.DF)),
++ 		area=rep(1, nrow(grid.DF)),
++ 		status=rep(0L, nrow(grid.DF))
++ 	),
++ 	species=data.frame(name=unique(spp.samples.DF$species)),
++ 	target=target.DF,
++ 	attribute.spaces=append(append(surrogate.ASL, adaptive.ASL), neutral.ASL),
++ 	pu.species.probabilities=ldply(
++ 		seq_along(unique(spp.samples.DF$species)),
++ 		.fun=function(i) {
++ 			data.frame(
++ 				species=i,
++ 				pu=which(grid.DF[[unique(spp.samples.DF$species)[i]]]==1),
++ 				value=1
++ 			)
++ 		}
++ 	),
++ 	boundary=calcBoundaryData(grid.PLY)
++ )
+> ru <- RapUnsolved(RapUnreliableOpts(), rd)
+>  
+> ## save .rda
+> save.session('results/.cache/05-format-data-for-prioritisations.rda')
+Saving search path..
+Saving list of loaded packages..
+Saving all data...
+Done.
+> 
+> proc.time()
+   user  system elapsed 
+ 13.949   0.405  14.457 

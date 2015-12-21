@@ -25,6 +25,7 @@ suppressMessages(library(rworldxtra))
 suppressMessages(library(snow))
 suppressMessages(library(doParallel))
 suppressMessages(library(english))
+suppressMessages(library(session))
 
 ## load github packages
 # devtools::install_github('paleo13/raspr')
@@ -144,4 +145,6 @@ if (MODE=='release') {
 	rapr.pareto.surrogate.targets <- seq(0.01, 1, length.out=3)
 }
 
+# save workspace
+save.session('results/.cache/00-initialization.rda')
 

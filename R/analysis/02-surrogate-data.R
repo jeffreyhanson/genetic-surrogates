@@ -1,3 +1,6 @@
+## load .rda
+session::restore.session('results/.cache/01-load-data.rda')
+
 ## create spatial data
 # grid data as SpatialPolygonsDataFrame
 grid.PTS <- SpatialPoints(as.matrix(grid.DF[,2:3]))
@@ -46,3 +49,5 @@ pca.DF <- read.table('data/BioClim_variables/pca.TXT', skip=80) %>% `names<-`(
 	'Accumulative variation explained (%)')
 )
 
+## save .rda
+save.session('results/.cache/02-surrogate-data.rda')

@@ -1,3 +1,6 @@
+## load .rda
+session::restore.session('results/.cache/06-single-species-prioritisations.rda')
+
 ## multispecies analysis
 # make prioritisations
 multi.spp.prioritisations <- llply(
@@ -26,4 +29,6 @@ multi.spp.DF <- ldply(seq_along(multi.spp.prioritisations), function(i) {
 		Prioritisation=c('Amount', 'Surrogate', 'Genetic')[i]
 	)
 })
- 
+
+## save .rda
+save.session('results/.cache/07-multi-species-prioritisations.rda')

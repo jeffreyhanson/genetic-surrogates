@@ -1,3 +1,6 @@
+## load .rda
+session::restore.session('results/.cache/00-initialization.rda')
+
 ## compile spatial grid data
 # load grid cell centroids
 grid.DF <- fread(
@@ -60,3 +63,5 @@ for (i in unique(spp.samples.DF$species))
 		1
 	)
  
+## save .rda
+save.session('results/.cache/01-load-data.rda')

@@ -1,3 +1,6 @@
+## load .rda
+session::restore.session('results/.cache/07-multi-species-prioritisations.rda')
+
 ## pareto frontier analysis
 # generate prioritistions
 env.pareto.prioritisations <- llply(
@@ -32,4 +35,6 @@ geo.pareto.DF <- ldply(seq_along(geo.pareto.prioritisations), function(i) {
 		Surrogate.target=rapr.pareto.surrogate.targets[i]
 	)
 })
-  
+
+## save .rda
+save.session('results/.cache/08-pareto-frontier-analysis.rda')

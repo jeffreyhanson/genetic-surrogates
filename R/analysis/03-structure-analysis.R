@@ -1,3 +1,7 @@
+## load .rda
+session::restore.session('results/.cache/02-surrogate-data.rda')
+
+
 ### Structure analyses
 ## run analyses
 clust <- makeCluster(st.threads, type='SOCK')
@@ -23,6 +27,7 @@ clust <- stopCluster(clust)
 spp.BayeScanData.sample.subset.LST <- llply(
 	seq_along(spp.BayeScanData.LST),
 	.fun=function(i) {
+		print(i)
 		# get population identities
 		ids <- sample.membership(spp.StructureCollection.LST[[i]], threshold=st.probthresh)
 		validPos <- which(!is.na(ids))
@@ -35,3 +40,5 @@ spp.BayeScanData.sample.subset.LST <- llply(
 	}
 )
 
+## load .rda
+save.session('results/.cache/03-stucture-analysis.rda')

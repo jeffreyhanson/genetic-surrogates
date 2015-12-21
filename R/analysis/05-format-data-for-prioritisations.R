@@ -1,3 +1,6 @@
+## load .rda
+session::restore.session('results/.cache/04-bayescan-analysis.rda')
+
 # generate attribute spaces for geographic and environmental data
 surrogate.ASL <- llply(
 	list(grep('^env.*$', names(grid.DF)),grep('^geo.*$', names(grid.DF))),
@@ -77,3 +80,5 @@ rd <- RapData(
 )
 ru <- RapUnsolved(RapUnreliableOpts(), rd)
  
+## save .rda
+save.session('results/.cache/05-format-data-for-prioritisations.rda')

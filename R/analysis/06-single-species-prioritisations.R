@@ -1,3 +1,6 @@
+## load .rda
+session::restore.session('results/.cache/05-format-data-for-prioritisations.rda')
+
 ## single species analysis
 # generate RapSolved objects
 single.spp.prioritisations <- llply(
@@ -34,3 +37,6 @@ single.spp.DF <- ldply(
 		)
 	}
 )
+
+## save .rda
+save.session('results/.cache/06-single-species-prioritisations.rda')

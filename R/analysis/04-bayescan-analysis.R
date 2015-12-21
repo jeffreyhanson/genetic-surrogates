@@ -1,3 +1,6 @@
+## load .rda
+session::restore.session('results/.cache/03-stucture-analysis.rda')
+
 # subset out loci with polymorphisms that have really low or really high frequency
 spp.BayeScanData.sample.loci.subset.LST <- llply(
 	spp.BayeScanData.sample.subset.LST,
@@ -91,3 +94,6 @@ for (i in seq_along(unique(spp.samples.DF$species))) {
 
 # update grid.PLY with additional attributes
 grid.PLY@data <- grid.DF
+
+## save .rda
+save.session('results/.cache/04-bayescan-analysis.rda')

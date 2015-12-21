@@ -1,3 +1,6 @@
+## load .rda
+session::restore.session('results/.cache/08-pareto-frontier-analysis.rda')
+
 ### Single species prioritisations
 ## statistical analysis
 # prepare data
@@ -41,3 +44,5 @@ multi.spp.MCP <- summary(
 		linfct=mcp(Prioritisation.Metric='Tukey')),
 	adjusted('bonferroni'))
 
+## save .rda
+save.session('results/.cache/09-statistical-analysis.rda')
