@@ -4,6 +4,14 @@ options(error=function(){
   traceback()
 })
 
+# parse args
+args <- commandArgs(TRUE)
+if (grepl('MODE',args))
+	MODE <- strsplit(grep('MODE', args, value=TRUE), '=', fixed=TRUE)[[1]][[2]]
+
+print(args)
+	
+	
 #### Load pacakges
 # load CRAN packages
 suppressMessages(library(data.table))
@@ -65,6 +73,7 @@ for (x in dir(file.path('R', 'functions'), full.names=TRUE)) source(x)
 
 ### set parameters
 if (!exists('MODE')) MODE <- 'debug'
+cat('MODE = ',MODE,'\n')
 
 if (MODE=='debug') {
 	## debugging parameters
