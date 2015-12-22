@@ -2,7 +2,7 @@
 # set parameters for inference 
 # MODE=release 
 # set parameters for debugging code
-MODE=release
+MODE=debug
 
 # main commands
 all: clean analysis manuscript

@@ -10,4 +10,10 @@
 # log files
 gurobi.log
 
+# system files
 .directory
+
+# cache
+results/.cache/*.Rout
+results/.cache/*.rda
+

@@ -14,6 +14,7 @@ print(args)
 	
 #### Load pacakges
 # load CRAN packages
+suppressMessages(library(stats))
 suppressMessages(library(data.table))
 suppressMessages(library(ggplot2))
 suppressMessages(library(grid))

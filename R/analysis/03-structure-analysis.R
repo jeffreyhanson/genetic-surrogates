@@ -19,6 +19,7 @@ spp.StructureCollection.LST <- llply(
 	REPEATS=cl.repeats,
 	M=cl.m,
 	S=cl.s,
+	verbose=TRUE,
 	.parallel=TRUE
 )
 clust <- stopCluster(clust)
