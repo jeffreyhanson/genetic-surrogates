@@ -6,10 +6,11 @@ options(error=function(){
 
 # parse args
 args <- commandArgs(TRUE)
-if (grepl('MODE',args))
-	MODE <- strsplit(grep('MODE', args, value=TRUE), '=', fixed=TRUE)[[1]][[2]]
-
-print(args)
+if (length(args)>1) {
+	print(args)
+	if (grepl('MODE',args))
+		MODE <- strsplit(grep('MODE', args, value=TRUE), '=', fixed=TRUE)[[1]][[2]]
+}
 	
 	
 #### Load pacakges
@@ -35,6 +36,7 @@ suppressMessages(library(snow))
 suppressMessages(library(doParallel))
 suppressMessages(library(english))
 suppressMessages(library(session))
+suppressMessages(library(maptools))
 
 ## load github packages
 # devtools::install_github('paleo13/raspr')
@@ -79,7 +81,7 @@ cat('MODE = ',MODE,'\n')
 if (MODE=='debug') {
 	## debugging parameters
 	# number of species
-	n.spp <- 3
+	n.spp <- 27
 	# structure parameters
 	st.threads <- 1
 	st.numruns <- 4
@@ -95,7 +97,7 @@ if (MODE=='debug') {
 	cl.m <- 'LargeKGreedy'
 	# BayeScan parameters
 	bs.reps <- 2
-	bs.fdr <- 0.5
+	bs.fdr <- 0.8
 	bs.threads <- 1
 	bs.n <- 10
 	bs.thin <- 1

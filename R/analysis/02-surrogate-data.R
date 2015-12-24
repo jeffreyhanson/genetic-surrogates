@@ -25,8 +25,12 @@ spp.sample.PTS <- SpatialPointsDataFrame(
 spp.sample.PPTS <- spTransform(spp.sample.PTS, europeEA)
 
 ## extract geographic data
-centroids.DF <- gCentroid(grid.PPLY, byid=TRUE) %>% slot('coords') %>%
-	as.data.frame() %>% `names<-`(paste0('geo_d',1:2))
+centroids.DF <- grid.PPLY %>%
+	spTransform(europeED) %>%
+	gCentroid(byid=TRUE) %>%
+	slot('coords') %>%
+	as.data.frame() %>%
+	`names<-`(paste0('geo_d',1:2))
 grid.DF <- cbind(grid.DF, centroids.DF)
 
 ## extract climatic data

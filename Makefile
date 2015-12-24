@@ -13,8 +13,16 @@ clean:
 # commands for generating manuscript
 manuscript: article/article.pdf
 
-article/article.pdf: article/article.Rmd article/Endnote_lib.bib article/preamble-latex.tex article/reference-style.csl
+article/article.pdf: article/article.Rmd article/Endnote_lib.bib article/preamble-latex.tex article/reference-style.csl article/supporting_information.tex article/figures.tex
 	R -e "MODE='$(MODE)';rmarkdown::render('article/article.Rmd')"
+	rm article/supporting_information.pdf
+	rm article/figures.pdf
+
+article/supporting_information.tex: article/supporting_information.Rmd
+	R -e "MODE='$(MODE)';rmarkdown::render('article/supporting_information.Rmd')"
+
+article/figures.tex: article/figures.Rmd
+	R -e "MODE='$(MODE)';rmarkdown::render('article/figures.Rmd')"
 
 # commands for running analysis
 analysis: results/results.rda

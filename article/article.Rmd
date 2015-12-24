@@ -1,7 +1,7 @@
 ---
 title: "Are environmental and geographic effective surrogates for genetic variation in conservation planning?"
 author: |
-  | Jeffrey O. Hanson$^1$, Jonathan R. Rhodes$^2$, Cynthia Riginos$^2$, Hugh P. Possingham$^1$, Richard A. Fuller$^1$
+  | Jeffrey O. Hanson$^1$, Jonathan R. Rhodes$^2$, Cynthia Riginos$^1$, Hugh P. Possingham$^1$, Richard A. Fuller$^1$
   | $^1$School of Biological Sciences, The University of Queensland, Brisbane, QLD, Australia
   | $^2$School of Geography, Planning and Environmental Management, The University of Queensland, Brisbane, QLD, Australia
   | Correspondance should be addressed to jeffrey.hanson@uqconnect.edu.au
@@ -10,188 +10,67 @@ tags: ["conservation", "biodiversity", "AFLP", "reserve-selection"]
 abstract: "Insert abstract here."
 output:
   rmarkdown::pdf_document:
-    toc: true
+    toc: false
     toc_depth: 5
     keep_tex: yes
     fig_caption: yes
     includes:
       in_header: preamble-latex.tex
+      after_body: postamble-latex.tex
 fontsize: 11pt
 documentclass: article
 bibliography: Endnote_lib.bib
 csl: reference-style.csl
-vignette: >
-  %\VignetteIndexEntry{rapr}
-  %\VignetteEngine{knitr::rmarkdown}
-  \usepackage[utf8]{inputenc}
 ---
+
+<!-- NOTES -->
+<!-- 6 page limit w/o incurring costs -->
 
 ```{r, include=FALSE}
 # set wd
 setwd('..')
 
+# load .rda files
+load('results/results.rda')
+
 # load packages
 source('R/analysis/00-initialization.R')
 
-# load .rda files
-load('results/results.rda')
+# set options
+options(error=NULL)
 ```
 
+
 ## Introduction
+<!-- 200 word limit -->
 
 
 ## Methods
 ### Study area
-To address the aims of this study, we utilized species distribution and genomic data collected by the IntraBioDiv project [Figure S1; @r451]. As part of this project, data for 27 alpine plant species were collected across the European Alps using a regular grid [22.3 km $\times$ 25 km; see @r452 for methodological details]. In every second cell, plant samples were collected from three individiduals for each species present inside the cell. Samples were genotyped using amplified fragment length polymorphisms [AFLP; @r453]. Matrices denoting the presence/absence of polymorphisms at loci were consutrcted independently for each species. This dataset was well suited for the purposes of this study, because it provides spatially explicit genomic data for a multitude of species. Additionally, the study area spans across broad-scale environmental gradients--ranging from lowlands to snow-caped peaks--that have been found to correlate with genetic variation for some of these species [].
+To address the aims of the study, we utilized species distribution and genomic data collected by the IntraBioDiv project [Figure S1; @r451; see @r452 for methodological details]. This dataset was well suited for this study, because it provides spatially explicit genomic data for a multitude of species across a broad geographic area and over large environmental gradients. As part of this project, data for 27 alpine plant species were collected across the European Alps according to a grid (22.3 km $\times$ 25 km). Briefly, in every second cell, plant samples were collected from three individuals for each species present inside the cell. Samples were genotyped using amplified fragment length polymorphisms [AFLP; @r453]. Matrices denoting the presence/absence of polymorphisms at loci were constructed independently for each species. Thus for each second grid cell, for each of the species in the grid cell, the dataset contains information describing the genomic variation of individuals inside the grid cell. We used these grid cells as planning units to develop prioritizations to investigate the effectiveness of surrogates for the (AFLP) genetic variation.
 
 ### Surrogate data
-We explored the effectiveness of environmental and geographic surrogates. To describe variation in the location of each grid, we projected the grids to an equal-area coordinate system (ESRI:102014) and determined the centroid of each cell. To describe the climatic variation among each cell, we obtained twenty-one bioclimatic variables [@r33]. These layers were clipped to the extent of the grid and subject to a principle components analysis (PCA; Table S1). The first two principle components (PCs) cumulatively explained `r round(pca.DF[[4]][2],1)`% of the variation and were used to generate two new layers. The average value of each PC layer in each grid was used to characterise the climatic conditions in the grid cell (Figure S2).
+We explored the effectiveness of climatic and geographic surrogates. To describe variation in the location of each grid cell, we projected the grid into an equi-distant coordinate system (ESRI:102031) and used the centroid of each cell. To describe the climatic variation among each cell, we obtained twenty-one bioclimatic variables [approx. 1km resolution; @r33]. These layers and the grid cells were projected into an equal-area coordinate system (ESRI:102014). The bioclimatic variables were clipped to the extent of the grid and subject to a principle components analysis (PCA; Table S1). The first two principle components (PCs) cumulatively explained `r round(pca.DF[[4]][2],1)`% of the variation and were used to generate two new layers. We calculated the average value for each PC layer in each grid cell, and used these values to characterize the main themes of climatic variation among the grid cells (Figure S2).
 
 ### Outlier locus detection
-To investigate the effectiveness of the surrogates for adaptive and neutral genetic variation, we first identifed which of the sampled loci for each species for each species were under selection. We used an outlier locus detection method [evaluated in @r454] to avoid circularity issues. The basic premise underpinning this method is that neutral loci are expected to have a specific level of variation among populations ($F_{st}$), and loci that deviate from this expectation are under selection. Previously, Bothwell _et al._ [-@r455] applied such detection methods to one of the species (_Getiana nivalis_) in this dataset. Here, we applied similar methods to each of the twenty-seven species in the dataset.
+To investigate the effectiveness of the surrogates for adaptive and neutral genetic variation, we first identified which of the sampled loci for each species were under selection. We used outlier locus detection methods [evaluated in @r454] to avoid circularity issues. The basic premise underpinning these analyses is that neutral loci are expected to have a specific level of variation among populations ($F_{st}$), and loci that deviate from this expectation should be under selection. Thus loci can be identified as being under selection without using environmental data. In an earlier study, Bothwell _et al._ [-@r455] applied such outlier detection methods to one of the species in this dataset (_Getiana nivalis_). Here, we adopted a similar methodology and applied it to each of the 27 species in the dataset.
 
-Breifly, we grouped individuals into genetic lineages (Figure S2). The purpose of this step was to avoid confounding variation between populations with due to genetic history with variation attributed to selection pressures. We used the Bayesian clustering method implemented in Structure (version 2.3.4) assuming admixture and an independent alleles model. For each species, we identified the most plausible number of populations (K = `r st.k[1]`--`r st.k[2]`; `r st.numruns` runs per K; `r st.burnin` burn-in; `r st.numreps` iterations) using the delta-K method [Figure S3; @r460]. Population membership probabilities from replicate runs were aligned using CLUMPP [version 1.1.2; `r cl.numreps` runs of the greedy search method with random starts per K per species; @r459], and averaged to estimate the probability that each individual belonged to each population (Figure S4). Individuals with a reasonably high probability of belonging to a single population ($\geq `r st.probthresh`$) were assigned accordingly (Figure S5), and used for subseqent locus detection methods.
+First, we grouped individuals into genetic lineages for each species (Figure S2). The purpose of this step was to avoid confounding variation between populations with due to genetic history with variation attributed to selection pressures. We used the Bayesian clustering method implemented in $\texttt{Structure}$ [version 2.3.4; @r461; @r462] assuming admixture and an independent alleles model. For each species, we identified the most plausible number of populations (K = `r st.k[1]`--`r st.k[2]`; `r st.numruns` runs per K; `r st.burnin` burn-in iterations; `r st.numreps` post-burn-in iterations) using the $\Delta$K method [Figure S3; @r460]. We aggregated the population membership probabilities from replicate runs using $\texttt{CLUMPP}$ [version 1.1.2; large K greedy search method with `r cl.repeats` random starts per K per species; Figure S4; @r459]. Individuals with a moderate probability of belonging to a single population ($\geq `r st.probthresh`$) were assigned accordingly (Figure S5), and subject to subsequent outlier locus detection methods.
 
-We used Bayescan [version 2.1; @r456] to identify the sampled loci under selection for each species (Table S2). For each species, Bayescan was run using the population memberships identified using Structure (1:1 prior odds, `r bs.nbp` pilot runs, and `r bs.n` iterations thinned by `r bs.thin` iterations with a `r bs.burn` burn-in). Following guidelines in the Bayescan manual, we omitted loci where the global frequency of the minor allele was $\geq$ 0.05 to avoid false-positives. To ensure convergence, we ran `r as.english(bs.reps)` replicates per species using a false discovery rate (FDR) $\leq `r bs.fdr`$. 
+We used $\texttt{Bayescan}$ [version 2.1; @r456] to identify loci under selection for each species (Table S2). For each species, $\texttt{Bayescan}$ was run using the population memberships identified in the previous analysis (1:1 prior odds; `r bs.nbp` pilot runs; `r bs.burn` burn-in iterations; `r bs.n` post-burn-in iterations thinned by `r bs.thin` iterations). Following guidelines in the $\texttt{Bayescan}$ manual, we omitted loci where the global frequency of the minor allele was $\geq 0.05$ to avoid false-positives. To ensure convergence, we ran `r bs.reps` replicates per species using a suitable false discovery rate [FDR; $\leq `r bs.fdr`$; @r466]. 
 
-After classifying the loci as adaptive or neutral for each species, we mapped the main gradients of adaptive and/or neutral genetic variation for each species (Figures S4--S29). For each species, we used Gower distances to express the difference in adaptive and/or neutral polymorphisms between individuals [using the cluster R package; @r457]. These distances were subject to a non metric multi-dimensional scaling analysis [implemented in the vegan R package using K=`r mds.k` and `r mds.trymax` random starts; Table S3; @r458]. The ordinated variables were then associated with the grid cells were each species was sampled. 
+After classifying loci as adaptive or neutral, we mapped the main gradients of the adaptive (if present) and neutral genetic variation for each species (Figures S4--S29). Note that while individuals not assigned to populations were omitted from the $\texttt{Bayescan}$ analysis, here we used all the individuals. For each species, for each type of genetic variation present, we used Gower distances [@r464] to express the genomic differences between individuals [using the cluster R package to accommodate sparsity; @r457]. These distances were subject to a non metric multi-dimensional scaling analysis [implemented in the vegan R package using K=`r mds.k` and `r mds.trymax` random starts; Table S3; @r458]. The average of the ordinated values associated with individuals in each grid cell we used to characterize the genomic variation in the grid cell.
 
-### Prioritisations
-
-
-
-
+### Prioritizations
+We used the unreliable representative and adequate prioritization (URAP) formulation of the reserve selection problem [@r465]. We treated the genomic and surrogate variables as distinct attribute spaces. We set the demand points for each species and its attribute space using the values associated with the planning units. First, we generated a set of single species prioritizations. For each species, we generated a prioritization using a `r (rapr.amount.target*100)`% amount-based target, a prioritization using a `r (rapr.amount.target*100)`% amount-based target and `r (rapr.surrogate.target*100)`% space-based targets for the surrogate variation, and a prioritization using a `r (rapr.amount.target*100)`% amount-based target and `r (rapr.genetic.target*100) `% space-based targets for the genomic variation. Next, we generated three multi-species prioritizations using the same sets of targets used in the single species prioritizations. Finally, to understand the relationship between the surrogate-based and genomic-based targets, we generated a suite of prioritizations using increasing space-based targets between `r (min(rapr.pareto.surrogate.targets)*100)`% and `r (max(rapr.pareto.surrogate.targets)*100)`% in increments of `r diff(rapr.pareto.surrogate.targets[1:2])*100`%. For each prioritization we calculated the proportion of the adaptive (if present) and neutral genetic variation that it secured. We solved the reserve selection problems to within `r (gb.MIPGap*100)`% of optimality using the $\texttt{rapr}$ R package [@r465] and $\texttt{Gurobi}$ [@r463].
 
 ## Results
-### Single species prioritisations
-
-```{r, fig.width=6, fig.height=3, fig.cap='Summary of single species prioritisations. Single species prioritisations were generated using amount-based targets, amount-based and surrogate-based targets, and amount-based and genetic-based targets for each species. Data shows the performance of prioritisations generated using these three sets of targets. Bars denote means and standard errors.'}
-# prepare data for plotting
-single.spp.PDF <- expand.grid(
-	Prioritisation=unique(single.spp.SDF$Prioritisation),
-	Metric=unique(single.spp.SDF$Metric))
-single.spp.PDF <- cbind(single.spp.PDF,
-	as.data.frame(predict(single.spp.GLM, single.spp.PDF,
-		type='response', se.fit=TRUE))) %>%
-	mutate(lower=fit-se.fit, upper=fit+se.fit,
-		letters=toupper(cld(single.spp.MCP)$mcletters$Letters),
-		letter_pos=upper+0.05)
-# make plot
-ggplot(aes(x=Metric,y=fit,fill=Prioritisation),
-	data=single.spp.PDF) +
-	geom_bar(position=position_dodge(0.9),
-		stat='identity') +
-	geom_errorbar(
-		aes(ymin=lower,ymax=upper),
-		position=position_dodge(0.9), width=0.6) +
-	geom_text(aes(x=Metric, y=letter_pos,
-		label=letters), position=position_dodge(0.9)) +
-	scale_fill_manual(name='Prioritisation',
-		values=c('grey80','grey50','grey20')) +
-	ylab('Proportion genetic\nvariation secured (%)') +
-	xlab('') +
-	theme_classic()
-```
+### Single species prioritizations
 
 ### Multi-species prioritisations
 
-```{r, fig.width=8, fig.height=3.5, fig.cap='Multi-species prioritisations. Panel (a) shows the prioritisation generated for using just amount-based targets. Panel (b) shows the prioritisation generated using amount-based and surrogate based targets. Panel (c) shows the prioritisation generated using amount-based and genetic-based targets'}
-# download basemap
-data(countriesHigh)
-countries.FPLY <- countriesHigh[
-	countriesHigh$ADMIN %in% c(
-		'Italy', 'Switzerland', 'France', 'Austria',
-		'Germany', 'Slovenia', 'Croatia', 'Hungary',
-		'Monaco', 'Germany'
-	)
-,] %>% spFortify
-# prepare data for plotting
-multi.spp.grid.FPLY <- grid.PLY
-for (i in seq_along(multi.spp.prioritisations))
-	multi.spp.grid.FPLY@data[[paste0('v',i)]] <- selections(multi.spp.prioritisations[[i]])
-multi.spp.grid.FPLY <- spFortify(multi.spp.grid.FPLY)
-# make maps
-do.call(
-	grid.arrange,
-	append(
-		llply(
-			seq_along(multi.spp.prioritisations),
-			function(i) {
-				ggplot() +
-					geom_polygon(data=countries.FPLY, aes(x=long, y=lat, group=group),
-						fill='grey20', color='grey80') +
-					geom_polygon(data=multi.spp.grid.FPLY, aes_string(x='long', y='lat', 
-						group='group', fill=paste0('v',i)),
-						alpha=0.8, color='grey10') +
-					guides(fill=guide_legend(title=' ')) +
-					theme_classic() +
-					theme(axis.ticks=element_blank(), axis.text=element_blank(),
-						plot.margin=unit(c(0,0,0,0),'cm'), axis.line=element_blank(),
-						legend.position='none') +
-					coord_cartesian(
-						xlim=buffered.range(multi.spp.grid.FPLY$long, 0.05),
-						ylim=buffered.range(multi.spp.grid.FPLY$lat, 0.05)
-					) +
-					xlab('') +
-					ylab('') +
-					annotate('text',
-						x=min(multi.spp.grid.FPLY$long)+diff(range(multi.spp.grid.FPLY$long)*0.1),
-						y=min(multi.spp.grid.FPLY$lat)+diff(range(multi.spp.grid.FPLY$lat)*1.01),
-						label=letters[i], hjust=1, vjust=1, color='white', size=8)
-			}
-		),
-		list(nrow=1)
-	)
-)
-```
-
-```{r, fig.width=6, fig.height=3, fig.cap='Summary of multi-species prioritisations. Three prioritisations were generated using amount-based targets, amount-based and surrogate-based targets, and amount-based and genetic-based targets for each species. Data shows the performance of these prioritisations based on how much genetic variation they explain. Bars denote means and standard errors.'}
-# prepare data for plotting
-multi.spp.PDF <- expand.grid(
-	Prioritisation=unique(multi.spp.SDF$Prioritisation),
-	Metric=unique(multi.spp.SDF$Metric))
-multi.spp.PDF <- cbind(multi.spp.PDF,
-	as.data.frame(predict(multi.spp.GLM, multi.spp.PDF,
-		type='response', se.fit=TRUE))) %>%
-	mutate(lower=fit-se.fit, upper=fit+se.fit,
-		letters=toupper(cld(multi.spp.MCP)$mcletters$Letters),
-		letter_pos=upper+0.05)
-# make plot
-ggplot(aes(x=Metric,y=fit,fill=Prioritisation),
-	data=multi.spp.PDF) +
-	geom_bar(position=position_dodge(0.9),
-		stat='identity') +
-	geom_errorbar(
-		aes(ymin=lower,ymax=upper),
-		position=position_dodge(0.9), width=0.6) +
-	geom_text(aes(x=Metric, y=letter_pos,
-		label=letters), position=position_dodge(0.9)) +
-	scale_fill_manual(name='Prioritisation',
-		values=c('grey80','grey50','grey20')) +
-	ylab('Proportion genetic\nvariation secured (%)') +
-	xlab('') +
-	theme_classic()
-```
 
 ### Pareo-frontier analysis
-
-```{r, fig.width=8, fig.height=3.5, fig.cap='The relationship between surrogates and genetic variation secured in prioritisations.'}
-# make plots
-p1 <- ggplot(data=env.pareto.DF) +
-	geom_line(aes(x=Surrogate.target,y=adaptive.held,group=Species),
-		alpha=0.5) +
-	xlab('Environmental variation secured (%)') +
-	ylab('Adaptive genetic\nvariation secured (%)') +
-	theme_classic()
-p2 <- ggplot(data=geo.pareto.DF) +
-	geom_line(aes(x=Surrogate.target,y=neutral.held,group=Species),
-		alpha=0.5) +
-	xlab('Geographic variation secured (%)') +
-	ylab('Neutral genetic\nvariation secured (%)') +
-	theme_classic()
-grid.arrange(p1, p2, nrow=1)
-```
-
 
 ## Discussion
 
@@ -200,268 +79,4 @@ grid.arrange(p1, p2, nrow=1)
 JOH is funded by an Australian Postgraduate Award (APA) scholarship. RAF has an Australian Research Council Future Fellowship. This work was supported by the Centre of Excellence for Environmental Decisions (CEED) and the Landscape Ecology and Conservation Group (LEC) at The University of Queensland.
 
 ## References
-
-
-## Figures
-
-
-
-## Tables
-
-
-## Supporting Information
-
-### Figure S1: Species distributions
-```{r, fig.width=9.5, fig.height=10, out.width='7.5in', out.height='8.5in', fig.cap='Species distributions. Squares represent planning units. For a given species, planning units that were found to be inhabited are denoted with bright blue.'}
-## plot map of species distributions
-# fortify data
-grid.FPLY <- spFortify(grid.PLY)
-spp.grid.FPLY <- ldply(unique(spp.samples.DF$species), function(x) {
-		z <- grid.FPLY[,c('long', 'lat', 'group', x),drop=FALSE]
-		names(z)[4] <- 'presence'
-		z$species <- gsub('\\_', ' ', x)
-		return(z)
-	}
-)
-# plot species data
-ggplot() +
-	geom_polygon(data=countries.FPLY, aes(x=long, y=lat, group=group),
-		fill='grey20', color='grey80') +
-	geom_polygon(data=spp.grid.FPLY, aes(x=long, y=lat, 
-		group=group, fill=presence), alpha=0.8, color='grey10') +
-	theme_classic() +
-	guides(fill=guide_legend(title='Presence')) +
-	theme(axis.ticks=element_blank(), axis.text=element_blank(),
-		axis.line=element_blank()) +
-	coord_cartesian(
-		xlim=buffered.range(grid.FPLY$long, 0.05),
-		ylim=buffered.range(grid.FPLY$lat, 0.05)
-	) +
-	xlab('') +
-	ylab('') +
-	facet_wrap(~ species, ncol=4)
-```
-
-```{r, fig.width=4, fig.height=3.5, fig.cap="Species richness. Squares denote planning units. Planning units with a brighter color are inhabited by more species."}
-# calculate species richness
-grid.PLY$Species_richness <- grid.PLY@data %>%
-	select(5:(4+n.spp)) %>% as.matrix() %>% rowSums()
-
-# plot species richness
-ggplot() +
-	geom_polygon(data=countries.FPLY, aes(x=long, y=lat, group=group),
-		fill='grey20', color='grey80') +
-	geom_polygon(data=spFortify(grid.PLY), aes(x=long, y=lat, 
-		group=group, fill=Species_richness), alpha=0.8, color='grey10') +
-	guides(fill=guide_legend(title='Count (#)')) +
-	theme_classic() +
-	theme(axis.ticks=element_blank(), axis.text=element_blank(),
-		axis.line=element_blank()) +
-	coord_cartesian(
-		xlim=buffered.range(grid.FPLY$long, 0.05),
-		ylim=buffered.range(grid.FPLY$lat, 0.05)
-	) +
-	xlab('') +
-	ylab('') +
-	ggtitle('Species richness')
-```
-
-### Figure S2: Maps of climatic variation
-```{r, width=6.5, height=4.5, fig.cap='Climatic variation. Each panel depicts variation based on a different principle component (PC). Sqaures represent planning units. The color of each planning unit denotes the average priciniple component value of pixels inside it. Planning units with more similar colors have more similar climates regimes.'}
-do.call(
-	grid.arrange,
-		append(
-		llply(grep('^env\\_.*$', names(grid.DF), value=TRUE), function(x) {
-			ggplot() +
-				geom_polygon(data=countries.FPLY, aes(x=long, y=lat, group=group),
-					fill='grey20', color='grey80') +
-				geom_polygon(data=grid.FPLY, aes_string(x='long', y='lat', 
-					group='group', fill=x),
-					alpha=0.8, color='grey10') +
-				guides(fill=guide_legend(title=' ')) +
-				theme_classic() +
-				theme(axis.ticks=element_blank(), axis.text=element_blank(),
-					plot.margin=unit(c(0,0,0,0),'cm'), axis.line=element_blank()) +
-				coord_cartesian(
-					xlim=buffered.range(grid.FPLY$long, 0.05),
-					ylim=buffered.range(grid.FPLY$lat, 0.05)
-				) +
-				xlab('') +
-				ylab('') +
-				ggtitle(paste0('PC ', substr(x, nchar(x), nchar(x))))
-		}),
-		list(ncol=2)
-	)
-)
-```
-
-### Figure S3. Number populations in each species.
-```{r}
-# format data
-deltak.DF <- ldply(
-	seq_along(unique(spp.samples.DF$species)),
-	.fun=function(i) {
-		mutate(
-			spp.StructureCollection.LST[[i]]@summary,
-			Species=gsub('_', ' ', unique(spp.samples.DF$species), fixed=TRUE)
-		)
-	}
-)
-# make plot
-ggplot() +
-	geom_point(aes(y=delta.k, x=k)) +
-	geom_line(aes(y=delta.k, x=k)) +
-	theme_classic() +
-	xlab('Number of populations') +
-	ylab('Relative support (delta-K)') +
-	facet_wrap(~ Species, ncol=6)
-```
-
-### Figure S4. Population memberships for each species.
-```{r}
-# prepare data
-
-
-# make plot
-
-
-```
-
-
-### Figure S5. Distribution of populations for each species.
-```{r}
-# prepare data
-
-# make plot
-
-
-```
-
-```{r}
-plot.spp.mds <- function(i) {
-	# define function
-	make.mds.plot <- function(j,k) {
-		ggplot() +
-			geom_polygon(data=countries.FPLY, aes(x=long, y=lat, group=group),
-				fill='grey20', color='grey80') +
-			geom_polygon(data=grid.FPLY, aes_string(x='long', y='lat', 
-				group='group', fill=paste0(unique(spp.samples.DF$species)[i], '_', j, '_d',k)),
-				alpha=0.8, color='grey10') +
-			guides(fill=guide_legend(title=' ')) +
-			theme_classic() +
-			theme(axis.ticks=element_blank(), axis.text=element_blank(),
-				plot.margin=unit(c(0,0,0,0),'cm'), axis.line=element_blank()) +
-			coord_cartesian(
-				xlim=buffered.range(grid.FPLY$long, 0.05),
-				ylim=buffered.range(grid.FPLY$lat, 0.05)
-			) +
-			xlab('') +
-			ylab('') +
-			ggtitle(paste0(j,' (',k,')'))
-	}
-	# init
-	adapt.col <- paste0(unique(spp.samples.DF$species)[i], '_adaptive_d1')
-	neutral.col <- paste0(unique(spp.samples.DF$species)[i], '_neutral_d1')
-	plotLST <- list()
-	# make adaptive plot
-	if (adapt.col %in% names(grid.FPLY)) {
-		for (k in seq_len(mds.k))
-			plotLST <- append(plotLST, list(make.mds.plot('adaptive', k)))
-	} 
-	# make neutral plot
-	if (neutral.col %in% names(grid.FPLY)) {
-		for (k in seq_len(mds.k))
-			plotLST <- append(plotLST, list(make.mds.plot('neutral', k)))
-	} 
-	# make plot
-	do.call(
-		grid.arrange,
-		append(
-			plotLST,
-			list(ncol=6)
-		)
-	)
-}
-```
-
-### Figures S
-```{r, fig.width=6.5, fig.height=4.5, fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[1]),'}. Each square represents a planning unit. The color of each planning unit panel corresponds to ordination values. Planning units with similar colors contain individiduals with similar genetic variation.')}
-plot.spp.mds(1)
-```
-
-```{r, fig.width=6.5, fig.height=4.5, fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[2]),'}. See Figure XX caption for conventions.')}
-plot.spp.mds(2)
-```
-
-```{r, fig.width=6.5, fig.height=4.5, fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[3]),'}. See Figure XX caption for conventions.')}
-plot.spp.mds(3)
-```
-
-### Table S1: Principle components analysis on climatic variation
-```{r}
-## make results table showing Eigen values
-knitr::kable(
-	pca.DF,
-	digits=2,
-	caption='Summary of principle components analysis (PCA) on bioclimatic variation across the study area. The first two principle components (PCs) were used for subsequent analysis.',
-	align=c('l', 'c', 'c', 'c')
-)
-```
-
-### Table S2: BayeScan Results
-```{r}
-knitr::kable(
-	format.table(
-		ldply(
-			seq_along(unique(spp.samples.DF$species)), 
-			function(i) {
-				data.frame(
-					Species=paste0('\\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[i]),'}'),
-					Primer=spp.BayeScan.sample.loci.subset.LST[[i]]@data@primers,
-					Probability=spp.BayeScan.sample.loci.subset.LST[[i]]@results@summary[[2]],
-					qval=spp.BayeScan.sample.loci.subset.LST[[i]]@results@summary[[4]],
-					alpha=spp.BayeScan.sample.loci.subset.LST[[i]]@results@summary[[5]],
-					fst=spp.BayeScan.sample.loci.subset.LST[[i]]@results@summary[[6]],
-					Type=spp.BayeScan.sample.loci.subset.LST[[i]]@results@summary[[7]]
-				)
-			}
-		),
-		omit='Type'
-	),
-	digits=2,
-	col.names=c('Species', 'Primer', 'Probability', 'q-value', '$\\alpha$', '$F_{ST}$', 'Type'),
-	align=c('l', 'c', 'c', 'c', 'c', 'c', 'c')
-)
-```
-### Table S3: Genomic MDS results
-```{r}
-knitr::kable(
-	format.table(
-		filter(
-			ldply(
-				seq_along(unique(spp.samples.DF$species)), 
-				function(i) {
-					ldply(
-						seq_along(spp.mds.LST[[i]]),
-						function(j) {
-						data.frame(
-							Species=paste0('\\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[i]),'}'),
-							Loci=names(spp.mds.LST[[i]])[j],
-							Stress=ifelse(is.null(spp.mds.LST[[i]][[j]]), NA_real_, spp.mds.LST[[i]][[j]]$stress),
-							Converged=ifelse(is.null(spp.mds.LST[[i]][[j]]), NA_real_, spp.mds.LST[[i]][[j]]$converged)
-						)
-					})
-				}
-			),
-			!is.na(Stress)
-		),
-		omit=c('Loci','Converged')
-	),
-	digits=2,
-	caption='Summary of non-metric multi-dimensional scaling (MDS) analyses on genetic variation for each species.',
-	col.names=c('Species', 'Loci Type', 'NMDS Stress', 'Converged'),
-	align=c('l', 'c', 'c', 'c')
-)
-```
-
 

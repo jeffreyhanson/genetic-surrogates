@@ -1,0 +1,153 @@
+---
+fontsize: 11pt
+documentclass: article
+bibliography: Endnote_lib.bib
+csl: reference-style.csl
+output:
+  rmarkdown::pdf_document:
+    toc: false
+    keep_tex: no
+    fig_caption: yes
+    includes:
+      in_header: preamble-latex.tex
+---
+
+```{r, include=FALSE}
+# set wd
+setwd('..')
+
+# load .rda files
+load('results/results.rda')
+
+# load packages
+source('R/analysis/00-initialization.R')
+
+# set options
+options(error=NULL)
+```
+
+## Figures
+
+```{r, echo=FALSE, fig.width=6, fig.height=3, fig.cap='Summary of single species prioritisations. Single species prioritisations were generated using amount-based targets, amount-based and surrogate-based targets, and amount-based and genetic-based targets for each species. Data shows the performance of prioritisations generated using these three sets of targets. Bars denote means and standard errors.'}
+# prepare data for plotting
+single.spp.PDF <- expand.grid(
+	Prioritisation=unique(single.spp.SDF$Prioritisation),
+	Metric=unique(single.spp.SDF$Metric))
+single.spp.PDF <- cbind(single.spp.PDF,
+	as.data.frame(predict(single.spp.GLM, single.spp.PDF,
+		type='response', se.fit=TRUE))) %>%
+	mutate(lower=fit-se.fit, upper=fit+se.fit,
+		letters=toupper(cld(single.spp.MCP)$mcletters$Letters),
+		letter_pos=upper+0.05)
+# make plot
+ggplot(aes(x=Metric,y=fit,fill=Prioritisation),
+	data=single.spp.PDF) +
+	geom_bar(position=position_dodge(0.9),
+		stat='identity') +
+	geom_errorbar(
+		aes(ymin=lower,ymax=upper),
+		position=position_dodge(0.9), width=0.6) +
+	geom_text(aes(x=Metric, y=letter_pos,
+		label=letters), position=position_dodge(0.9)) +
+	scale_fill_manual(name='Prioritisation',
+		values=c('grey80','grey50','grey20')) +
+	ylab('Proportion genetic\nvariation secured (%)') +
+	xlab('') +
+	theme_classic()
+```
+
+```{r, echo=FALSE, fig.width=8, fig.height=3.5, fig.cap='Multi-species prioritisations. Panel (a) shows the prioritisation generated for using just amount-based targets. Panel (b) shows the prioritisation generated using amount-based and surrogate based targets. Panel (c) shows the prioritisation generated using amount-based and genetic-based targets'}
+# download basemap
+data(countriesHigh)
+countries.FPLY <- countriesHigh[
+	countriesHigh$ADMIN %in% c(
+		'Italy', 'Switzerland', 'France', 'Austria',
+		'Germany', 'Slovenia', 'Croatia', 'Hungary',
+		'Monaco', 'Germany'
+	)
+,] %>% spFortify
+# prepare data for plotting
+multi.spp.grid.FPLY <- grid.PLY
+for (i in seq_along(multi.spp.prioritisations))
+	multi.spp.grid.FPLY@data[[paste0('v',i)]] <- selections(multi.spp.prioritisations[[i]])
+multi.spp.grid.FPLY <- spFortify(multi.spp.grid.FPLY)
+# make maps
+do.call(
+	grid.arrange,
+	append(
+		llply(
+			seq_along(multi.spp.prioritisations),
+			function(i) {
+				ggplot() +
+					geom_polygon(data=countries.FPLY, aes(x=long, y=lat, group=group),
+						fill='grey20', color='grey80') +
+					geom_polygon(data=multi.spp.grid.FPLY, aes_string(x='long', y='lat', 
+						group='group', fill=paste0('v',i)),
+						alpha=0.8, color='grey10') +
+					guides(fill=guide_legend(title=' ')) +
+					theme_classic() +
+					theme(axis.ticks=element_blank(), axis.text=element_blank(),
+						plot.margin=unit(c(0,0,0,0),'cm'), axis.line=element_blank(),
+						legend.position='none') +
+					coord_cartesian(
+						xlim=buffered.range(multi.spp.grid.FPLY$long, 0.05),
+						ylim=buffered.range(multi.spp.grid.FPLY$lat, 0.05)
+					) +
+					xlab('') +
+					ylab('') +
+					annotate('text',
+						x=min(multi.spp.grid.FPLY$long)+diff(range(multi.spp.grid.FPLY$long)*0.1),
+						y=min(multi.spp.grid.FPLY$lat)+diff(range(multi.spp.grid.FPLY$lat)*1.01),
+						label=letters[i], hjust=1, vjust=1, color='white', size=8)
+			}
+		),
+		list(nrow=1)
+	)
+)
+```
+
+```{r, echo=FALSE, fig.width=6, fig.height=3, fig.cap='Summary of multi-species prioritisations. Three prioritisations were generated using amount-based targets, amount-based and surrogate-based targets, and amount-based and genetic-based targets for each species. Data shows the performance of these prioritisations based on how much genetic variation they explain. Bars denote means and standard errors.'}
+# prepare data for plotting
+multi.spp.PDF <- expand.grid(
+	Prioritisation=unique(multi.spp.SDF$Prioritisation),
+	Metric=unique(multi.spp.SDF$Metric))
+multi.spp.PDF <- cbind(multi.spp.PDF,
+	as.data.frame(predict(multi.spp.GLM, multi.spp.PDF,
+		type='response', se.fit=TRUE))) %>%
+	mutate(lower=fit-se.fit, upper=fit+se.fit,
+		letters=toupper(cld(multi.spp.MCP)$mcletters$Letters),
+		letter_pos=upper+0.05)
+# make plot
+ggplot(aes(x=Metric,y=fit,fill=Prioritisation),
+	data=multi.spp.PDF) +
+	geom_bar(position=position_dodge(0.9),
+		stat='identity') +
+	geom_errorbar(
+		aes(ymin=lower,ymax=upper),
+		position=position_dodge(0.9), width=0.6) +
+	geom_text(aes(x=Metric, y=letter_pos,
+		label=letters), position=position_dodge(0.9)) +
+	scale_fill_manual(name='Prioritisation',
+		values=c('grey80','grey50','grey20')) +
+	ylab('Proportion genetic\nvariation secured (%)') +
+	xlab('') +
+	theme_classic()
+```
+
+```{r, echo=FALSE, fig.width=8, fig.height=3.5, fig.cap='The relationship between surrogates and genetic variation secured in prioritizations.'}
+# make plots
+p1 <- ggplot(data=env.pareto.DF) +
+	geom_line(aes(x=Surrogate.target,y=adaptive.held,group=Species),
+		alpha=0.5) +
+	xlab('Environmental variation secured (%)') +
+	ylab('Adaptive genetic\nvariation secured (%)') +
+	theme_classic()
+p2 <- ggplot(data=geo.pareto.DF) +
+	geom_line(aes(x=Surrogate.target,y=neutral.held,group=Species),
+		alpha=0.5) +
+	xlab('Geographic variation secured (%)') +
+	ylab('Neutral genetic\nvariation secured (%)') +
+	theme_classic()
+grid.arrange(p1, p2, nrow=1)
+```
+ 

@@ -1,0 +1,129 @@
+\documentclass[11pt,]{article}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\usepackage{fixltx2e} % provides \textsubscript
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+\else % if luatex or xelatex
+  \ifxetex
+    \usepackage{mathspec}
+    \usepackage{xltxtra,xunicode}
+  \else
+    \usepackage{fontspec}
+  \fi
+  \defaultfontfeatures{Mapping=tex-text,Scale=MatchLowercase}
+  \newcommand{\euro}{€}
+\fi
+% use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+% use microtype if available
+\IfFileExists{microtype.sty}{%
+\usepackage{microtype}
+\UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\usepackage[margin=1in]{geometry}
+\usepackage{graphicx}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+\ifxetex
+  \usepackage[setpagesize=false, % page size defined by xetex
+              unicode=false, % unicode breaks when used with xetex
+              xetex]{hyperref}
+\else
+  \usepackage[unicode=true]{hyperref}
+\fi
+\hypersetup{breaklinks=true,
+            bookmarks=true,
+            pdfauthor={},
+            pdftitle={},
+            colorlinks=true,
+            citecolor=blue,
+            urlcolor=blue,
+            linkcolor=magenta,
+            pdfborder={0 0 0}}
+\urlstyle{same}  % don't use monospace font for urls
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt plus 2pt minus 1pt}
+\setlength{\emergencystretch}{3em}  % prevent overfull lines
+\setcounter{secnumdepth}{0}
+
+%%% Use protect on footnotes to avoid problems with footnotes in titles
+\let\rmarkdownfootnote\footnote%
+\def\footnote{\protect\rmarkdownfootnote}
+
+%%% Change title format to be more compact
+\usepackage{titling}
+
+% Create subtitle command for use in maketitle
+\newcommand{\subtitle}[1]{
+  \posttitle{
+    \begin{center}\large#1\end{center}
+    }
+}
+
+\setlength{\droptitle}{-2em}
+  \title{}
+  \pretitle{\vspace{\droptitle}}
+  \posttitle{}
+  \author{}
+  \preauthor{}\postauthor{}
+  \date{}
+  \predate{}\postdate{}
+
+
+
+\begin{document}
+
+\maketitle
+
+
+\subsection{Figures}\label{figures}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics{figures_files/figure-latex/unnamed-chunk-2-1.pdf}
+\caption{Summary of single species prioritisations. Single species
+prioritisations were generated using amount-based targets, amount-based
+and surrogate-based targets, and amount-based and genetic-based targets
+for each species. Data shows the performance of prioritisations
+generated using these three sets of targets. Bars denote means and
+standard errors.}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics{figures_files/figure-latex/unnamed-chunk-3-1.pdf}
+\caption{Multi-species prioritisations. Panel (a) shows the
+prioritisation generated for using just amount-based targets. Panel (b)
+shows the prioritisation generated using amount-based and surrogate
+based targets. Panel (c) shows the prioritisation generated using
+amount-based and genetic-based targets}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics{figures_files/figure-latex/unnamed-chunk-4-1.pdf}
+\caption{Summary of multi-species prioritisations. Three prioritisations
+were generated using amount-based targets, amount-based and
+surrogate-based targets, and amount-based and genetic-based targets for
+each species. Data shows the performance of these prioritisations based
+on how much genetic variation they explain. Bars denote means and
+standard errors.}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics{figures_files/figure-latex/unnamed-chunk-5-1.pdf}
+\caption{The relationship between surrogates and genetic variation
+secured in prioritizations.}
+\end{figure}
+
+\end{document}
