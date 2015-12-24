@@ -123,7 +123,7 @@ if (MODE=='release') {
 	# number of species
 	n.spp <- 27
 	# structure parameters
-	st.threads <- 10
+	st.threads <- 21
 	st.numruns <- 20
 	st.k <- 1:10
 	st.numreps <- 100000
@@ -138,7 +138,7 @@ if (MODE=='release') {
 	# BayeScan parameters
 	bs.reps <- 4
 	bs.fdr <- 0.1
-	bs.threads <- 10
+	bs.threads <- 21
 	bs.n <- 5000
 	bs.thin <- 10
 	bs.nbp <- 20
@@ -148,7 +148,7 @@ if (MODE=='release') {
 	mds.k <- 2
 	mds.trymax <- 100
 	# Gurobi parameters
-	gb.Threads <- 10
+	gb.Threads <- 21
 	gb.MIPGap <- 0.05
 	# targets
 	rapr.amount.target <- 0.2
