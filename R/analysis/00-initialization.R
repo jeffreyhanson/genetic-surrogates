@@ -6,7 +6,7 @@ options(error=function(){
 
 # parse args
 args <- commandArgs(TRUE)
-if (length(args)>1) {
+if (length(args)>0) {
 	print(args)
 	if (grepl('MODE',args))
 		MODE <- strsplit(grep('MODE', args, value=TRUE), '=', fixed=TRUE)[[1]][[2]]
