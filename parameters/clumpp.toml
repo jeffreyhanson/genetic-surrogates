@@ -1,0 +1,11 @@
+title = "clumpp parameters"
+
+[debug]
+repeats = 1000
+s = false
+m = "LargeKGreedy"
+
+[release]
+repeats = 1000
+s = false
+m = "LargeKGreedy"

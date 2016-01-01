@@ -1,0 +1,9 @@
+title = "mds parameters"
+
+[debug]
+k = 2
+trymax = 2
+
+[release]
+k = 2
+trymax = 100

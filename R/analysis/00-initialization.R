@@ -37,6 +37,7 @@ suppressMessages(library(doParallel))
 suppressMessages(library(english))
 suppressMessages(library(session))
 suppressMessages(library(maptools))
+suppressMessages(library(RcppTOML))
 
 ## load github packages
 # devtools::install_github('paleo13/raspr')
@@ -77,85 +78,7 @@ for (x in dir(file.path('R', 'functions'), full.names=TRUE)) source(x)
 ### set parameters
 if (!exists('MODE')) MODE <- 'debug'
 cat('MODE = ',MODE,'\n')
-
-if (MODE=='debug') {
-	## debugging parameters
-	# number of species
-	n.spp <- 27
-	# structure parameters
-	st.threads <- 1
-	st.numruns <- 4
-	st.k <- 1:3
-	st.numreps <- 10
-	st.burnin <- 10
-	st.noadmix  <- FALSE
-	st.admburnin  <- 10
-	st.probthresh <- 0.75
-	# clumpp parameters
-	cl.repeats <- 1000
-	cl.s <- FALSE
-	cl.m <- 'LargeKGreedy'
-	# BayeScan parameters
-	bs.reps <- 2
-	bs.fdr <- 0.8
-	bs.threads <- 1
-	bs.n <- 10
-	bs.thin <- 1
-	bs.nbp <- 3
-	bs.pilot <- 3
-	bs.burn <- 40
-	bs.freq <- 0.05
-	# MDS parameters
-	mds.k <- 2
-	mds.trymax <- 2
-	# Gurobi parameters
-	gb.Threads <- 1L
-	gb.MIPGap <- 0.9
-	# targets
-	rapr.amount.target <- 0.2
-	rapr.surrogate.target <- 0.9
-	rapr.genetic.target <- 0.9
-	rapr.pareto.surrogate.targets <- seq(0.01, 1, length.out=3)
-}
-
-if (MODE=='release') {
-	## analysis parameters
-	# number of species
-	n.spp <- 27
-	# structure parameters
-	st.threads <- 21
-	st.numruns <- 20
-	st.k <- 1:10
-	st.numreps <- 100000
-	st.burnin <- 100000
-	st.noadmix  <- FALSE
-	st.admburnin  <- 500
-	st.probthresh <- 0.75
-	# clumpp parameters
-	cl.repeats <- 1000
-	cl.s <- FALSE
-	cl.m <- 'LargeKGreedy'
-	# BayeScan parameters
-	bs.reps <- 4
-	bs.fdr <- 0.1
-	bs.threads <- 21
-	bs.n <- 5000
-	bs.thin <- 10
-	bs.nbp <- 20
-	bs.pilot <- 50000
-	bs.burn <- 50000
-	# MDS parameters
-	mds.k <- 2
-	mds.trymax <- 100
-	# Gurobi parameters
-	gb.Threads <- 21
-	gb.MIPGap <- 0.05
-	# targets
-	rapr.amount.target <- 0.2
-	rapr.surrogate.target <- 0.9
-	rapr.genetic.target <- 0.9
-	rapr.pareto.surrogate.targets <- seq(0.01, 1, length.out=3)
-}
+general.params.LST <- parseTOML('parameters/general.toml')
 
 # save workspace
 save.session('results/.cache/00-initialization.rda')

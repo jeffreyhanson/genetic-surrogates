@@ -1,0 +1,8 @@
+title = "general parameters"
+
+[release]
+n.spp = 27
+
+[debug]
+n.spp = 3
+

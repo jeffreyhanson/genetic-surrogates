@@ -1,12 +1,16 @@
 ## load .rda
 session::restore.session('results/.cache/03-stucture-analysis.rda')
 
+## load parameters
+bayescan.params.LST <- parseTOML('parameters/bayescan.toml')
+mds.params.LST <- parseTOML('parameters/mds.toml')
+
 # subset out loci with polymorphisms that have really low or really high frequency
 spp.BayeScanData.sample.loci.subset.LST <- llply(
 	spp.BayeScanData.sample.subset.LST,
 	function(x) {
 		freqs <- colMeans(x@matrix)
-		valid.loci <- which(freqs <= 1-(bs.freq) | freqs >= bs.freq)
+		valid.loci <- which(freqs <= 1-(bayescan.params.LST[[MODE]]$freq) | freqs >= bayescan.params.LST[[MODE]]$freq)
 		return(bayescanr:::loci.subset(x, valid.loci))
 	}
 )
@@ -15,13 +19,13 @@ spp.BayeScanData.sample.loci.subset.LST <- llply(
 spp.BayeScan.sample.loci.subset.LST <- llply(
 	spp.BayeScanData.sample.loci.subset.LST,
 	run.BayeScan,
-	fdr=bs.fdr,
-	threads=bs.threads,
-	n=bs.n,
-	thin=bs.thin,
-	nbp=bs.nbp,
-	pilot=bs.pilot,
-	burn=bs.burn
+	fdr=bayescan.params.LST[[MODE]]$fdr,
+	threads=bayescan.params.LST[[MODE]]$threads,
+	n=bayescan.params.LST[[MODE]]$n,
+	thin=bayescan.params.LST[[MODE]]$thin,
+	nbp=bayescan.params.LST[[MODE]]$nbp,
+	pilot=bayescan.params.LST[[MODE]]$pilot,
+	burn=bayescan.params.LST[[MODE]]$burn
 )
 
 # run mds
@@ -47,8 +51,8 @@ spp.mds.LST <- llply(
 				mds(
 					bayescanr:::loci.subset(curr.spp, curr.spp.type==j),
 					metric='gower',
-					k=mds.k,
-					trymax=mds.trymax
+					k=mds.params.LST[[MODE]]$k,
+					trymax=mds.params.LST[[MODE]]$trymax
 				)
 			)
 		}), c('adaptive','neutral')))
@@ -66,7 +70,7 @@ spp.samples.DF <- ldply(seq_along(unique(spp.samples.DF$species)), .fun=function
 				x,
 				`names<-`(
 					as.data.frame(spp.mds.LST[[i]][[j]]$points),
-					paste0(j,'_d',seq_len(mds.k))
+					paste0(j,'_d',seq_len(mds.params.LST[[MODE]]$k))
 				)
 			)
 		}
@@ -79,7 +83,7 @@ for (i in seq_along(unique(spp.samples.DF$species))) {
 	for (j in c('adaptive', 'neutral')) {
 		if(!is.null(spp.mds.LST[[i]][[j]])) {
 			curr.sub <- filter(spp.samples.DF, species==unique(spp.samples.DF$species)[i])
-			for (k in seq_len(mds.k)) {
+			for (k in seq_len(mds.params.LST[[MODE]]$k)) {
 				curr.vals <- tapply(
 					curr.sub[[paste0(j,'_d',k)]],
 					curr.sub$cell,

@@ -19,7 +19,7 @@ spp.aflp.paths <- dir(
 	'data/Data_Meirmans_et_al_IntrabioDiv',
 	'^.*AFLP\\.dat$',
 	full.names=TRUE
-)[seq_len(n.spp)]
+)[seq_len(general.params.LST[[MODE]]$n.spp)]
 
 spp.BayeScanData.LST <- llply(
 	spp.aflp.paths,
@@ -37,7 +37,7 @@ spp.loc.paths <- dir(
 	'data/Data_Meirmans_et_al_IntrabioDiv',
 	'^.*locations\\.txt$',
 	full.names=TRUE
-)[seq_len(n.spp)]
+)[seq_len(general.params.LST[[MODE]]$n.spp)]
 spp.samples.DF <- ldply(
 	seq_along(spp.loc.paths),
 	.fun=function(i) {

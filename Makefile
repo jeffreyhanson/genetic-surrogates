@@ -35,15 +35,15 @@ results/.cache/09-*.rda: results/.cache/08-*.rda R/analysis/09-*.R
 	R CMD BATCH --no-restore --no-save R/analysis/09-*.R
 	mv *.Rout results/.cache/
 
-results/.cache/08-*.rda: results/.cache/07-*.rda R/analysis/08-*.R
+results/.cache/08-*.rda: results/.cache/07-*.rda R/analysis/08-*.R parameters/rapr.toml parameters/gurobi.toml
 	R CMD BATCH --no-restore --no-save R/analysis/08-*.R
 	mv *.Rout results/.cache/
 
-results/.cache/07-*.rda: results/.cache/06-*.rda R/analysis/07-*.R
+results/.cache/07-*.rda: results/.cache/06-*.rda R/analysis/07-*.R parameters/rapr.toml parameters/gurobi.toml
 	R CMD BATCH --no-restore --no-save R/analysis/07-*.R
 	mv *.Rout results/.cache/
 
-results/.cache/06-*.rda: results/.cache/05-*.rda R/analysis/06-*.R
+results/.cache/06-*.rda: results/.cache/05-*.rda R/analysis/06-*.R parameters/rapr.toml parameters/gurobi.toml
 	R CMD BATCH --no-restore --no-save R/analysis/06-*.R
 	mv *.Rout results/.cache/
 
@@ -51,11 +51,11 @@ results/.cache/05-*.rda: results/.cache/04-*.rda R/analysis/05-*.R
 	R CMD BATCH --no-restore --no-save R/analysis/05-*.R
 	mv *.Rout results/.cache/
 
-results/.cache/04-*.rda: results/.cache/03-*.rda R/analysis/04-*.R
+results/.cache/04-*.rda: results/.cache/03-*.rda R/analysis/04-*.R parameters/bayescan.toml parameters/mds.toml
 	R CMD BATCH --no-restore --no-save R/analysis/04-*.R
 	mv *.Rout results/.cache/
 
-results/.cache/03-*.rda: results/.cache/02-*.rda R/analysis/03-*.R
+results/.cache/03-*.rda: results/.cache/02-*.rda R/analysis/03-*.R parameters/structure.toml parameters/clumpp.toml
 	R CMD BATCH --no-restore --no-save R/analysis/03-*.R
 	mv *.Rout results/.cache/
 
@@ -67,7 +67,7 @@ results/.cache/01-*.rda: results/.cache/00-*.rda R/analysis/01-*.R
 	R CMD BATCH --no-restore --no-save R/analysis/01-*.R
 	mv *.Rout results/.cache/
 
-results/.cache/00-*.rda: R/analysis/00-*.R
+results/.cache/00-*.rda: R/analysis/00-*.R parameters/general.toml
 	R CMD BATCH --no-restore --no-save '--args MODE=$(MODE)' R/analysis/00-*.R
 	mv *.Rout results/.cache/
 

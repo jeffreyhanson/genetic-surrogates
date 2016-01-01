@@ -230,12 +230,12 @@ plot.spp.mds <- function(i) {
 	plotLST <- list()
 	# make adaptive plot
 	if (adapt.col %in% names(grid.FPLY)) {
-		for (k in seq_len(mds.k))
+		for (k in seq_len(mds.params.LST[[MODE]]$k))
 			plotLST <- append(plotLST, list(make.mds.plot('adaptive', k)))
 	} 
 	# make neutral plot
 	if (neutral.col %in% names(grid.FPLY)) {
-		for (k in seq_len(mds.k))
+		for (k in seq_len(mds.params.LST[[MODE]]$k))
 			plotLST <- append(plotLST, list(make.mds.plot('neutral', k)))
 	} 
 	# make plot

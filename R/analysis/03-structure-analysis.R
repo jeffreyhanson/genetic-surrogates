@@ -1,24 +1,27 @@
 ## load .rda
 session::restore.session('results/.cache/02-surrogate-data.rda')
 
+## load parameters
+structure.params.LST <- parseTOML('parameters/structure.toml')
+clumpp.params.LST <- parseTOML('parameters/clumpp.toml')
 
 ### Structure analyses
 ## run analyses
-clust <- makeCluster(st.threads, type='SOCK')
+clust <- makeCluster(structure.params.LST[[MODE]]$threads, type='SOCK')
 clusterEvalQ(clust, {library(structurer)})
 registerDoParallel(clust)
 spp.StructureCollection.LST <- llply(
 	spp.StructureData.LST,
 	run.Structure,
-	NUMRUNS=st.numruns,
-	MAXPOPS=st.k,
-	BURNIN=st.burnin,
-	NUMREPS=st.numreps,
-	NOADMIX=st.noadmix,
-	ADMBURNIN=st.admburnin,
-	REPEATS=cl.repeats,
-	M=cl.m,
-	S=cl.s,
+	NUMRUNS=structure.params.LST[[MODE]]$numruns,
+	MAXPOPS=structure.params.LST[[MODE]]$k,
+	BURNIN=structure.params.LST[[MODE]]$burnin,
+	NUMREPS=structure.params.LST[[MODE]]$numreps,
+	NOADMIX=structure.params.LST[[MODE]]$noadmix,
+	ADMBURNIN=structure.params.LST[[MODE]]$admburnin,
+	REPEATS=clumpp.params.LST[[MODE]]$repeats,
+	M=clumpp.params.LST[[MODE]]$m,
+	S=clumpp.params.LST[[MODE]]$s,
 	verbose=TRUE,
 	.parallel=TRUE
 )
@@ -30,7 +33,7 @@ spp.BayeScanData.sample.subset.LST <- llply(
 	.fun=function(i) {
 		print(i)
 		# get population identities
-		ids <- sample.membership(spp.StructureCollection.LST[[i]], threshold=st.probthresh)
+		ids <- sample.membership(spp.StructureCollection.LST[[i]], threshold=structure.params.LST[[MODE]]$probthresh)
 		validPos <- which(!is.na(ids))
 		# remove individuals below threshold
 		curr.spp <- spp.BayeScanData.LST[[i]]

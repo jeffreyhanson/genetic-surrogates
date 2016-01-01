@@ -5,8 +5,8 @@ session::restore.session('results/.cache/06-single-species-prioritisations.rda')
 # make prioritisations
 multi.spp.prioritisations <- llply(
 	list(
-		c(rapr.amount.target,0,0), c(rapr.amount.target,rapr.surrogate.target,0), 
-			c(rapr.amount.target,0,rapr.genetic.target,0)
+		c(rapr.params.LST[[MODE]]$amount.target,0,0), c(rapr.params.LST[[MODE]]$amount.target,rapr.params.LST[[MODE]]$surrogate.target,0), 
+			c(rapr.params.LST[[MODE]]$amount.target,0,rapr.params.LST[[MODE]]$genetic.target,0)
 	), 
 	function(y) {
 		species.prioritisation(
@@ -16,8 +16,8 @@ multi.spp.prioritisations <- llply(
 			geo.surrogate.targets=y[2],
 			adaptive.genetic.targets=y[3],
 			neutral.genetic.targets=y[3],
-			Threads=gb.Threads,
-			MIPGap=gb.MIPGap
+			Threads=gurobi.params.LST[[MODE]]$Threads,
+			MIPGap=gurobi.params.LST[[MODE]]$MIPGap
 		)
 	}
 )

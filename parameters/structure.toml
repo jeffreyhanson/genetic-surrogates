@@ -1,0 +1,21 @@
+title = "structure parameters"
+
+[debug] 
+threads = 1
+numruns = 4
+k = [1, 2, 3]
+numreps = 10
+burnin = 10
+noadmix  = false
+admburnin  = 10
+probthresh = 0.75
+
+[release]
+threads = 21
+numruns = 5
+k = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+numreps = 1000000
+burnin = 200000
+noadmix  = false
+admburnin  = 5000
+probthresh = 0.75

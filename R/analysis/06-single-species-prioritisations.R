@@ -1,6 +1,10 @@
 ## load .rda
 session::restore.session('results/.cache/05-format-data-for-prioritisations.rda')
 
+## load parameters
+rapr.params.LST <- parseTOML('parameters/rapr.toml')
+gurobi.params.LST <- parseTOML('parameters/gurobi.toml')
+
 ## single species analysis
 # generate RapSolved objects
 single.spp.prioritisations <- llply(
@@ -8,8 +12,8 @@ single.spp.prioritisations <- llply(
 	function(x) {
 		llply(
 			list(
-				c(rapr.amount.target,0,0), c(rapr.amount.target,rapr.surrogate.target,0), 
-					c(rapr.amount.target,0,rapr.genetic.target,0)
+				c(rapr.params.LST[[MODE]]$amount.target,0,0), c(rapr.params.LST[[MODE]]$amount.target,rapr.params.LST[[MODE]]$surrogate.target,0), 
+					c(rapr.params.LST[[MODE]]$amount.target,0,rapr.params.LST[[MODE]]$genetic.target,0)
 			), 
 			function(y) {
 				species.prioritisation(
@@ -19,8 +23,8 @@ single.spp.prioritisations <- llply(
 					geo.surrogate.targets=y[2],
 					adaptive.genetic.targets=y[3],
 					neutral.genetic.targets=y[3],
-					Threads=gb.Threads,
-					MIPGap=gb.MIPGap
+					Threads=gurobi.params.LST[[MODE]]$Threads,
+					MIPGap=gurobi.params.LST[[MODE]]$MIPGap
 				)
 			}
 		)
