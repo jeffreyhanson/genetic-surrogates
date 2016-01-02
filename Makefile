@@ -9,6 +9,8 @@ all: clean analysis manuscript
 
 clean:
 	rm -f *.aux *.bbl *.blg *.log *.pdf *.bak *~ *.Rout */*.Rout */*.pdf */*.aux */*.log *.rda */*.rda results/.cache/*.rda results/.cache/*.Rout
+	rm results/.cache/structure -rf
+	rm results/.cache/bayescan -rf
 
 # commands for generating manuscript
 manuscript: article/article.pdf

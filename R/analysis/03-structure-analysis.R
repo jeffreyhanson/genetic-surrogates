@@ -6,23 +6,33 @@ structure.params.LST <- parseTOML('parameters/structure.toml')
 clumpp.params.LST <- parseTOML('parameters/clumpp.toml')
 
 ### Structure analyses
+dir.create('results/.cache/structure')
+
 ## run analyses
 clust <- makeCluster(structure.params.LST[[MODE]]$threads, type='SOCK')
 clusterEvalQ(clust, {library(structurer)})
+clusterExport(clust, c('structure.params.LST','clumpp.params.LST','MODE', 'spp.StructureData.LST', 'spp.samples.DF'))
 registerDoParallel(clust)
 spp.StructureCollection.LST <- llply(
-	spp.StructureData.LST,
-	run.Structure,
-	NUMRUNS=structure.params.LST[[MODE]]$numruns,
-	MAXPOPS=structure.params.LST[[MODE]]$k,
-	BURNIN=structure.params.LST[[MODE]]$burnin,
-	NUMREPS=structure.params.LST[[MODE]]$numreps,
-	NOADMIX=structure.params.LST[[MODE]]$noadmix,
-	ADMBURNIN=structure.params.LST[[MODE]]$admburnin,
-	REPEATS=clumpp.params.LST[[MODE]]$repeats,
-	M=clumpp.params.LST[[MODE]]$m,
-	S=clumpp.params.LST[[MODE]]$s,
-	verbose=TRUE,
+	seq_along(spp.StructureData.LST),
+	.fun=function(x) {
+		curr.dir <- paste0('results/.cache/structure/',unique(spp.samples.DF$species)[i])
+		dir.create(curr.dir)
+		run.Structure(
+			spp.StructureData.LST[[i]],
+			NUMRUNS=structure.params.LST[[MODE]]$numruns,
+			MAXPOPS=structure.params.LST[[MODE]]$k,
+			BURNIN=structure.params.LST[[MODE]]$burnin,
+			NUMREPS=structure.params.LST[[MODE]]$numreps,
+			NOADMIX=structure.params.LST[[MODE]]$noadmix,
+			ADMBURNIN=structure.params.LST[[MODE]]$admburnin,
+			REPEATS=clumpp.params.LST[[MODE]]$repeats,
+			M=clumpp.params.LST[[MODE]]$m,
+			S=clumpp.params.LST[[MODE]]$s,
+			dir=curr.dir,
+			verbose=TRUE
+		)
+	},
 	.parallel=TRUE
 )
 clust <- stopCluster(clust)

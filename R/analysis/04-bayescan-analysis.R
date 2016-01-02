@@ -16,16 +16,23 @@ spp.BayeScanData.sample.loci.subset.LST <- llply(
 )
 
 # run BayeScan over subsetted objects
+dir.create('results/.cache/bayescan')
 spp.BayeScan.sample.loci.subset.LST <- llply(
-	spp.BayeScanData.sample.loci.subset.LST,
-	run.BayeScan,
-	fdr=bayescan.params.LST[[MODE]]$fdr,
-	threads=bayescan.params.LST[[MODE]]$threads,
-	n=bayescan.params.LST[[MODE]]$n,
-	thin=bayescan.params.LST[[MODE]]$thin,
-	nbp=bayescan.params.LST[[MODE]]$nbp,
-	pilot=bayescan.params.LST[[MODE]]$pilot,
-	burn=bayescan.params.LST[[MODE]]$burn
+	seq_along(spp.BayeScanData.sample.loci.subset.LST),
+	.fun=function(i) {
+		curr.dir <- paste0('results/.cache/bayescan/',unique(spp.samples.DF$species)[i])
+		dir.create(curr.dir)
+		run.BayeScan(
+			spp.BayeScanData.sample.loci.subset.LST[[i]],
+			fdr=bayescan.params.LST[[MODE]]$fdr,
+			threads=bayescan.params.LST[[MODE]]$threads,
+			n=bayescan.params.LST[[MODE]]$n,
+			thin=bayescan.params.LST[[MODE]]$thin,
+			nbp=bayescan.params.LST[[MODE]]$nbp,
+			pilot=bayescan.params.LST[[MODE]]$pilot,
+			burn=bayescan.params.LST[[MODE]]$burn
+		)
+	}
 )
 
 # run mds
