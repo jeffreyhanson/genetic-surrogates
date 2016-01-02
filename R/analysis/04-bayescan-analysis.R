@@ -30,7 +30,9 @@ spp.BayeScan.sample.loci.subset.LST <- llply(
 			thin=bayescan.params.LST[[MODE]]$thin,
 			nbp=bayescan.params.LST[[MODE]]$nbp,
 			pilot=bayescan.params.LST[[MODE]]$pilot,
-			burn=bayescan.params.LST[[MODE]]$burn
+			burn=bayescan.params.LST[[MODE]]$burn,
+			dir=curr.dir,
+			clean=FALSE
 		)
 	}
 )

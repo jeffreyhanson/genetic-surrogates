@@ -30,6 +30,7 @@ spp.StructureCollection.LST <- llply(
 			M=clumpp.params.LST[[MODE]]$m,
 			S=clumpp.params.LST[[MODE]]$s,
 			dir=curr.dir,
+			clean=FALSE,
 			verbose=TRUE
 		)
 	},
