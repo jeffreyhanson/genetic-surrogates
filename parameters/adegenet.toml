@@ -8,10 +8,8 @@ criterion = "diffNgroup"
 max.n.clust = 10
 n.iter = 1000
 n.start = 1000
-center = true
-scale = true
 pca.select = "percVar"
-perc.pca = 0.9
+perc.pca = 90
 
 [release]
 threads = 21
@@ -21,9 +19,7 @@ criterion = "diffNgroup"
 max.n.clust = 10
 n.iter = 1000
 n.start = 1000
-center = true
-scale = true
 pca.select = "percVar"
-perc.pca = 0.9
+perc.pca = 90
 
 

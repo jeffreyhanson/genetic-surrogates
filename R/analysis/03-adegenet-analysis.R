@@ -16,15 +16,13 @@ spp.Adegenet.LST <- llply(
 		# run adegenet analysis
 		return(
 			find.clusters(
-				spp.StructureData.LST[[i]]@matrix,
+				suppressWarnings(df2genind(spp.StructureData.LST[[i]]@matrix, ploidy=1, type="PA")),
 				stat = adegenet.params.LST[[MODE]]$stat,
 				choose.n.clust = adegenet.params.LST[[MODE]]$choose.n.clust,
 				criterion = adegenet.params.LST[[MODE]]$criterion,
 				max.n.clust = adegenet.params.LST[[MODE]]$max.n.clust,
 				n.iter = adegenet.params.LST[[MODE]]$n.iter,
 				n.start = adegenet.params.LST[[MODE]]$n.start,
-				center = adegenet.params.LST[[MODE]]$center,
-				scale = adegenet.params.LST[[MODE]]$scale,
 				pca.select = adegenet.params.LST[[MODE]]$pca.select,
 				perc.pca = adegenet.params.LST[[MODE]]$perc.pca
 			)
