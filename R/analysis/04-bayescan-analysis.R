@@ -1,5 +1,5 @@
 ## load .rda
-session::restore.session('results/.cache/03-stucture-analysis.rda')
+session::restore.session('results/.cache/03-adegenet-analysis.rda')
 
 ## load parameters
 bayescan.params.LST <- parseTOML('parameters/bayescan.toml')

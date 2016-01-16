@@ -1,0 +1,29 @@
+title = "adegenet parameters"
+
+[debug] 
+threads = 1
+stat = "BIC"
+choose.n.clust = false
+criterion = "diffNgroup"
+max.n.clust = 10
+n.iter = 1000
+n.start = 1000
+center = true
+scale = true
+pca.select = "percVar"
+perc.pca = 0.9
+
+[release]
+threads = 21
+stat = "BIC"
+choose.n.clust = false
+criterion = "diffNgroup"
+max.n.clust = 10
+n.iter = 1000
+n.start = 1000
+center = true
+scale = true
+pca.select = "percVar"
+perc.pca = 0.9
+
+
