@@ -9,7 +9,7 @@ mds.params.LST <- parseTOML('parameters/mds.toml')
 spp.BayeScanData.sample.loci.subset.LST <- llply(
 	spp.BayeScanData.sample.subset.LST,
 	function(x) {
-		freqs <- colMeans(x@matrix)
+		freqs <- colMeans(x@matrix, na.rm=TRUE)
 		valid.loci <- which(freqs <= 1-(bayescan.params.LST[[MODE]]$freq) | freqs >= bayescan.params.LST[[MODE]]$freq)
 		return(bayescanr:::loci.subset(x, valid.loci))
 	}
