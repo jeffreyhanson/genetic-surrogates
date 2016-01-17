@@ -11,6 +11,8 @@ clean:
 	rm -f *.aux *.bbl *.blg *.log *.pdf *.bak *~ *.Rout */*.Rout */*.pdf */*.aux */*.log *.rda */*.rda results/.cache/*.rda results/.cache/*.Rout
 	rm results/.cache/structure -rf
 	rm results/.cache/bayescan -rf
+	rm article/article_files/figure-latex/*.pdf -f
+	rm article/supporting_information_files/figure-latex/*.pdf -f
 
 # commands for generating manuscript
 manuscript: article/article.pdf

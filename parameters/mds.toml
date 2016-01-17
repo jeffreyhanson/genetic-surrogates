@@ -1,9 +1,15 @@
 title = "mds parameters"
 
 [debug]
-k = 2
-trymax = 2
+threads = 1
+min.k = 2
+max.k = 5
+max.stress = 0.1
+trymax = 10
 
 [release]
-k = 2
+threads = 21
+min.k = 2
+max.k = 100000
+max.stress = 0.1
 trymax = 100

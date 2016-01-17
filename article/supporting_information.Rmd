@@ -218,14 +218,14 @@ plot.spp.mds <- function(i) {
 	plotLST <- list()
 	# make adaptive plot
 	if (adapt.col %in% names(grid.FPLY)) {
-		for (k in seq_len(mds.params.LST[[MODE]]$k))
+		for (k in seq_len(spp.mds.LST[[i]][['adaptive']]$ndim))
 			plotLST <- append(plotLST, list(make.mds.plot('adaptive', k)))
 	} 
 	# make neutral plot
 	if (neutral.col %in% names(grid.FPLY)) {
-		for (k in seq_len(mds.params.LST[[MODE]]$k))
+		for (k in seq_len(spp.mds.LST[[i]][['neutral']]$ndim))
 			plotLST <- append(plotLST, list(make.mds.plot('neutral', k)))
-	} 
+	}
 	# make plot
 	do.call(
 		grid.arrange,
@@ -392,8 +392,9 @@ knitr::kable(
 						data.frame(
 							Species=paste0('\\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[i]),'}'),
 							Loci=names(spp.mds.LST[[i]])[j],
+							k=ifelse(is.null(spp.mds.LST[[i]][[j]]), NA_integer_, spp.mds.LST[[i]][[j]]$ndim),
 							Stress=ifelse(is.null(spp.mds.LST[[i]][[j]]), NA_real_, spp.mds.LST[[i]][[j]]$stress),
-							Converged=ifelse(is.null(spp.mds.LST[[i]][[j]]), NA_real_, spp.mds.LST[[i]][[j]]$converged)
+							Converged=ifelse(is.null(spp.mds.LST[[i]][[j]]), NA, spp.mds.LST[[i]][[j]]$converged)
 						)
 					})
 				}
@@ -404,8 +405,8 @@ knitr::kable(
 	),
 	digits=2,
 	caption='Summary of non-metric multi-dimensional scaling (MDS) analyses on genetic variation for each species.',
-	col.names=c('Species', 'Loci Type', 'NMDS Stress', 'Converged'),
-	align=c('l', 'c', 'c', 'c')
+	col.names=c('Species', 'Loci Type', 'k', 'NMDS Stress', 'Converged'),
+	align=c('l', 'c', 'c', 'c', 'c')
 )
 ```
  
