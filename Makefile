@@ -11,6 +11,8 @@ clean:
 	rm -f *.aux *.bbl *.blg *.log *.pdf *.bak *~ *.Rout */*.Rout */*.pdf */*.aux */*.log *.rda */*.rda results/.cache/*.rda results/.cache/*.Rout
 	rm results/.cache/structure -rf
 	rm results/.cache/bayescan -rf
+	rm article/article_files/figure-latex/*.pdf -f
+	rm article/supporting_information_files/figure-latex/*.pdf -f
 
 # commands for generating manuscript
 manuscript: article/article.pdf
@@ -57,7 +59,7 @@ results/.cache/04-*.rda: results/.cache/03-*.rda R/analysis/04-*.R parameters/ba
 	R CMD BATCH --no-restore --no-save R/analysis/04-*.R
 	mv *.Rout results/.cache/
 
-results/.cache/03-*.rda: results/.cache/02-*.rda R/analysis/03-*.R parameters/structure.toml parameters/clumpp.toml
+results/.cache/03-*.rda: results/.cache/02-*.rda R/analysis/03-*.R parameters/adegenet.toml
 	R CMD BATCH --no-restore --no-save R/analysis/03-*.R
 	mv *.Rout results/.cache/
 

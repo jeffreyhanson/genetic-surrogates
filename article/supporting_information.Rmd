@@ -33,12 +33,12 @@ countries.FPLY <- countriesHigh[
 		'Monaco', 'Germany'
 	)
 ,] %>% spFortify
+grid.FPLY <- spFortify(grid.PLY)
 ```
 
 ```{r, echo=FALSE, fig.width=9.5, fig.height=10, out.width='7.5in', out.height='8.5in', fig.cap='Species distributions. Squares represent planning units. For a given species, planning units that were found to be inhabited are denoted with bright blue.'}
 ## plot map of species distributions
 # fortify data
-grid.FPLY <- spFortify(grid.PLY)
 spp.grid.FPLY <- ldply(unique(spp.samples.DF$species), function(x) {
 		z <- grid.FPLY[,c('long', 'lat', 'group', x),drop=FALSE]
 		names(z)[4] <- 'presence'
@@ -117,89 +117,77 @@ do.call(
 )
 ```
 
-```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.width=6.5, fig.height=6.5, fig.cap='Relative support ($\\Delta$K) for the number of populations in each species. Each panel denotes a different species. The number of populations with the highest $Delta$K value is has the most support.'}
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.width=6.5, fig.height=6.5, fig.cap='Relative support ($BIC$) for the number of populations in each species. Each panel denotes a different species. Asterisks indicate the number of populations with the most support. See text for the method used to select these populations.'}
 # format data
-deltak.DF <- ldply(
+bic.buff <- laply(spp.Adegenet.LST, `[[`, 'Kstat') %>%
+	c() %>% range() %>% diff %>% `*`(0.05)
+bic.DF <- ldply(
 	seq_along(unique(spp.samples.DF$species)),
 	.fun=function(i) {
-		mutate(
-			spp.StructureCollection.LST[[i]]@summary,
+		data.frame(
+			k=as.numeric(gsub('K=', '', names(spp.Adegenet.LST[[i]]$Kstat), fixed=TRUE)),
+			stat=unname(spp.Adegenet.LST[[i]]$Kstat),
+			best_k=as.numeric(gsub('K=', '', names(spp.Adegenet.LST[[i]]$stat), fixed=TRUE)),
+			best_stat=unname(spp.Adegenet.LST[[i]]$stat) + bic.buff,
+			asterisk_col=c('black',rep('transparent', length(spp.Adegenet.LST[[i]]$Kstat)-1)),
 			Species=gsub('_', ' ', unique(spp.samples.DF$species)[i], fixed=TRUE)
 		)
 	}
 )
 # make plot
 suppressWarnings({
-	ggplot(data=deltak.DF) +
-		geom_point(aes(y=delta.k, x=k)) +
-		geom_line(aes(y=delta.k, x=k)) +
+	ggplot(data=bic.DF) +
+		geom_point(aes(y=stat, x=k)) +
+		geom_point(aes(y=best_stat, x=best_k), size=4, shape=8) +
+		geom_line(aes(y=stat, x=k)) +
 		theme_classic() +
 		xlab('Number of populations') +
-		ylab(expression(Relative~support~(Delta*K))) +
+		ylab('BIC') +
 		facet_wrap(~ Species, ncol=6)
 })
 ```
 
-```{r, echo=FALSE, fig.width=9, fig.height=6.5, fig.cap='Population membership plots. Each panel depicts a different species. Each vertical bar represents a different individual. The colors in each bar denote the probability that the individual belongs to different populations.'}
-# prepare data
-popm.DF <- ldply(
+```{r, echo=FALSE, fig.width=6.5, fig.height=6.5, fig.cap='Distribution of populations. Each panel depicts a different species. Squares denote planning units. Points denote the location of sampled individuals. The color of each point indicates the population to which each indiviudal was assigned.'}
+# define function
+plotLST <- llply(
 	seq_along(unique(spp.samples.DF$species)),
 	.fun=function(i) {
 		# init
-		raw.popm <- spp.StructureCollection.LST[[i]] %>% 
-			structurer:::sample.membership()
-		raw.popi <- apply(raw.popm, 1, which.max)
-		# compile data
-		curr.popm <- raw.popm %>%
-			as.data.frame %>%
-			mutate(id=as.character(seq_along(V2))) %>%
-			gather(id, percent) %>%
-			`names<-`(c('id','pop.id','percent')) %>%
-			mutate(Species=gsub('\\_', ' ',
-				unique(spp.samples.DF$species)[i]),
-				pop.id=as.character(as.numeric(gsub('V', '', pop.id))-1))
-		# sort data
-		sorted.popm <- curr.popm[0,]
-		for (i in seq_len(n_distinct(curr.popm$pop.id))) {
-				# get individuals with greatest membership
-				curr.i <- which(raw.popi==i)
-				curr.DF <- filter(curr.popm,
-					id %in% as.character(curr.i))
-				# sort these inidividuals by membership probability
-				curr.i <- curr.i[order(raw.popm[curr.i,i],
-					decreasing=TRUE)]
-				# rbind these individuals to sorted.popm
-				for (j in curr.i)
-					sorted.popm <- rbind(
-						sorted.popm,
-						filter(curr.DF, id==as.character(j))
-					)
-		}
-		sorted.popm$id <- factor(as.character(sorted.popm$id), 
-			levels=unique(as.character(sorted.popm$id)))
-		return(sorted.popm)
+		curr.pts <- filter(
+			spp.sample.PTS@data,
+			species==unique(spp.samples.DF$species)[i]
+		) %>% mutate(
+			population=spp.Adegenet.LST[[i]]$grp
+		)
+		# create plot
+		ggplot() +
+			geom_polygon(data=countries.FPLY, aes(x=long, y=lat, group=group),
+				fill='grey20', color='grey80') +
+			geom_polygon(data=grid.FPLY, aes_string(x='long', y='lat', 
+				group='group'), fill='transparent', color='grey10') +
+			geom_point(data=curr.pts, aes_string(x='sample.longitude', y='sample.latitude', color='population'),
+				alpha=0.3, size=3, position='jitter') +
+			guides(fill=guide_legend(title=' ')) +
+			theme_classic() +
+			theme(axis.ticks=element_blank(), axis.text=element_blank(),
+				plot.margin=unit(c(0,0,0,0),'cm'), axis.line=element_blank()) +
+			coord_cartesian(
+				xlim=buffered.range(grid.FPLY$long, 0.05),
+				ylim=buffered.range(grid.FPLY$lat, 0.05)
+			) +
+			xlab('') +
+			ylab('') +
+			ggtitle(gsub('_', ' ', unique(spp.samples.DF$species)[i], fixed=TRUE))
 	}
 )
-# make plot
-grobLST <- dlply(popm.DF, .(Species), .fun=function(x) {
-	ggplot(data=x, aes(x=id, y=percent, fill=pop.id)) +
-		geom_bar(stat='identity', width=1) +
-		theme_classic() +
-		theme(axis.ticks=element_blank(),
-			axis.text=element_blank(),
-			axis.title=element_blank(),
-			axis.line=element_blank(),
-			legend.position='none') +
-		ggtitle(x$Species[1])
-})
 # render plot
-do.call(grid.arrange, append(grobLST, list(ncol=4,nrow=6)))
-```
-
-```{r, echo=FALSE, fig.width=6.5, fig.height=6.5, fig.cap='Distribution of populations. Each panel depicts a different species. Each pie chart represents a grid cell where individuals belonging to a species were sampled. The colors of the pie chart show the frequency of individuals belonging to different populations.'}
-# prepare data
-# make plot
-plot(1, main='not done')
+do.call(
+	grid.arrange,
+	append(
+		plotLST,
+		list(ncol=6)
+	)
+)
 ```
 
 ```{r, echo=FALSE}
@@ -230,14 +218,14 @@ plot.spp.mds <- function(i) {
 	plotLST <- list()
 	# make adaptive plot
 	if (adapt.col %in% names(grid.FPLY)) {
-		for (k in seq_len(mds.params.LST[[MODE]]$k))
+		for (k in seq_len(spp.mds.LST[[i]][['adaptive']]$ndim))
 			plotLST <- append(plotLST, list(make.mds.plot('adaptive', k)))
 	} 
 	# make neutral plot
 	if (neutral.col %in% names(grid.FPLY)) {
-		for (k in seq_len(mds.params.LST[[MODE]]$k))
+		for (k in seq_len(spp.mds.LST[[i]][['neutral']]$ndim))
 			plotLST <- append(plotLST, list(make.mds.plot('neutral', k)))
-	} 
+	}
 	# make plot
 	do.call(
 		grid.arrange,
@@ -250,110 +238,110 @@ plot.spp.mds <- function(i) {
 ```
 
 ```{r, echo=FALSE, fig.width=6.5, fig.height=3.25, fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[1]),'}. Each square represents a planning unit. The color of each planning unit panel corresponds to ordination values. Planning units with similar colors contain individiduals with similar genetic variation.')}
-plot.spp.mds(1)
+if (1 <= general.params.LST[[MODE]]$n.spp) plot.spp.mds(1)
 ```
 
 ```{r, echo=FALSE, fig.width=6.5, fig.height=3.25, fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[2]),'}. See Figure S6 caption for conventions.')}
-plot.spp.mds(2)
+if (2 <= general.params.LST[[MODE]]$n.spp) plot.spp.mds(2)
 ```
 
 ```{r, echo=FALSE, fig.width=6.5, fig.height=3.25, fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[3]),'}. See Figure S6 caption for conventions.')}
-plot.spp.mds(3)
+if (3 <= general.params.LST[[MODE]]$n.spp) plot.spp.mds(3)
 ```
 
 ```{r, echo=FALSE, fig.width=6.5, fig.height=3.25, fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[4]),'}. See Figure S6 caption for conventions.')}
-# plot.spp.mds(4)
+if (4 <= general.params.LST[[MODE]]$n.spp) if (4 <= ) plot.spp.mds(4)
 ```
 
 ```{r, echo=FALSE, fig.width=6.5, fig.height=3.25, fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[5]),'}. See Figure S6 caption for conventions.')}
-# plot.spp.mds(5)
+if (5 <= general.params.LST[[MODE]]$n.spp) plot.spp.mds(5)
 ```
 
 ```{r, echo=FALSE, fig.width=6.5, fig.height=3.25, fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[6]),'}. See Figure S6 caption for conventions.')}
-# plot.spp.mds(6)
+if (6 <= general.params.LST[[MODE]]$n.spp) plot.spp.mds(6)
 ```
 
 ```{r, echo=FALSE, fig.width=6.5, fig.height=3.25, fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[7]),'}. See Figure S6 caption for conventions.')}
-# plot.spp.mds(7)
+if (7 <= general.params.LST[[MODE]]$n.spp) plot.spp.mds(7)
 ```
 
 ```{r, echo=FALSE, fig.width=6.5, fig.height=3.25, fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[8]),'}. See Figure S6 caption for conventions.')}
-# plot.spp.mds(8)
+if (8 <= general.params.LST[[MODE]]$n.spp) plot.spp.mds(8)
 ```
 
 ```{r, echo=FALSE, fig.width=6.5, fig.height=3.25, fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[9]),'}. See Figure S6 caption for conventions.')}
-# plot.spp.mds(9)
+if (9 <= general.params.LST[[MODE]]$n.spp) plot.spp.mds(9)
 ```
 
 ```{r, echo=FALSE, fig.width=6.5, fig.height=3.25, fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[10]),'}. See Figure S6 caption for conventions.')}
-# plot.spp.mds(10)
+if (10 <= general.params.LST[[MODE]]$n.spp) plot.spp.mds(10)
 ```
 
 ```{r, echo=FALSE, fig.width=6.5, fig.height=3.25, fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[11]),'}. See Figure S6 caption for conventions.')}
-# plot.spp.mds(11)
+if (11 <= general.params.LST[[MODE]]$n.spp) plot.spp.mds(11)
 ```
 
 ```{r, echo=FALSE, fig.width=6.5, fig.height=3.25, fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[12]),'}. See Figure S6 caption for conventions.')}
-# plot.spp.mds(12)
+if (12 <= general.params.LST[[MODE]]$n.spp) plot.spp.mds(12)
 ```
 
 ```{r, echo=FALSE, fig.width=6.5, fig.height=3.25, fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[13]),'}. See Figure S6 caption for conventions.')}
-# plot.spp.mds(13)
+if (13 <= general.params.LST[[MODE]]$n.spp) plot.spp.mds(13)
 ```
 
 ```{r, echo=FALSE, fig.width=6.5, fig.height=3.25, fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[14]),'}. See Figure S6 caption for conventions.')}
-# plot.spp.mds(14)
+if (14 <= general.params.LST[[MODE]]$n.spp) plot.spp.mds(14)
 ```
 
 ```{r, echo=FALSE, fig.width=6.5, fig.height=3.25, fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[15]),'}. See Figure S6 caption for conventions.')}
-# plot.spp.mds(15)
+if (15 <= general.params.LST[[MODE]]$n.spp) plot.spp.mds(15)
 ```
 
 ```{r, echo=FALSE, fig.width=6.5, fig.height=3.25, fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[16]),'}. See Figure S6 caption for conventions.')}
-# plot.spp.mds(16)
+if (16 <= general.params.LST[[MODE]]$n.spp) plot.spp.mds(16)
 ```
 
 ```{r, echo=FALSE, fig.width=6.5, fig.height=3.25, fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[17]),'}. See Figure S6 caption for conventions.')}
-# plot.spp.mds(17)
+if (17 <= general.params.LST[[MODE]]$n.spp) plot.spp.mds(17)
 ```
 
 ```{r, echo=FALSE, fig.width=6.5, fig.height=3.25, fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[18]),'}. See Figure S6 caption for conventions.')}
-# plot.spp.mds(18)
+if (18 <= general.params.LST[[MODE]]$n.spp) plot.spp.mds(18)
 ```
 
 ```{r, echo=FALSE, fig.width=6.5, fig.height=3.25, fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[19]),'}. See Figure S6 caption for conventions.')}
-# plot.spp.mds(19)
+if (19 <= general.params.LST[[MODE]]$n.spp) plot.spp.mds(19)
 ```
 
 ```{r, echo=FALSE, fig.width=6.5, fig.height=3.25, fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[20]),'}. See Figure S6 caption for conventions.')}
-# plot.spp.mds(20)
+if (20 <= general.params.LST[[MODE]]$n.spp) plot.spp.mds(20)
 ```
 
 ```{r, echo=FALSE, fig.width=6.5, fig.height=3.25, fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[21]),'}. See Figure S6 caption for conventions.')}
-# plot.spp.mds(21)
+if (21 <= general.params.LST[[MODE]]$n.spp) plot.spp.mds(21)
 ```
 
 ```{r, echo=FALSE, fig.width=6.5, fig.height=3.25, fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[22]),'}. See Figure S6 caption for conventions.')}
-# plot.spp.mds(22)
+if (22 <= general.params.LST[[MODE]]$n.spp) plot.spp.mds(22)
 ```
 
 ```{r, echo=FALSE, fig.width=6.5, fig.height=3.25, fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[23]),'}. See Figure S6 caption for conventions.')}
-# plot.spp.mds(23)
+if (23 <= general.params.LST[[MODE]]$n.spp) plot.spp.mds(23)
 ```
 
 ```{r, echo=FALSE, fig.width=6.5, fig.height=3.25, fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[24]),'}. See Figure S6 caption for conventions.')}
-# plot.spp.mds(24)
+if (24 <= general.params.LST[[MODE]]$n.spp) plot.spp.mds(24)
 ```
 
 ```{r, echo=FALSE, fig.width=6.5, fig.height=3.25, fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[25]),'}. See Figure S6 caption for conventions.')}
-# plot.spp.mds(25)
+if (25 <= general.params.LST[[MODE]]$n.spp) plot.spp.mds(25)
 ```
 ```{r, echo=FALSE, fig.width=6.5, fig.height=3.25, fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[26]),'}. See Figure S6 caption for conventions.')}
-# plot.spp.mds(26)
+if (26 <= general.params.LST[[MODE]]$n.spp) plot.spp.mds(26)
 ```
 
 ```{r, echo=FALSE, fig.width=6.5, fig.height=3.25, fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[27]),'}. See Figure S6 caption for conventions.')}
-# plot.spp.mds(27)
+if (27 <= general.params.LST[[MODE]]$n.spp) plot.spp.mds(27)
 ```
 
 ```{r, echo=FALSE}
@@ -404,8 +392,9 @@ knitr::kable(
 						data.frame(
 							Species=paste0('\\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[i]),'}'),
 							Loci=names(spp.mds.LST[[i]])[j],
+							k=ifelse(is.null(spp.mds.LST[[i]][[j]]), NA_integer_, spp.mds.LST[[i]][[j]]$ndim),
 							Stress=ifelse(is.null(spp.mds.LST[[i]][[j]]), NA_real_, spp.mds.LST[[i]][[j]]$stress),
-							Converged=ifelse(is.null(spp.mds.LST[[i]][[j]]), NA_real_, spp.mds.LST[[i]][[j]]$converged)
+							Converged=ifelse(is.null(spp.mds.LST[[i]][[j]]), NA, spp.mds.LST[[i]][[j]]$converged)
 						)
 					})
 				}
@@ -416,8 +405,8 @@ knitr::kable(
 	),
 	digits=2,
 	caption='Summary of non-metric multi-dimensional scaling (MDS) analyses on genetic variation for each species.',
-	col.names=c('Species', 'Loci Type', 'NMDS Stress', 'Converged'),
-	align=c('l', 'c', 'c', 'c')
+	col.names=c('Species', 'Loci Type', 'k', 'NMDS Stress', 'Converged'),
+	align=c('l', 'c', 'c', 'c', 'c')
 )
 ```
  

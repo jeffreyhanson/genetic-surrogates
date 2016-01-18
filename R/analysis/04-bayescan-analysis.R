@@ -1,5 +1,5 @@
 ## load .rda
-session::restore.session('results/.cache/03-stucture-analysis.rda')
+session::restore.session('results/.cache/03-adegenet-analysis.rda')
 
 ## load parameters
 bayescan.params.LST <- parseTOML('parameters/bayescan.toml')
@@ -9,7 +9,7 @@ mds.params.LST <- parseTOML('parameters/mds.toml')
 spp.BayeScanData.sample.loci.subset.LST <- llply(
 	spp.BayeScanData.sample.subset.LST,
 	function(x) {
-		freqs <- colMeans(x@matrix)
+		freqs <- colMeans(x@matrix, na.rm=TRUE)
 		valid.loci <- which(freqs <= 1-(bayescan.params.LST[[MODE]]$freq) | freqs >= bayescan.params.LST[[MODE]]$freq)
 		return(bayescanr:::loci.subset(x, valid.loci))
 	}
@@ -37,11 +37,18 @@ spp.BayeScan.sample.loci.subset.LST <- llply(
 	}
 )
 
+# init snow cluster
+clust <- makeCluster(mds.params.LST[[MODE]]$threads, type='SOCK')
+clusterEvalQ(clust, {library(structurer);library(bayescanr);library(plyr)})
+clusterExport(clust, c('MODE', 'spp.BayeScanData.LST', 'spp.BayeScan.sample.loci.subset.LST', 'mds.params.LST'))
+registerDoParallel(clust)
+
 # run mds
 spp.mds.LST <- llply(
 	seq_along(spp.BayeScanData.LST),
 	.fun=function(i) {
 		# subset loci for species
+		cat('starting species',i,'\n')
 		curr.spp <- bayescanr:::loci.subset(
 			spp.BayeScanData.LST[[i]],
 			which(spp.BayeScanData.LST[[i]]@primers %in% spp.BayeScan.sample.loci.subset.LST[[i]]@data@primers)
@@ -56,19 +63,33 @@ spp.mds.LST <- llply(
 		return(`names<-`(llply(c('adaptive', 'neutral'), function(j) {
 			if (sum(curr.spp.type==j)==0)
 				return(NULL)
-			return(
-				mds(
+			# init
+			cat('\tstarting',j,'loci \n')
+			curr.stress <- 1.0
+			curr.k <- mds.params.LST[[MODE]]$min.k
+			# find mds with suitable k
+			while (curr.stress > mds.params.LST[[MODE]]$max.stress & curr.k <= mds.params.LST[[MODE]]$max.k) {
+				cat('\t\tk=',curr.k,'\n')
+				curr.mds <- mds(
 					bayescanr:::loci.subset(curr.spp, curr.spp.type==j),
 					metric='gower',
-					k=mds.params.LST[[MODE]]$k,
-					trymax=mds.params.LST[[MODE]]$trymax
+					k=curr.k,
+					trymax=mds.params.LST[[MODE]]$trymax,
+					wascores=FALSE,
+					autotransform=FALSE,
+					noshare=FALSE
 				)
-			)
+				curr.stress <- curr.mds$stress
+				curr.k <- curr.k + 1
+			}
+			return(curr.mds)
 		}), c('adaptive','neutral')))
-	}
+	},
+	.parallel=TRUE
 )
 
-# remove NULL entries from MDS list
+# kill cluster
+clust <- stopCluster(clust)
 
 # store mds rotations for each sample
 spp.samples.DF <- ldply(seq_along(unique(spp.samples.DF$species)), .fun=function(i) {
@@ -79,7 +100,7 @@ spp.samples.DF <- ldply(seq_along(unique(spp.samples.DF$species)), .fun=function
 				x,
 				`names<-`(
 					as.data.frame(spp.mds.LST[[i]][[j]]$points),
-					paste0(j,'_d',seq_len(mds.params.LST[[MODE]]$k))
+					paste0(j,'_d',seq_len(spp.mds.LST[[i]][[j]]$ndim))
 				)
 			)
 		}
@@ -92,7 +113,7 @@ for (i in seq_along(unique(spp.samples.DF$species))) {
 	for (j in c('adaptive', 'neutral')) {
 		if(!is.null(spp.mds.LST[[i]][[j]])) {
 			curr.sub <- filter(spp.samples.DF, species==unique(spp.samples.DF$species)[i])
-			for (k in seq_len(mds.params.LST[[MODE]]$k)) {
+			for (k in seq_len(spp.mds.LST[[i]][[j]]$ndim)) {
 				curr.vals <- tapply(
 					curr.sub[[paste0(j,'_d',k)]],
 					curr.sub$cell,

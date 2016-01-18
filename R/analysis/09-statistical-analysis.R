@@ -13,7 +13,7 @@ single.spp.SDF <- single.spp.DF %>%
 # model
 single.spp.GLM <- suppressWarnings(glm(value ~ Prioritisation * Metric,
 	family='binomial', data=single.spp.SDF))
-single.spp.AOV <- suppressWarnings(anova(single.spp.GLM))
+single.spp.AOV <- suppressWarnings(anova(single.spp.GLM, test="LRT"))
 # post-hoc
 single.spp.GLM2 <- suppressWarnings(glm(value ~ Prioritisation.Metric,
 	family='binomial', data=single.spp.SDF))
@@ -35,7 +35,7 @@ multi.spp.SDF <- multi.spp.DF %>%
 # model
 multi.spp.GLM <- suppressWarnings(glm(value ~ Prioritisation * Metric,
 	family='binomial', data=multi.spp.SDF))
-multi.spp.AOV <- suppressWarnings(anova(multi.spp.GLM))
+multi.spp.AOV <- suppressWarnings(anova(multi.spp.GLM, test="LRT"))
 # post-hoc
 multi.spp.GLM2 <- suppressWarnings(glm(value ~ Prioritisation.Metric,
 	family='binomial', data=multi.spp.SDF))

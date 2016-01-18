@@ -22,7 +22,7 @@ adaptive.ASL <- llply(
 		# else return attribute space
 		make.single.species.AttributeSpace(
 			site.data=select(grid.DF, contains(paste0(unique(spp.samples.DF$species)[i], '_adaptive'))),
-			species.data=select(filter(spp.samples.DF, species==unique(spp.samples.DF$species)[i]), contains('adaptive')),
+			species.data=filter(spp.samples.DF, species==unique(spp.samples.DF$species)[i])[,paste0('adaptive_d',seq_len(spp.mds.LST[[i]][['adaptive']]$ndim)),drop=FALSE],
 			spp.pos=i,
 			n.species=n_distinct(spp.samples.DF$species)
 		)
@@ -39,7 +39,7 @@ neutral.ASL <- llply(
 		# else return attribute space
 		make.single.species.AttributeSpace(
 			site.data=select(grid.DF, contains(paste0(unique(spp.samples.DF$species)[i], '_neutral'))),
-			species.data=select(filter(spp.samples.DF, species==unique(spp.samples.DF$species)[i]), contains('neutral')),
+			species.data=filter(spp.samples.DF, species==unique(spp.samples.DF$species)[i])[,paste0('neutral_d',seq_len(spp.mds.LST[[i]][['neutral']]$ndim)),drop=FALSE],
 			spp.pos=i,
 			n.species=n_distinct(spp.samples.DF$species)
 		)
