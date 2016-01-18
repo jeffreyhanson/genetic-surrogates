@@ -59,7 +59,7 @@ make.targets <- function(
 		# return data.frame
 		spp.DF <- data.frame(
 			species=seq_along(species),
-			target=rep(i+2, length(species)),
+			target=rep(i+length(adaptive.spaces)+2, length(species)),
 			proportion=replace(
 				rep(0, length(species)),
 				spp.pos,

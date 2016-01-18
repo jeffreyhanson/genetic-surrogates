@@ -12,8 +12,9 @@ single.spp.prioritisations <- llply(
 	function(x) {
 		llply(
 			list(
-				c(rapr.params.LST[[MODE]]$amount.target,0,0), c(rapr.params.LST[[MODE]]$amount.target,rapr.params.LST[[MODE]]$surrogate.target,0), 
-					c(rapr.params.LST[[MODE]]$amount.target,0,rapr.params.LST[[MODE]]$genetic.target,0)
+				c(rapr.params.LST[[MODE]]$amount.target,0,0),
+				c(rapr.params.LST[[MODE]]$amount.target,rapr.params.LST[[MODE]]$surrogate.target,0), 
+				c(rapr.params.LST[[MODE]]$amount.target,0,rapr.params.LST[[MODE]]$genetic.target)
 			), 
 			function(y) {
 				species.prioritisation(
