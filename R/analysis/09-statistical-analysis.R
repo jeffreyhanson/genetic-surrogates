@@ -11,14 +11,12 @@ single.spp.SDF <- single.spp.DF %>%
 		'neutral.held'='Neutral variation'))) %>%
 	mutate(Prioritisation.Metric=interaction(Prioritisation,Metric)) 
 # model
-single.spp.GLM <- suppressWarnings(glm(value ~ Prioritisation * Metric,
-	family='binomial', data=single.spp.SDF))
-single.spp.AOV <- suppressWarnings(anova(single.spp.GLM, test="LRT"))
+single.spp.GLMM <- suppressWarnings(glmer(value ~ Prioritisation * Metric + (1 | Species), family='binomial', data=single.spp.SDF, nAGQ=20))
+single.spp.AOV <- suppressWarnings(anova(single.spp.GLMM, test="LRT"))
 # post-hoc
-single.spp.GLM2 <- suppressWarnings(glm(value ~ Prioritisation.Metric,
-	family='binomial', data=single.spp.SDF))
+single.spp.GLMM2 <- suppressWarnings(glmer(value ~ Prioritisation.Metric + (1 | Species), family='binomial', data=single.spp.SDF, nAGQ=20))
 single.spp.MCP <- summary(
-	glht(single.spp.GLM2,
+	glht(single.spp.GLMM2,
 		linfct=mcp(Prioritisation.Metric='Tukey')),
 	adjusted('bonferroni'))
  
@@ -33,14 +31,12 @@ multi.spp.SDF <- multi.spp.DF %>%
 		'neutral.held'='Neutral variation'))) %>%
 	mutate(Prioritisation.Metric=interaction(Prioritisation,Metric)) 
 # model
-multi.spp.GLM <- suppressWarnings(glm(value ~ Prioritisation * Metric,
-	family='binomial', data=multi.spp.SDF))
-multi.spp.AOV <- suppressWarnings(anova(multi.spp.GLM, test="LRT"))
+multi.spp.GLMM <- suppressWarnings(glmer(value ~ Prioritisation * Metric + (1 | Species), family='binomial', data=multi.spp.SDF, nAGQ=20))
+multi.spp.AOV <- suppressWarnings(anova(multi.spp.GLMM, test="LRT"))
 # post-hoc
-multi.spp.GLM2 <- suppressWarnings(glm(value ~ Prioritisation.Metric,
-	family='binomial', data=multi.spp.SDF))
+multi.spp.GLMM2 <- suppressWarnings(glmer(value ~ Prioritisation.Metric + (1 | Species), family='binomial', data=multi.spp.SDF, nAGQ=20))
 multi.spp.MCP <- summary(
-	glht(multi.spp.GLM2,
+	glht(multi.spp.GLMM2,
 		linfct=mcp(Prioritisation.Metric='Tukey')),
 	adjusted('bonferroni'))
 

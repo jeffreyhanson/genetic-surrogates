@@ -5,29 +5,77 @@ session::restore.session('results/.cache/05-format-data-for-prioritisations.rda'
 rapr.params.LST <- parseTOML('parameters/rapr.toml')
 gurobi.params.LST <- parseTOML('parameters/gurobi.toml')
 
-## single species analysis
-# generate RapSolved objects
-single.spp.prioritisations <- llply(
+### single species analysis
+## generate RapSolved objects
+# amount-based prioritisations
+single.spp.amount.prioritisations <- llply(
 	seq_along(unique(spp.samples.DF$species)),
 	function(x) {
-		llply(
-			list(
-				c(rapr.params.LST[[MODE]]$amount.target,0,0),
-				c(rapr.params.LST[[MODE]]$amount.target,rapr.params.LST[[MODE]]$surrogate.target,0), 
-				c(rapr.params.LST[[MODE]]$amount.target,0,rapr.params.LST[[MODE]]$genetic.target)
-			), 
-			function(y) {
-				species.prioritisation(
-					x=spp.subset(ru, x),
-					amount.targets=y[1],
-					env.surrogate.targets=y[2],
-					geo.surrogate.targets=y[2],
-					adaptive.genetic.targets=y[3],
-					neutral.genetic.targets=y[3],
-					Threads=gurobi.params.LST[[MODE]]$Threads,
-					MIPGap=gurobi.params.LST[[MODE]]$MIPGap
-				)
-			}
+		# identify which planning units are occupied by the species
+		curr.pu <- which(grid.DF[[unique(spp.samples.DF$species)[[x]]]]==1)
+		n.pu <- ceiling(length(curr.pu) * rapr.params.LST[[MODE]]$amount.target)
+		# generate portfolio of random selections
+		return(
+			llply(
+				seq_len(rapr.params.LST[[MODE]]$single.species.amount.replicates),
+				function(r) {
+					species.prioritisation(
+						x=spp.subset(ru, x),
+						amount.targets=rapr.params.LST[[MODE]]$amount.target,
+						env.surrogate.targets=rapr.params.LST[[MODE]]$surrogate.target,
+						geo.surrogate.targets=rapr.params.LST[[MODE]]$surrogate.target,
+						adaptive.genetic.targets=0,
+						neutral.genetic.targets=0,
+						b=sample(curr.pu, n.pu)
+					)
+				}
+			)
+		)
+	}
+)
+
+# surrogate-based priortisations
+single.spp.surrogate.prioritisations <- llply(
+	seq_along(unique(spp.samples.DF$species)),
+	function(x) {
+		species.prioritisation(
+				x=spp.subset(ru, x),
+				amount.targets=rapr.params.LST[[MODE]]$amount.target,
+				env.surrogate.targets=rapr.params.LST[[MODE]]$surrogate.target,
+				geo.surrogate.targets=rapr.params.LST[[MODE]]$surrogate.target,
+				adaptive.genetic.targets=0,
+				neutral.genetic.targets=0,
+				Threads=gurobi.params.LST[[MODE]]$Threads,
+				MIPGap=gurobi.params.LST[[MODE]]$MIPGap
+		)
+	}
+)
+
+# genetic-based prioritisations
+single.spp.genetic.prioritisations <- llply(
+	seq_along(unique(spp.samples.DF$species)),
+	function(x) {
+		species.prioritisation(
+				x=spp.subset(ru, x),
+				amount.targets=rapr.params.LST[[MODE]]$amount.target,
+				env.surrogate.targets=0,
+				geo.surrogate.targets=0,
+				adaptive.genetic.targets=rapr.params.LST[[MODE]]$genetic.target,
+				neutral.genetic.targets=rapr.params.LST[[MODE]]$genetic.target,
+				Threads=gurobi.params.LST[[MODE]]$Threads,
+				MIPGap=gurobi.params.LST[[MODE]]$MIPGap
+		)
+	}
+)
+
+# combine lists of seperate prioritisations
+single.spp.prioritisations <- llply(
+	seq_along(unique(spp.samples.DF$species)),
+	function(i) {
+		list(
+			single.spp.amount.prioritisations[[i]],
+			single.spp.surrogate.prioritisations[[i]],
+			single.spp.genetic.prioritisations[[i]]
 		)
 	}
 )
@@ -37,8 +85,14 @@ single.spp.DF <- ldply(
 	single.spp.prioritisations,
 	function(x) {
 		mutate(
-			ldply(x, extractResults),
-			Prioritisation=c('Amount', 'Surrogate', 'Genetic')
+			ldply(x, function(y) {
+				if (!inherits(y, 'list'))
+					y <- list(y)
+				ldply(y, extractResults)
+			}),
+			Prioritisation=c(
+				rep('Amount',rapr.params.LST[[MODE]]$single.species.amount.replicates),
+				'Surrogate', 'Genetic')
 		)
 	}
 )

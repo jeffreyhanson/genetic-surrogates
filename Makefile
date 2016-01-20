@@ -4,7 +4,7 @@
 # set parameters for debugging code
 MODE=debug
 
-# main commands
+# main operations
 all: clean analysis manuscript
 
 clean:
@@ -13,20 +13,29 @@ clean:
 	rm results/.cache/bayescan -rf
 	rm article/article_files/figure-latex/*.pdf -f
 	rm article/supporting_information_files/figure-latex/*.pdf -f
-
+	rm article/figures.tex -f
+	rm article/figures.md -f
+	rm article/supporting_information.tex -f
+	rm article/supporting_information.md -f
+	rm article/article.md -f
+	rm article/article.tex -f
+	
 # commands for generating manuscript
 manuscript: article/article.pdf
 
-article/article.pdf: article/article.Rmd article/Endnote_lib.bib article/preamble-latex.tex article/reference-style.csl article/supporting_information.tex article/figures.tex
+article/article.pdf: article/article.Rmd article/Endnote_lib.bib article/preamble-latex.tex article/reference-style.csl article/supporting_information.pdf article/figures.pdf
 	R -e "MODE='$(MODE)';rmarkdown::render('article/article.Rmd')"
-	rm article/supporting_information.pdf
-	rm article/figures.pdf
+	rm article/article.md -f
 
-article/supporting_information.tex: article/supporting_information.Rmd
+article/supporting_information.pdf: article/supporting_information.Rmd article/preamble-latex.tex article/preamble-latex2.tex
 	R -e "MODE='$(MODE)';rmarkdown::render('article/supporting_information.Rmd')"
+	rm article/figures.tex -f
+	rm article/figures.md -f
 
-article/figures.tex: article/figures.Rmd
+article/figures.pdf: article/figures.Rmd article/preamble-latex.tex article/preamble-latex2.tex
 	R -e "MODE='$(MODE)';rmarkdown::render('article/figures.Rmd')"
+	rm article/supporting_information.tex
+	rm article/supporting_information.md -f
 
 # commands for running analysis
 analysis: results/results.rda

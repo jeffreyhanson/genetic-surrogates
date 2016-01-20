@@ -39,6 +39,7 @@ suppressMessages(library(session))
 suppressMessages(library(maptools))
 suppressMessages(library(RcppTOML))
 suppressMessages(library(adegenet))
+suppressMessages(library(lme4))
 
 ## load github packages
 # devtools::install_github('paleo13/raspr')

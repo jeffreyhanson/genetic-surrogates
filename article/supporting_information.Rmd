@@ -10,6 +10,8 @@ output:
       in_header: [preamble-latex.tex, preamble-latex2.tex]
 ---
 ## Supporting Information
+All data and code is stored in an online repository (\url{www.github.com/paleo13/genetic.surrogates}) to replicate analyses in this study. See the \textit{README} file for instructions.
+
 
 ```{r, include=FALSE}
 # set wd
@@ -89,7 +91,7 @@ ggplot() +
 	ggtitle('Species richness')
 ```
 
-```{r, fig.width=6.5, fig.height=3.25, fig.cap='Climatic variation. Each panel depicts variation based on a different principle component (PC). Squares represent planning units. The color of each planning unit denotes the average PC value of pixels inside it. Planning units with more similar colors have more similar climate regimes.', echo=FALSE}
+```{r, fig.width=8, fig.height=3.5, fig.cap='Climatic variation. Each panel depicts variation based on a different principle component (PC). Squares represent planning units. The color of each planning unit denotes the average PC value of pixels inside it. Planning units with more similar colors have more similar climate regimes.', echo=FALSE}
 do.call(
 	grid.arrange,
 		append(
@@ -250,7 +252,7 @@ if (3 <= general.params.LST[[MODE]]$n.spp) plot.spp.mds(3)
 ```
 
 ```{r, echo=FALSE, fig.width=6.5, fig.height=3.25, fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[4]),'}. See Figure S6 caption for conventions.')}
-if (4 <= general.params.LST[[MODE]]$n.spp) if (4 <= ) plot.spp.mds(4)
+if (4 <= general.params.LST[[MODE]]$n.spp) plot.spp.mds(4)
 ```
 
 ```{r, echo=FALSE, fig.width=6.5, fig.height=3.25, fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[5]),'}. See Figure S6 caption for conventions.')}

@@ -37,6 +37,7 @@ Software packages included in repository
 * Structure (version 2.3.4)
 
 R packages
+* adegenet
 * cluster
 * data.table
 * doParallel
@@ -45,6 +46,7 @@ R packages
 * ggplot2
 * grid
 * gridExtra
+* lme4
 * maptools
 * multcomp
 * pander

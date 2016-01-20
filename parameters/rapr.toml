@@ -1,12 +1,15 @@
 title = "rapr parameters"
 
 [debug]
+single.species.amount.replicates = 10
 amount.target = 0.2
 surrogate.target = 0.9
 genetic.target = 0.9
 pareto.surrogate.targets = [0.01, 0.505, 1]
 
+
 [release]
+single.species.amount.replicates = 1000
 amount.target = 0.2
 surrogate.target = 0.9
 genetic.target = 0.9
