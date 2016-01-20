@@ -7,7 +7,7 @@ output:
   rmarkdown::pdf_document:
     fig_caption: yes
     includes:
-      in_header: [preamble-latex.tex, preamble-latex2.tex]
+      in_header: [preamble-latex.tex, preamble-latex3.tex]
 ---
 ## Supporting Information
 All data and code is stored in an online repository (\url{www.github.com/paleo13/genetic.surrogates}) to replicate analyses in this study. See the \textit{README} file for instructions.
@@ -32,7 +32,7 @@ countries.FPLY <- countriesHigh[
 	countriesHigh$ADMIN %in% c(
 		'Italy', 'Switzerland', 'France', 'Austria',
 		'Germany', 'Slovenia', 'Croatia', 'Hungary',
-		'Monaco', 'Germany'
+		'Monaco', 'Germany', 'Slovakia', 'Czech Republic'
 	)
 ,] %>% spFortify
 grid.FPLY <- spFortify(grid.PLY)

@@ -43,10 +43,23 @@ extract.DF <- grid.PPLY %>% rasterize(bioclim.STK, field='id') %>%
 # merge with grid.DF
 grid.DF <- cbind(grid.DF, extract.DF)
 
-## update spatial objects
+## update @data slot in spatial objects
 grid.PLY@data <- grid.DF
 grid.PPLY@data <- grid.DF
- 
+
+## remove grids without any species occurences
+# idenitfy pus with occurences
+valid.rows <- which(apply(grid.DF[,unique(spp.samples.DF$species),drop=FALSE], 1, sum)>0)
+# subset objects
+grid.DF <- grid.DF[valid.rows,,drop=FALSE]
+grid.PLY <- grid.PLY[valid.rows,]
+grid.PPLY <- grid.PPLY[valid.rows,]
+centroids.DF <- centroids.DF[valid.rows,,drop=FALSE]
+# reset ids
+grid.DF$id <- seq_len(nrow(grid.DF))
+grid.PLY$id <- seq_len(nrow(grid.DF))
+grid.PPLY$id <- seq_len(nrow(grid.DF))
+
 ## load and save pca summary
 pca.DF <- read.table('data/BioClim_variables/pca.TXT', skip=80) %>% `names<-`(
 	c('Principle Component', 'Eigen Value', 'Variation explained (%)',

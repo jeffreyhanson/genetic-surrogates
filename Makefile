@@ -27,14 +27,14 @@ article/article.pdf: article/article.Rmd article/Endnote_lib.bib article/preambl
 	R -e "MODE='$(MODE)';rmarkdown::render('article/article.Rmd')"
 	rm article/article.md -f
 
-article/supporting_information.pdf: article/supporting_information.Rmd article/preamble-latex.tex article/preamble-latex2.tex
-	R -e "MODE='$(MODE)';rmarkdown::render('article/supporting_information.Rmd')"
+article/figures.pdf: article/figures.Rmd article/preamble-latex.tex article/preamble-latex2.tex
+	R -e "MODE='$(MODE)';rmarkdown::render('article/figures.Rmd')"
 	rm article/figures.tex -f
 	rm article/figures.md -f
 
-article/figures.pdf: article/figures.Rmd article/preamble-latex.tex article/preamble-latex2.tex
-	R -e "MODE='$(MODE)';rmarkdown::render('article/figures.Rmd')"
-	rm article/supporting_information.tex
+article/supporting_information.pdf: article/supporting_information.Rmd article/preamble-latex.tex article/preamble-latex3.tex
+	R -e "MODE='$(MODE)';rmarkdown::render('article/supporting_information.Rmd')"
+	rm article/supporting_information.tex -f
 	rm article/supporting_information.md -f
 
 # commands for running analysis

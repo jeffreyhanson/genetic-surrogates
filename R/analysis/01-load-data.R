@@ -55,6 +55,7 @@ spp.samples.DF <- ldply(
 		grid.DF,
 		by='cell'
 )
+
 # append species data to grid data.frame (wide-format)
 for (i in unique(spp.samples.DF$species))
 	grid.DF[[i]] <- replace(
@@ -62,6 +63,6 @@ for (i in unique(spp.samples.DF$species))
 		which(grid.DF$cell %in% filter(spp.samples.DF, species==i)$cell),
 		1
 	)
- 
+
 ## save .rda
 save.session('results/.cache/01-load-data.rda')

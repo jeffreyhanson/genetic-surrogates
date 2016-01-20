@@ -3,6 +3,7 @@ session::restore.session('results/.cache/07-multi-species-prioritisations.rda')
 
 ## pareto frontier analysis
 # generate prioritistions
+cat("starting environmental pareto frontier calculations\n")
 env.pareto.prioritisations <- llply(
 	rapr.params.LST[[MODE]]$pareto.surrogate.targets,
 	species.prioritisation,
@@ -10,8 +11,11 @@ env.pareto.prioritisations <- llply(
 	amount.targets=0,
 	geo.surrogate.targets=0,
 	adaptive.genetic.targets=0,
-	neutral.genetic.targets=0
+	neutral.genetic.targets=0,
+	.progress='text'
 )
+
+cat("starting geographic pareto frontier calculations\n")
 geo.pareto.prioritisations <- llply(
 	rapr.params.LST[[MODE]]$pareto.surrogate.targets,
 	species.prioritisation,
@@ -19,7 +23,8 @@ geo.pareto.prioritisations <- llply(
 	amount.targets=0,
 	env.surrogate.targets=0,
 	adaptive.genetic.targets=0,
-	neutral.genetic.targets=0
+	neutral.genetic.targets=0,
+	.progress='text'
 )
 
 # extract results

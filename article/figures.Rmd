@@ -56,7 +56,7 @@ countries.FPLY <- countriesHigh[
 	countriesHigh$ADMIN %in% c(
 		'Italy', 'Switzerland', 'France', 'Austria',
 		'Germany', 'Slovenia', 'Croatia', 'Hungary',
-		'Monaco', 'Germany'
+		'Monaco', 'Germany', 'Slovakia', 'Czech Republic'
 	)
 ,] %>% spFortify
 # prepare data for plotting

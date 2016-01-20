@@ -14,8 +14,8 @@ To rerun all computational analyses, run this
 Repository overview
 * article
 	+ files to create article
-* bin
-	+ external programs used to run analysis
+* parameters
+	+ TOML files containing parameters used to run analysis.
 * data
 	+ raw data used for article
 * R
