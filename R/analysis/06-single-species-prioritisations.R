@@ -97,5 +97,22 @@ single.spp.DF <- ldply(
 	}
 )
 
+# remove all but the first amount-based prioritisation for each species to reduce disk usage
+single.spp.prioritisations <- llply(
+	seq_along(unique(spp.samples.DF$species)),
+	function(i) {
+		list(
+			single.spp.amount.prioritisations[[i]][[1]],
+			single.spp.surrogate.prioritisations[[i]],
+			single.spp.genetic.prioritisations[[i]]
+		)
+	}
+)
+
+# remove objects to clear disk usage
+rm(single.spp.amount.prioritisations)
+rm(single.spp.surrogate.prioritisations)
+rm(single.spp.genetic.prioritisations)
+
 ## save .rda
 save.session('results/.cache/06-single-species-prioritisations.rda')
