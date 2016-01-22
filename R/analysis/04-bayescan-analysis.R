@@ -3,7 +3,7 @@ session::restore.session('results/.cache/03-adegenet-analysis.rda')
 
 ## load parameters
 bayescan.params.LST <- parseTOML('parameters/bayescan.toml')
-mds.params.LST <- parseTOML('parameters/mds.toml')
+mds.params.LST <- parseTOML('parameters/nmds.toml')
 
 # subset out loci with polymorphisms that have really low or really high frequency
 spp.BayeScanData.sample.loci.subset.LST <- llply(

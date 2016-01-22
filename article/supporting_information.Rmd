@@ -377,7 +377,8 @@ knitr::kable(
 	),
 	digits=2,
 	col.names=c('Species', 'Primer', 'Probability', 'q-value', '$\\alpha$', '$F_{ST}$', 'Type'),
-	align=c('l', 'c', 'c', 'c', 'c', 'c', 'c')
+	align=c('l', 'c', 'c', 'c', 'c', 'c', 'c'),
+	caption='Loci classifications for each species. Each row denotes a sampled loci for a given species, and the evidence for it being under selection based on outputs from the program \texttt{Bayescan}.'
 )
 ```
 

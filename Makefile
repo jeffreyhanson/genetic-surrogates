@@ -64,7 +64,7 @@ results/.cache/05-*.rda: results/.cache/04-*.rda R/analysis/05-*.R
 	R CMD BATCH --no-restore --no-save R/analysis/05-*.R
 	mv *.Rout results/.cache/
 
-results/.cache/04-*.rda: results/.cache/03-*.rda R/analysis/04-*.R parameters/bayescan.toml parameters/mds.toml
+results/.cache/04-*.rda: results/.cache/03-*.rda R/analysis/04-*.R parameters/bayescan.toml parameters/nmds.toml
 	R CMD BATCH --no-restore --no-save R/analysis/04-*.R
 	mv *.Rout results/.cache/
 

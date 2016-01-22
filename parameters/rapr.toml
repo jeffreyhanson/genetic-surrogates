@@ -5,7 +5,7 @@ single.species.amount.replicates = 10
 amount.target = 0.3
 surrogate.target = 0.9
 genetic.target = 0.9
-pareto.surrogate.targets = [0.01, 0.505, 1]
+correlation.surrogate.targets = [0.01, 0.12, 0.23, 0.34, 0.45, 0.56, 0.67, 0.78, 0.89, 1.00]
 
 
 [release]
@@ -13,5 +13,5 @@ single.species.amount.replicates = 1000
 amount.target = 0.3
 surrogate.target = 0.9
 genetic.target = 0.9
-pareto.surrogate.targets = [0.01, 0.12, 0.23, 0.34, 0.45, 0.56, 0.67, 0.78, 0.89, 1.00]
+correlation.surrogate.targets = [0.01, 0.12, 0.23, 0.34, 0.45, 0.56, 0.67, 0.78, 0.89, 1.00]
 

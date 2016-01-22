@@ -33,3 +33,27 @@ spFortify <- function(x, columns=names(x@data)) {
 	return(f)
 }
 
+#' pretty.pval
+#' 
+#' This function returns the rounded version of a p-value for use in text along with the correct arithmatic operator.
+#' @param x \code{numeric} p-value
+#' @return \code{character} object.
+#' @example
+#' pretty.pval(0.04)
+#' pretty.pval(0.0000001)
+#' pretty.pval(0.565656)
+#' @export
+pretty.pval <- function(x) {
+	if (x > 1)
+		return('> 1')
+	if (x > 0.1)
+		return('> 0.1')
+	if (x > 0.05)
+		return('> 0.05')
+	if (x < 0.001)
+		return('< 0.001')
+	if (x < 0.01)
+		return('< 0.01')
+	if (x < 0.05)
+		return('< 0.05')
+}

@@ -122,17 +122,40 @@ ggplot(aes(x=Metric,y=value,fill=Prioritisation),
 	theme_classic()
 ```
 
-```{r, echo=FALSE, fig.width=8, fig.height=3, fig.cap='The relationship between surrogates and genetic variation secured in prioritizations. Each panel shows the relationship for a different type of genetic variation. Each line denotes a different species. Lines are transparent and so darker regions show areas where species have similar relationships.'}
-# make plots
-p1 <- ggplot(data=env.pareto.DF) +
-	geom_line(aes(x=Surrogate.target,y=adaptive.held,group=Species),
-		alpha=0.3) +
+```{r, echo=FALSE, fig.width=8, fig.height=3, fig.cap='The relationship between surrogates and genetic variation secured in prioritizations. The left panel shows the relationship between environmental surrogates and adaptive genetic variation, and the right for geographic surrogates and neutral genetic variation. Transparent gray lines denote trneds for each species, and black lines show general trends across all species.'}
+### prepare data frames for plotting
+## environmental vs adaptive
+# random effects
+env.correlation.RPDF <- expand.grid(Surrogate.target=seq(min(env.correlation.DF$Surrogate.target), max(env.correlation.DF$Surrogate.target), length.out=100),
+	Species=unique(env.correlation.DF$Species))
+env.correlation.RPDF$r.ranef <- fixef(env.correlation.NLMM)[[1]] + ranef(env.correlation.NLMM)$Species$r[env.correlation.RPDF$Species]
+env.correlation.RPDF$fit <- 0 + (1 - 0) * (1 - exp(- env.correlation.RPDF$r.ranef * env.correlation.RPDF$Surrogate.target))
+# fixed effects
+env.correlation.FPDF <- data.frame(Surrogate.target=seq(min(env.correlation.DF$Surrogate.target), max(env.correlation.DF$Surrogate.target), length.out=100))
+env.correlation.FPDF$fit <- 0 + (1 - 0) * (1 - exp(-fixef(env.correlation.NLMM) * env.correlation.FPDF$Surrogate.target))
+
+## geographic vs neutral
+# random effects
+geo.correlation.RPDF <- expand.grid(Surrogate.target=seq(min(geo.correlation.DF$Surrogate.target), max(geo.correlation.DF$Surrogate.target), length.out=100),
+	Species=unique(geo.correlation.DF$Species))
+geo.correlation.RPDF$r.ranef <- fixef(geo.correlation.NLMM)[[1]] + ranef(geo.correlation.NLMM)$Species$r[geo.correlation.RPDF$Species]
+geo.correlation.RPDF$fit <- 0 + (1 - 0) * (1 - exp(- geo.correlation.RPDF$r.ranef * geo.correlation.RPDF$Surrogate.target))
+# fixed effects
+geo.correlation.FPDF <- data.frame(Surrogate.target=seq(min(geo.correlation.DF$Surrogate.target), max(geo.correlation.DF$Surrogate.target), length.out=100))
+geo.correlation.FPDF$fit <- 0 + (1 - 0) * (1 - exp(-fixef(geo.correlation.NLMM) * geo.correlation.FPDF$Surrogate.target))
+
+### make plots
+p1 <- ggplot() +
+	geom_point(aes(x=Surrogate.target, y=adaptive.held), data=env.correlation.DF) +
+	geom_line(aes(x=Surrogate.target,y=fit,group=Species), data=env.correlation.RPDF, alpha=0.3) +
+	geom_line(aes(x=Surrogate.target,y=fit), data=env.correlation.FPDF, size=1.5) +
 	xlab('Environmental variation secured (%)') +
 	ylab('Adaptive genetic\nvariation secured (%)') +
 	theme_classic()
-p2 <- ggplot(data=geo.pareto.DF) +
-	geom_line(aes(x=Surrogate.target,y=neutral.held,group=Species),
-		alpha=0.3) +
+p2 <- ggplot() +
+	geom_point(aes(x=Surrogate.target, y=neutral.held), data=geo.correlation.DF) +
+	geom_line(aes(x=Surrogate.target,y=fit,group=Species), data=geo.correlation.RPDF, alpha=0.3) +
+	geom_line(aes(x=Surrogate.target,y=fit), data=geo.correlation.FPDF, size=1.5) +
 	xlab('Geographic variation secured (%)') +
 	ylab('Neutral genetic\nvariation secured (%)') +
 	theme_classic()
