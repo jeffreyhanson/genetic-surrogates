@@ -9,7 +9,9 @@ single.spp.SDF <- single.spp.DF %>%
 	filter(Metric %in% c('adaptive.held', 'neutral.held')) %>%
 	mutate(Metric=revalue(Metric, c('adaptive.held'='Adaptive variation', 
 		'neutral.held'='Neutral variation'))) %>%
-	mutate(Prioritisation.Metric=interaction(Prioritisation,Metric)) 
+	mutate(Prioritisation = factor(Prioritisation, levels=c('Amount','Surrogate','Genetic'))) %>%
+	mutate(Prioritisation.Metric=interaction(Prioritisation,Metric))
+
 # model
 single.spp.GLMM <- suppressWarnings(glmer(value ~ Prioritisation * Metric + (1 | Species), family='binomial', data=single.spp.SDF, nAGQ=20))
 single.spp.GLMM1 <- suppressWarnings(glmer(value ~ Prioritisation + Metric + (1 | Species), family='binomial', data=single.spp.SDF, nAGQ=20))
@@ -38,6 +40,8 @@ multi.spp.SDF <- multi.spp.DF %>%
 	mutate(Metric=revalue(Metric, c('adaptive.held'='Adaptive variation', 
 		'neutral.held'='Neutral variation'))) %>%
 	mutate(Prioritisation.Metric=interaction(Prioritisation,Metric)) 
+multi.spp.SDF$Prioritisation <- factor(multi.spp.SDF$Prioritisation, levels=c('Amount','Surrogate','Genetic'))
+
 # model
 multi.spp.GLMM <- suppressWarnings(glmer(value ~ Prioritisation * Metric + (1 | Species), family='binomial', data=multi.spp.SDF, nAGQ=20))
 multi.spp.GLMM1 <- suppressWarnings(glmer(value ~ Prioritisation + Metric + (1 | Species), family='binomial', data=multi.spp.SDF, nAGQ=20))

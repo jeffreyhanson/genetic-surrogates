@@ -233,7 +233,7 @@ plot.spp.mds <- function(i) {
 		grid.arrange,
 		append(
 			plotLST,
-			list(ncol=6)
+			list(ncol=4)
 		)
 	)
 }

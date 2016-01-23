@@ -26,20 +26,19 @@ options(error=NULL)
 
 ## Figures
 
-```{r, echo=FALSE, fig.width=6, fig.height=3, fig.cap='Summary of single species prioritizations. Single species prioritizations were generated using amount-based targets, amount-based and surrogate-based targets, and amount-based and genetic-based targets for each species. Violin plots show the performance of prioritizations generated using these three sets of targets. Points denote the values associated with each prioritization. Letters denote significant differences ($P < 0.05$).'}
+```{r, echo=FALSE, fig.width=6, fig.height=3, fig.cap='Summary of single species prioritizations. Single species prioritizations were generated using amount-based targets, amount-based and surrogate-based targets, and amount-based and genetic-based targets for each species. Violin plots show the performance of prioritizations generated using these three sets of targets. Letters denote significant differences ($P < 0.05$).'}
 # prepare data for plotting
 single.spp.PDF <- expand.grid(
 	Prioritisation=unique(single.spp.SDF$Prioritisation),
 	Metric=unique(single.spp.SDF$Metric)
 ) %>% mutate(
 	letters=toupper(cld(single.spp.MCP)$mcletters$Letters),
-	letter.height=max(single.spp.SDF$value)+(diff(range(single.spp.SDF$value))*0.1)
+	letter.height=max(single.spp.SDF$value, na.rm=TRUE)+(diff(range(single.spp.SDF$value, na.rm=TRUE))*0.1)
 )
 # make plot
 ggplot(aes(x=Metric,y=value,fill=Prioritisation),
 	data=single.spp.SDF) +
 	geom_violin(position=position_dodge(0.9)) +
-	geom_point(alpha=0.2,position=position_jitterdodge(dodge.width=0.9, jitter.width=0.25)) +
 	geom_text(aes(x=Metric, y=letter.height, label=letters),
 		data=single.spp.PDF, position=position_dodge(0.9)) +
 	scale_fill_manual(name='Prioritisation',
@@ -106,13 +105,12 @@ multi.spp.PDF <- expand.grid(
 	Metric=unique(multi.spp.SDF$Metric)
 ) %>% mutate(
 	letters=toupper(cld(multi.spp.MCP)$mcletters$Letters),
-	letter.height=max(multi.spp.SDF$value)+(diff(range(multi.spp.SDF$value))*0.1)
+	letter.height=max(multi.spp.SDF$value, na.rm=TRUE)+(diff(range(multi.spp.SDF$value, na.rm=TRUE))*0.1)
 )
 # make plot
 ggplot(aes(x=Metric,y=value,fill=Prioritisation),
 	data=multi.spp.SDF) +
 	geom_violin(position=position_dodge(0.9)) +
-	geom_point(alpha=0.2,position=position_jitterdodge(dodge.width=0.9, jitter.width=0.25)) +
 	geom_text(aes(x=Metric, y=letter.height,label=letters),
 		data=multi.spp.PDF, position=position_dodge(0.9)) +
 	scale_fill_manual(name='Prioritisation',
