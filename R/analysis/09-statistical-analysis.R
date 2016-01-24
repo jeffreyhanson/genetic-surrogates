@@ -61,10 +61,12 @@ multi.spp.MCP <- summary(
 	adjusted('bonferroni'))
 
 ### Correlation analysis
-mod.form = ~ 0 + (1 - 0) * (1 - exp(-r * input))
+mod.form = ~ 1 - (1 - 0) * exp(-r * input)
 mod.fun = deriv(mod.form, namevec=c('r'), function.arg=c('input','r'))
 env.correlation.NLMM <- nlmer(adaptive.held ~ mod.fun(Surrogate.target,r) ~ r|Species, data=env.correlation.DF, start=c(r=1), control=nlmerControl(optimizer='bobyqa'))
-geo.correlation.NLMM <- nlmer(neutral.held ~ mod.fun(Surrogate.target,r) ~ r|Species, data=env.correlation.DF, start=c(r=1), control=nlmerControl(optimizer='bobyqa'))
+geo.correlation.NLMM <- nlmer(neutral.held ~ mod.fun(Surrogate.target,r) ~ r|Species, data=geo.correlation.DF, start=c(r=1), control=nlmerControl(optimizer='bobyqa'))
+
+
 
 ## save .rda
 save.session('results/.cache/09-statistical-analysis.rda')

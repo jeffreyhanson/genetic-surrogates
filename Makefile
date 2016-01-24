@@ -2,7 +2,7 @@
 # set parameters for inference 
 # MODE=release 
 # set parameters for debugging code
-MODE=debug
+MODE=release
 
 # main operations
 all: clean analysis manuscript
@@ -19,6 +19,7 @@ clean:
 	rm article/supporting_information.md -f
 	rm article/article.md -f
 	rm article/article.tex -f
+	rm article/article.docx -f
 	
 # commands for generating manuscript
 manuscript: article/article.pdf
@@ -26,6 +27,7 @@ manuscript: article/article.pdf
 article/article.pdf: article/article.Rmd article/Endnote_lib.bib article/preamble-latex.tex article/reference-style.csl article/supporting_information.pdf article/figures.pdf
 	R -e "MODE='$(MODE)';rmarkdown::render('article/article.Rmd')"
 	rm article/article.md -f
+	pandoc -s article/article.pdf -o article/article.docx
 
 article/figures.pdf: article/figures.Rmd article/preamble-latex.tex article/preamble-latex2.tex
 	R -e "MODE='$(MODE)';rmarkdown::render('article/figures.Rmd')"

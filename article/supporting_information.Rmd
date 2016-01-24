@@ -152,7 +152,8 @@ suppressWarnings({
 ```{r, echo=FALSE, fig.width=6.5, fig.height=6.5, fig.cap='Distribution of populations. Each panel depicts a different species. Squares denote planning units. Points denote the location of sampled individuals, and their colors denote the distribution of populations. Note that points have been slightly jittered so that individuals in close proximity are visible.'}
 # define function
 plotLST <- llply(
-	seq_along(unique(spp.samples.DF$species)),
+	# seq_along(unique(spp.samples.DF$species)),
+	seq_along(unique(spp.samples.DF$species)[-23]), # omit spp 23 from current version
 	.fun=function(i) {
 		# init
 		curr.pts <- filter(
@@ -328,7 +329,7 @@ if (22 <= general.params.LST[[MODE]]$n.spp) plot.spp.mds(22)
 ```
 
 ```{r, echo=FALSE, fig.width=6.5, fig.height=3.25, fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[23]),'}. See Figure S6 caption for conventions.')}
-if (23 <= general.params.LST[[MODE]]$n.spp) plot.spp.mds(23)
+# if (23 <= general.params.LST[[MODE]]$n.spp) plot.spp.mds(23)
 ```
 
 ```{r, echo=FALSE, fig.width=6.5, fig.height=3.25, fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[24]),'}. See Figure S6 caption for conventions.')}

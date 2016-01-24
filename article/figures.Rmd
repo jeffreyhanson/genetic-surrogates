@@ -36,16 +36,18 @@ single.spp.PDF <- expand.grid(
 	letter.height=max(single.spp.SDF$value, na.rm=TRUE)+(diff(range(single.spp.SDF$value, na.rm=TRUE))*0.1)
 )
 # make plot
-ggplot(aes(x=Metric,y=value,fill=Prioritisation),
-	data=single.spp.SDF) +
-	geom_violin(position=position_dodge(0.9)) +
-	geom_text(aes(x=Metric, y=letter.height, label=letters),
-		data=single.spp.PDF, position=position_dodge(0.9)) +
-	scale_fill_manual(name='Prioritisation',
-		values=c('grey80','grey50','grey20')) +
-	ylab('Genetic variation secured (%)') +
-	xlab('') +
-	theme_classic()
+suppressWarnings({
+	ggplot(aes(x=Metric,y=value,fill=Prioritisation),
+		data=single.spp.SDF) +
+		geom_violin(position=position_dodge(0.9)) +
+		geom_text(aes(x=Metric, y=letter.height, label=letters),
+			data=single.spp.PDF, position=position_dodge(0.9)) +
+		scale_fill_manual(name='Prioritisation',
+			values=c('grey80','grey50','grey20')) +
+		ylab('Genetic variation secured (%)') +
+		xlab('') +
+		theme_classic()
+})
 ```
 
 ```{r, echo=FALSE, fig.width=8, fig.height=3, fig.cap='Multi-species prioritizations. Panel (a) shows the prioritization generated for using just amount-based targets. Panel (b) shows the prioritization generated using amount-based and surrogate based targets. Panel (c) shows the prioritization generated using amount-based and genetic-based targets.'}
@@ -108,16 +110,18 @@ multi.spp.PDF <- expand.grid(
 	letter.height=max(multi.spp.SDF$value, na.rm=TRUE)+(diff(range(multi.spp.SDF$value, na.rm=TRUE))*0.1)
 )
 # make plot
-ggplot(aes(x=Metric,y=value,fill=Prioritisation),
-	data=multi.spp.SDF) +
-	geom_violin(position=position_dodge(0.9)) +
-	geom_text(aes(x=Metric, y=letter.height,label=letters),
-		data=multi.spp.PDF, position=position_dodge(0.9)) +
-	scale_fill_manual(name='Prioritisation',
-		values=c('grey80','grey50','grey20')) +
-	ylab('Genetic variation secured (%)') +
-	xlab('') +
-	theme_classic()
+suppressWarnings({
+	ggplot(aes(x=Metric,y=value,fill=Prioritisation),
+		data=multi.spp.SDF) +
+		geom_violin(position=position_dodge(0.9)) +
+		geom_text(aes(x=Metric, y=letter.height,label=letters),
+			data=multi.spp.PDF, position=position_dodge(0.9)) +
+		scale_fill_manual(name='Prioritisation',
+			values=c('grey80','grey50','grey20')) +
+		ylab('Genetic variation secured (%)') +
+		xlab('') +
+		theme_classic()
+})
 ```
 
 ```{r, echo=FALSE, fig.width=8, fig.height=3, fig.cap='The relationship between surrogates and genetic variation secured in prioritizations. The left panel shows the relationship between environmental surrogates and adaptive genetic variation, and the right for geographic surrogates and neutral genetic variation. Transparent gray lines denote trneds for each species, and black lines show general trends across all species.'}
@@ -127,36 +131,38 @@ ggplot(aes(x=Metric,y=value,fill=Prioritisation),
 env.correlation.RPDF <- expand.grid(Surrogate.target=seq(min(env.correlation.DF$Surrogate.target), max(env.correlation.DF$Surrogate.target), length.out=100),
 	Species=unique(env.correlation.DF$Species))
 env.correlation.RPDF$r.ranef <- fixef(env.correlation.NLMM)[[1]] + ranef(env.correlation.NLMM)$Species$r[env.correlation.RPDF$Species]
-env.correlation.RPDF$fit <- 0 + (1 - 0) * (1 - exp(- env.correlation.RPDF$r.ranef * env.correlation.RPDF$Surrogate.target))
+env.correlation.RPDF$fit <- 1 - (1 - 0) * exp(- env.correlation.RPDF$r.ranef * env.correlation.RPDF$Surrogate.target)
 # fixed effects
 env.correlation.FPDF <- data.frame(Surrogate.target=seq(min(env.correlation.DF$Surrogate.target), max(env.correlation.DF$Surrogate.target), length.out=100))
-env.correlation.FPDF$fit <- 0 + (1 - 0) * (1 - exp(-fixef(env.correlation.NLMM) * env.correlation.FPDF$Surrogate.target))
+env.correlation.FPDF$fit <- 1 - (1 - 0) * exp(- fixef(env.correlation.NLMM)[[1]] * env.correlation.FPDF$Surrogate.target)
 
 ## geographic vs neutral
 # random effects
 geo.correlation.RPDF <- expand.grid(Surrogate.target=seq(min(geo.correlation.DF$Surrogate.target), max(geo.correlation.DF$Surrogate.target), length.out=100),
 	Species=unique(geo.correlation.DF$Species))
 geo.correlation.RPDF$r.ranef <- fixef(geo.correlation.NLMM)[[1]] + ranef(geo.correlation.NLMM)$Species$r[geo.correlation.RPDF$Species]
-geo.correlation.RPDF$fit <- 0 + (1 - 0) * (1 - exp(- geo.correlation.RPDF$r.ranef * geo.correlation.RPDF$Surrogate.target))
+geo.correlation.RPDF$fit <- 1 - (1 - 0) * exp(- geo.correlation.RPDF$r.ranef * geo.correlation.RPDF$Surrogate.target)
 # fixed effects
 geo.correlation.FPDF <- data.frame(Surrogate.target=seq(min(geo.correlation.DF$Surrogate.target), max(geo.correlation.DF$Surrogate.target), length.out=100))
-geo.correlation.FPDF$fit <- 0 + (1 - 0) * (1 - exp(-fixef(geo.correlation.NLMM) * geo.correlation.FPDF$Surrogate.target))
+geo.correlation.FPDF$fit <- 1 - (1 - 0) * exp(- fixef(geo.correlation.NLMM)[[1]] * geo.correlation.FPDF$Surrogate.target)
 
 ### make plots
-p1 <- ggplot() +
-	geom_point(aes(x=Surrogate.target, y=adaptive.held), data=env.correlation.DF) +
-	geom_line(aes(x=Surrogate.target,y=fit,group=Species), data=env.correlation.RPDF, alpha=0.3) +
-	geom_line(aes(x=Surrogate.target,y=fit), data=env.correlation.FPDF, size=1.5) +
-	xlab('Environmental variation secured (%)') +
-	ylab('Adaptive genetic\nvariation secured (%)') +
-	theme_classic()
-p2 <- ggplot() +
-	geom_point(aes(x=Surrogate.target, y=neutral.held), data=geo.correlation.DF) +
-	geom_line(aes(x=Surrogate.target,y=fit,group=Species), data=geo.correlation.RPDF, alpha=0.3) +
-	geom_line(aes(x=Surrogate.target,y=fit), data=geo.correlation.FPDF, size=1.5) +
-	xlab('Geographic variation secured (%)') +
-	ylab('Neutral genetic\nvariation secured (%)') +
-	theme_classic()
-grid.arrange(p1, p2, nrow=1)
+suppressWarnings({
+	p1 <- ggplot() +
+		geom_point(aes(x=Surrogate.target, y=adaptive.held), data=env.correlation.DF) +
+		geom_line(aes(x=Surrogate.target,y=fit,group=Species), data=env.correlation.RPDF, alpha=0.3) +
+		geom_line(aes(x=Surrogate.target,y=fit), data=env.correlation.FPDF, size=1.5) +
+		xlab('Environmental variation secured (%)') +
+		ylab('Adaptive genetic\nvariation secured (%)') +
+		theme_classic()
+	p2 <- ggplot() +
+		geom_point(aes(x=Surrogate.target, y=neutral.held), data=geo.correlation.DF) +
+		geom_line(aes(x=Surrogate.target,y=fit,group=Species), data=geo.correlation.RPDF, alpha=0.3) +
+		geom_line(aes(x=Surrogate.target,y=fit), data=geo.correlation.FPDF, size=1.5) +
+		xlab('Geographic variation secured (%)') +
+		ylab('Neutral genetic\nvariation secured (%)') +
+		theme_classic()
+	grid.arrange(p1, p2, nrow=1)
+})
 ```
  
