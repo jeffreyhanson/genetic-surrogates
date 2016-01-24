@@ -119,7 +119,7 @@ do.call(
 )
 ```
 
-```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.width=6.5, fig.height=6.5, fig.cap='Relative support ($BIC$) for the number of populations in each species. Each panel denotes a different species. Asterisks indicate the number of populations with the most support. See text for the method used to select these populations.'}
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.width=6.5, fig.height=6.5, fig.cap='Relative support ($BIC$) for the number of populations in each species. Each panel denotes a different species. Asterisks indicate the number of populations with the most support (see text for methodological details).'}
 # format data
 bic.buff <- laply(spp.Adegenet.LST, `[[`, 'Kstat') %>%
 	c() %>% range() %>% diff %>% `*`(0.05)
@@ -149,7 +149,7 @@ suppressWarnings({
 })
 ```
 
-```{r, echo=FALSE, fig.width=6.5, fig.height=6.5, fig.cap='Distribution of populations. Each panel depicts a different species. Squares denote planning units. Points denote the location of sampled individuals. The color of each point indicates the population to which each indiviudal was assigned.'}
+```{r, echo=FALSE, fig.width=6.5, fig.height=6.5, fig.cap='Distribution of populations. Each panel depicts a different species. Squares denote planning units. Points denote the location of sampled individuals, and their colors denote the distribution of populations. Note that points have been slightly jittered so that individuals in close proximity are visible.'}
 # define function
 plotLST <- llply(
 	seq_along(unique(spp.samples.DF$species)),
@@ -239,7 +239,7 @@ plot.spp.mds <- function(i) {
 }
 ```
 
-```{r, echo=FALSE, fig.width=6.5, fig.height=3.25, fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[1]),'}. Each square represents a planning unit. The color of each planning unit panel corresponds to ordination values. Planning units with similar colors contain individiduals with similar genetic variation.')}
+```{r, echo=FALSE, fig.width=6.5, fig.height=3.25, fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[1]),'}. Each panel shows a different dimension of the variation as indicated by its title. Squares represent planning units. The color of each planning unit panel corresponds to the average ordinated values associated with individuals sampled inside it. No indiviudals of this species were found inside the gray planning units.')}
 if (1 <= general.params.LST[[MODE]]$n.spp) plot.spp.mds(1)
 ```
 
@@ -412,4 +412,4 @@ knitr::kable(
 	align=c('l', 'c', 'c', 'c', 'c')
 )
 ```
- 
+
