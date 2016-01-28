@@ -2,7 +2,7 @@
 # set parameters for inference 
 # MODE=release 
 # set parameters for debugging code
-MODE=release
+MODE=debug
 
 # main operations
 all: clean analysis manuscript
@@ -13,10 +13,13 @@ clean:
 	rm results/.cache/bayescan -rf
 	rm article/article_files/figure-latex/*.pdf -f
 	rm article/supporting_information_files/figure-latex/*.pdf -f
+	rm article/figures_files/figure-latex/*.pdf -f
 	rm article/figures.tex -f
 	rm article/figures.md -f
+	rm article/figures.docx -f
 	rm article/supporting_information.tex -f
 	rm article/supporting_information.md -f
+	rm article/supporting_information.docx -f
 	rm article/article.md -f
 	rm article/article.tex -f
 	rm article/article.docx -f
@@ -25,17 +28,20 @@ clean:
 manuscript: article/article.pdf
 
 article/article.pdf: article/article.Rmd article/Endnote_lib.bib article/preamble-latex.tex article/reference-style.csl article/supporting_information.pdf article/figures.pdf
-	R -e "MODE='$(MODE)';rmarkdown::render('article/article.Rmd')"
+	R -e "rmarkdown::render('article/article.Rmd')"
+	pandoc -s article/article.tex -o article/article.docx
+	rm article/article.tex -f
 	rm article/article.md -f
-	pandoc -s article/article.pdf -o article/article.docx
 
 article/figures.pdf: article/figures.Rmd article/preamble-latex.tex article/preamble-latex2.tex
-	R -e "MODE='$(MODE)';rmarkdown::render('article/figures.Rmd')"
+	R -e "rmarkdown::render('article/figures.Rmd')"
+	pandoc -s article/figures.tex -o article/figures.docx
 	rm article/figures.tex -f
 	rm article/figures.md -f
 
 article/supporting_information.pdf: article/supporting_information.Rmd article/preamble-latex.tex article/preamble-latex3.tex
-	R -e "MODE='$(MODE)';rmarkdown::render('article/supporting_information.Rmd')"
+	R -e "rmarkdown::render('article/supporting_information.Rmd')"
+	pandoc -s article/supporting_information.tex -o article/supporting_information.docx
 	rm article/supporting_information.tex -f
 	rm article/supporting_information.md -f
 

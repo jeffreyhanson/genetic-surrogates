@@ -5,7 +5,7 @@ session::restore.session('results/.cache/08-correlation-analysis.rda')
 ## statistical analysis
 # prepare data
 single.spp.SDF <- single.spp.DF %>%
-	gather(Metric, value, amount.held:neutral.held) %>%
+	gather(Metric, value, amount.held:neutral.held) %>%	
 	filter(Metric %in% c('adaptive.held', 'neutral.held')) %>%
 	mutate(Metric=revalue(Metric, c('adaptive.held'='Adaptive variation', 
 		'neutral.held'='Neutral variation'))) %>%

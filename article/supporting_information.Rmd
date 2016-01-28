@@ -6,6 +6,7 @@ csl: reference-style.csl
 output:
   rmarkdown::pdf_document:
     fig_caption: yes
+    keep_tex: yes
     includes:
       in_header: [preamble-latex.tex, preamble-latex3.tex]
 ---
@@ -17,11 +18,8 @@ All data and code is stored in an online repository (\url{www.github.com/paleo13
 # set wd
 setwd('..')
 
-# load .rda files
-load('results/results.rda')
-
-# load packages
-source('R/analysis/00-initialization.R')
+# load .rda file
+session::restore.session('results/results.rda')
 
 # set options
 options(error=NULL)
@@ -119,7 +117,7 @@ do.call(
 )
 ```
 
-```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.width=6.5, fig.height=6.5, fig.cap='Relative support ($BIC$) for the number of populations in each species. Each panel denotes a different species. Asterisks indicate the number of populations with the most support (see text for methodological details).'}
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.width=9.5, fig.height=10, fig.cap='Relative support ($BIC$) for the number of populations in each species. Each panel denotes a different species. Asterisks indicate the number of populations with the most support (see text for methodological details).'}
 # format data
 bic.buff <- laply(spp.Adegenet.LST, `[[`, 'Kstat') %>%
 	c() %>% range() %>% diff %>% `*`(0.05)
@@ -145,11 +143,11 @@ suppressWarnings({
 		theme_classic() +
 		xlab('Number of populations') +
 		ylab('BIC') +
-		facet_wrap(~ Species, ncol=6)
+		facet_wrap(~ Species, ncol=4)
 })
 ```
 
-```{r, echo=FALSE, fig.width=6.5, fig.height=6.5, fig.cap='Distribution of populations. Each panel depicts a different species. Squares denote planning units. Points denote the location of sampled individuals, and their colors denote the distribution of populations. Note that points have been slightly jittered so that individuals in close proximity are visible.'}
+```{r, echo=FALSE, fig.width=15, fig.height=14, fig.cap='Distribution of populations. Each panel depicts a different species. Squares denote planning units. Points denote the location of sampled individuals, and their colors denote the distribution of populations. Note that points have been slightly jittered so that individuals in close proximity are visible.'}
 # define function
 plotLST <- llply(
 	# seq_along(unique(spp.samples.DF$species)),
@@ -170,7 +168,7 @@ plotLST <- llply(
 				group='group'), fill='transparent', color='grey10') +
 			geom_point(data=curr.pts, aes_string(x='sample.longitude', y='sample.latitude', color='population'),
 				alpha=0.3, size=3, position='jitter') +
-			guides(fill=guide_legend(title=' ')) +
+			guides(fill=guide_legend(title=''), color=guide_legend(title='')) +
 			theme_classic() +
 			theme(axis.ticks=element_blank(), axis.text=element_blank(),
 				plot.margin=unit(c(0,0,0,0),'cm'), axis.line=element_blank()) +
@@ -188,7 +186,7 @@ do.call(
 	grid.arrange,
 	append(
 		plotLST,
-		list(ncol=6)
+		list(ncol=4)
 	)
 )
 ```
@@ -238,112 +236,128 @@ plot.spp.mds <- function(i) {
 		)
 	)
 }
+
+calc.fig.height <- function(i) {
+	# init
+	adapt.col <- paste0(unique(spp.samples.DF$species)[i], '_adaptive_d1')
+	neutral.col <- paste0(unique(spp.samples.DF$species)[i], '_neutral_d1')
+	n.plots <- 0 
+	# count adaptive plot
+	if (adapt.col %in% names(grid.FPLY))
+		n.plots <- n.plots + spp.mds.LST[[i]][['adaptive']]$ndim
+	# count neutral plot
+	if (neutral.col %in% names(grid.FPLY))
+		n.plots <- n.plots + spp.mds.LST[[i]][['neutral']]$ndim
+	# exports
+	return(ceiling(n.plots/4) * 2.8)
+}
 ```
 
-```{r, echo=FALSE, fig.width=6.5, fig.height=3.25, fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[1]),'}. Each panel shows a different dimension of the variation as indicated by its title. Squares represent planning units. The color of each planning unit panel corresponds to the average ordinated values associated with individuals sampled inside it. No indiviudals of this species were found inside the gray planning units.')}
+```{r, echo=FALSE, fig.width=15, fig.height=calc.fig.height(1), fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[1]),'}. Each panel shows a different dimension of the variation as indicated by its title. Squares represent planning units. The color of each planning unit panel corresponds to the average ordinated values associated with individuals sampled inside it. No indiviudals of this species were found inside the gray planning units.')}
 if (1 <= general.params.LST[[MODE]]$n.spp) plot.spp.mds(1)
 ```
 
-```{r, echo=FALSE, fig.width=6.5, fig.height=3.25, fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[2]),'}. See Figure S6 caption for conventions.')}
+```{r, echo=FALSE, fig.width=15, fig.height=calc.fig.height(2), fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[2]),'}. See Figure S6 caption for conventions.')}
 if (2 <= general.params.LST[[MODE]]$n.spp) plot.spp.mds(2)
 ```
 
-```{r, echo=FALSE, fig.width=6.5, fig.height=3.25, fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[3]),'}. See Figure S6 caption for conventions.')}
+```{r, echo=FALSE, fig.width=15, fig.height=calc.fig.height(3), fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[3]),'}. See Figure S6 caption for conventions.')}
 if (3 <= general.params.LST[[MODE]]$n.spp) plot.spp.mds(3)
 ```
 
-```{r, echo=FALSE, fig.width=6.5, fig.height=3.25, fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[4]),'}. See Figure S6 caption for conventions.')}
+```{r, echo=FALSE, fig.width=15, fig.height=calc.fig.height(4), fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[4]),'}. See Figure S6 caption for conventions.')}
 if (4 <= general.params.LST[[MODE]]$n.spp) plot.spp.mds(4)
 ```
 
-```{r, echo=FALSE, fig.width=6.5, fig.height=3.25, fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[5]),'}. See Figure S6 caption for conventions.')}
+```{r, echo=FALSE, fig.width=15, fig.height=calc.fig.height(5), fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[5]),'}. See Figure S6 caption for conventions.')}
 if (5 <= general.params.LST[[MODE]]$n.spp) plot.spp.mds(5)
 ```
 
-```{r, echo=FALSE, fig.width=6.5, fig.height=3.25, fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[6]),'}. See Figure S6 caption for conventions.')}
+```{r, echo=FALSE, fig.width=15, fig.height=calc.fig.height(6), fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[6]),'}. See Figure S6 caption for conventions.')}
 if (6 <= general.params.LST[[MODE]]$n.spp) plot.spp.mds(6)
 ```
 
-```{r, echo=FALSE, fig.width=6.5, fig.height=3.25, fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[7]),'}. See Figure S6 caption for conventions.')}
+```{r, echo=FALSE, fig.width=15, fig.height=calc.fig.height(7), fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[7]),'}. See Figure S6 caption for conventions.')}
 if (7 <= general.params.LST[[MODE]]$n.spp) plot.spp.mds(7)
 ```
 
-```{r, echo=FALSE, fig.width=6.5, fig.height=3.25, fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[8]),'}. See Figure S6 caption for conventions.')}
+```{r, echo=FALSE, fig.width=15, fig.height=calc.fig.height(8), fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[8]),'}. See Figure S6 caption for conventions.')}
 if (8 <= general.params.LST[[MODE]]$n.spp) plot.spp.mds(8)
 ```
 
-```{r, echo=FALSE, fig.width=6.5, fig.height=3.25, fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[9]),'}. See Figure S6 caption for conventions.')}
+```{r, echo=FALSE, fig.width=15, fig.height=calc.fig.height(9), fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[9]),'}. See Figure S6 caption for conventions.')}
 if (9 <= general.params.LST[[MODE]]$n.spp) plot.spp.mds(9)
 ```
 
-```{r, echo=FALSE, fig.width=6.5, fig.height=3.25, fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[10]),'}. See Figure S6 caption for conventions.')}
+```{r, echo=FALSE, fig.width=15, fig.height=calc.fig.height(10), fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[10]),'}. See Figure S6 caption for conventions.')}
 if (10 <= general.params.LST[[MODE]]$n.spp) plot.spp.mds(10)
 ```
 
-```{r, echo=FALSE, fig.width=6.5, fig.height=3.25, fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[11]),'}. See Figure S6 caption for conventions.')}
+```{r, echo=FALSE, fig.width=15, fig.height=calc.fig.height(11), fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[11]),'}. See Figure S6 caption for conventions.')}
 if (11 <= general.params.LST[[MODE]]$n.spp) plot.spp.mds(11)
 ```
 
-```{r, echo=FALSE, fig.width=6.5, fig.height=3.25, fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[12]),'}. See Figure S6 caption for conventions.')}
+```{r, echo=FALSE, fig.width=15, fig.height=calc.fig.height(12), fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[12]),'}. See Figure S6 caption for conventions.')}
 if (12 <= general.params.LST[[MODE]]$n.spp) plot.spp.mds(12)
 ```
 
-```{r, echo=FALSE, fig.width=6.5, fig.height=3.25, fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[13]),'}. See Figure S6 caption for conventions.')}
+```{r, echo=FALSE, fig.width=15, fig.height=calc.fig.height(13), fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[13]),'}. See Figure S6 caption for conventions.')}
 if (13 <= general.params.LST[[MODE]]$n.spp) plot.spp.mds(13)
 ```
 
-```{r, echo=FALSE, fig.width=6.5, fig.height=3.25, fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[14]),'}. See Figure S6 caption for conventions.')}
+```{r, echo=FALSE, fig.width=15, fig.height=calc.fig.height(14), fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[14]),'}. See Figure S6 caption for conventions.')}
 if (14 <= general.params.LST[[MODE]]$n.spp) plot.spp.mds(14)
 ```
 
-```{r, echo=FALSE, fig.width=6.5, fig.height=3.25, fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[15]),'}. See Figure S6 caption for conventions.')}
+```{r, echo=FALSE, fig.width=15, fig.height=calc.fig.height(15), fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[15]),'}. See Figure S6 caption for conventions.')}
 if (15 <= general.params.LST[[MODE]]$n.spp) plot.spp.mds(15)
 ```
 
-```{r, echo=FALSE, fig.width=6.5, fig.height=3.25, fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[16]),'}. See Figure S6 caption for conventions.')}
+```{r, echo=FALSE, fig.width=15, fig.height=calc.fig.height(16), fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[16]),'}. See Figure S6 caption for conventions.')}
 if (16 <= general.params.LST[[MODE]]$n.spp) plot.spp.mds(16)
 ```
 
-```{r, echo=FALSE, fig.width=6.5, fig.height=3.25, fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[17]),'}. See Figure S6 caption for conventions.')}
+```{r, echo=FALSE, fig.width=15, fig.height=calc.fig.height(17), fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[17]),'}. See Figure S6 caption for conventions.')}
 if (17 <= general.params.LST[[MODE]]$n.spp) plot.spp.mds(17)
 ```
 
-```{r, echo=FALSE, fig.width=6.5, fig.height=3.25, fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[18]),'}. See Figure S6 caption for conventions.')}
+```{r, echo=FALSE, fig.width=15, fig.height=calc.fig.height(18), fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[18]),'}. See Figure S6 caption for conventions.')}
 if (18 <= general.params.LST[[MODE]]$n.spp) plot.spp.mds(18)
 ```
 
-```{r, echo=FALSE, fig.width=6.5, fig.height=3.25, fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[19]),'}. See Figure S6 caption for conventions.')}
+```{r, echo=FALSE, fig.width=15, fig.height=calc.fig.height(19), fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[19]),'}. See Figure S6 caption for conventions.')}
 if (19 <= general.params.LST[[MODE]]$n.spp) plot.spp.mds(19)
 ```
 
-```{r, echo=FALSE, fig.width=6.5, fig.height=3.25, fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[20]),'}. See Figure S6 caption for conventions.')}
+```{r, echo=FALSE, fig.width=15, fig.height=calc.fig.height(20), fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[20]),'}. See Figure S6 caption for conventions.')}
 if (20 <= general.params.LST[[MODE]]$n.spp) plot.spp.mds(20)
 ```
 
-```{r, echo=FALSE, fig.width=6.5, fig.height=3.25, fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[21]),'}. See Figure S6 caption for conventions.')}
+```{r, echo=FALSE, fig.width=15, fig.height=calc.fig.height(21), fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[21]),'}. See Figure S6 caption for conventions.')}
 if (21 <= general.params.LST[[MODE]]$n.spp) plot.spp.mds(21)
 ```
 
-```{r, echo=FALSE, fig.width=6.5, fig.height=3.25, fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[22]),'}. See Figure S6 caption for conventions.')}
+```{r, echo=FALSE, fig.width=15, fig.height=calc.fig.height(22), fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[22]),'}. See Figure S6 caption for conventions.')}
 if (22 <= general.params.LST[[MODE]]$n.spp) plot.spp.mds(22)
 ```
 
-```{r, echo=FALSE, fig.width=6.5, fig.height=3.25, fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[23]),'}. See Figure S6 caption for conventions.')}
-# if (23 <= general.params.LST[[MODE]]$n.spp) plot.spp.mds(23)
+```{r, echo=FALSE, fig.width=15, fig.height=calc.fig.height(23), fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[23]),'}. See Figure S6 caption for conventions.')}
+if (23 <= general.params.LST[[MODE]]$n.spp) plot.spp.mds(23)
 ```
 
-```{r, echo=FALSE, fig.width=6.5, fig.height=3.25, fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[24]),'}. See Figure S6 caption for conventions.')}
+```{r, echo=FALSE, fig.width=15, fig.height=calc.fig.height(24), fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[24]),'}. See Figure S6 caption for conventions.')}
 if (24 <= general.params.LST[[MODE]]$n.spp) plot.spp.mds(24)
 ```
 
-```{r, echo=FALSE, fig.width=6.5, fig.height=3.25, fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[25]),'}. See Figure S6 caption for conventions.')}
+```{r, echo=FALSE, fig.width=15, fig.height=calc.fig.height(25), fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[25]),'}. See Figure S6 caption for conventions.')}
 if (25 <= general.params.LST[[MODE]]$n.spp) plot.spp.mds(25)
 ```
-```{r, echo=FALSE, fig.width=6.5, fig.height=3.25, fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[26]),'}. See Figure S6 caption for conventions.')}
+
+```{r, echo=FALSE, fig.width=15, fig.height=calc.fig.height(26), fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[26]),'}. See Figure S6 caption for conventions.')}
 if (26 <= general.params.LST[[MODE]]$n.spp) plot.spp.mds(26)
 ```
 
-```{r, echo=FALSE, fig.width=6.5, fig.height=3.25, fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[27]),'}. See Figure S6 caption for conventions.')}
+```{r, echo=FALSE, fig.width=15, fig.height=calc.fig.height(27), fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[27]),'}. See Figure S6 caption for conventions.')}
 if (27 <= general.params.LST[[MODE]]$n.spp) plot.spp.mds(27)
 ```
 
@@ -379,7 +393,7 @@ knitr::kable(
 	digits=2,
 	col.names=c('Species', 'Primer', 'Probability', 'q-value', '$\\alpha$', '$F_{ST}$', 'Type'),
 	align=c('l', 'c', 'c', 'c', 'c', 'c', 'c'),
-	caption='Loci classifications for each species. Each row denotes a sampled loci for a given species, and the evidence for it being under selection based on outputs from the program \texttt{Bayescan}.'
+	caption='Loci classifications for each species. Each row denotes a sampled loci for a given species, and the evidence for it being under selection based on outputs from the program \\texttt{Bayescan}.'
 )
 ```
 

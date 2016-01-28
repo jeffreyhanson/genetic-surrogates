@@ -24,24 +24,34 @@ csl: reference-style.csl
 ---
 
 <!-- NOTES -->
-<!-- 200 word limit for abstract -->
-<!-- 6 page limit w/o incurring costs -->
+<!-- 150 word limit for abstract -->
+<!-- 5000 word length limit -->
 
 ```{r, include=FALSE}
 # set wd
 setwd('..')
 
-# load .rda files
-load('results/results.rda')
-
-# load packages
-source('R/analysis/00-initialization.R')
+# load .rda file
+session::restore.session('results/results.rda')
 
 # set options
 options(error=NULL)
 ```
 
+
+<!--  title page -->
+Short running title: Genetic surrogates in conservation \newline
+Word count: XXXXX \newline
+Number of references: XXXX \newline
+Number of figures, table and text boxes: 4 \newline
+
+\newpage
+
+<!-- add line numbers -->
+\begin{linenumbers}
+
 ## Introduction
+<!--  main text -->
 Biodiversity is under threat. Over the last few decades, many species have gone extinct [@r270; @r272]. Today, thousands of species are listed as endangered or near threatened in the International Union for Conservation of Nature (IUCN) red list (\url{www.iucnredlist.org}). In the future, species are expected to face even more threats [eg. climate change; @r236; @r243]. In response to this crisis, the overarching aim of conservation is to maximize the long-term persistence of biodiversity [@r255; @r67].
 
 The act of setting aside areas for preservation is the hallmark of modern conservation [@r440]. Protected areas buffer species from anthropogenic impacts and provide places for biodiversity processes to persist (eg. nutrient cycling and water purification). Additionally, protected areas set the stage for direct management actions (eg. habitat rehabilitation, translocation, and invasive species management). Since the resources available for conservation are limited, the plans for protected areas (prioritizations) are often generated using spatially explicit biological data (eg. species distribution data) and decision support tools [eg. $\texttt{MARXAN}$; @r22; $\texttt{Zonation}$; @r429] that identify cost-effective solutions. 
@@ -78,7 +88,7 @@ To understand the relationship between the surrogate-based targets and the propo
 ## Statistical analysis
 We tested for differences in the effectiveness of prioritizations representing typical scenarios using generalized linear mixed-effects models [GLMMs; using the $\texttt{lme4}$ R package; @r469]. We fit two full models to the proportion of genomic variation secured in the single- and multi-species prioritizations using a logit link. Both models contained a predictor variable indicating if the prioritization was generated using amount, surrogate, or genetic targets, a second predictor variable indicating if the genetic variation was adaptive or neutral, and the interaction between these variables. Additionally, both models contained an intercept-only random effect to ensure that comparisons were made within species. Each full model was subject to a step-wise term deletion routine using likelihood ratio tests (LRT) to assess term significance (terms were retained when $P < 0.05$). Finally, we conducted a post-hoc analysis using Tukey constrasts with a Bonferroni correction [using the $\texttt{multcomp}$ R package; @r470].
 
-We investigated the relationship between surrogate-based targets and the genetic variation secured in a prioritization using nonlinear mixed-effects models (NLMMs; using the $\texttt{lme4}$ R package). Two models were fit to the adaptive and neutral genetic variation secured using a negative exponential formulation to estimate the rate of the accumulation of genetic variation ($y = 0 + (0 - 1) \times exp(-r \times x)$; $r$ is the accumulate rate). Both models contained intercept and slope random effects to accommodate variation between species.
+We investigated the relationship between surrogate-based targets and the genetic variation secured in a prioritization using nonlinear mixed-effects models (NLMMs; using the $\texttt{lme4}$ R package). Two models were fit to the adaptive and neutral genetic variation secured using a negative exponential formulation to estimate the rate of the accumulation of genetic variation ($y = 0 + (0 - 1) \times exp(-r \times x)$; $r$ is the accumulate rate). Both models accomodated random effects for the accumulation rate ($r$) parameter.
 
 ## Results
 <!-- Single species prioritizations -->
@@ -127,3 +137,4 @@ JOH is funded by an Australian Postgraduate Award (APA) scholarship. RAF has an 
 
 ## References
 
+\end{linenumbers}

@@ -2,5 +2,6 @@
 session::restore.session('results/.cache/09-statistical-analysis.rda')
 
 #### save results
-save.image('results/results.rda')
+session::save.session('results/results.rda')
+
 

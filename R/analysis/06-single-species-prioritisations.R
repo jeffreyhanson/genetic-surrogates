@@ -13,22 +13,22 @@ single.spp.amount.prioritisations <- llply(
 	function(x) {
 		# identify which planning units are occupied by the species
 		curr.pu <- which(grid.DF[[unique(spp.samples.DF$species)[[x]]]]==1)
-		n.pu <- ceiling(length(curr.pu) * rapr.params.LST[[MODE]]$amount.target)
+		n.pu <- ceiling(length(curr.pu) * rapr.params.LST[[MODE]]$single.species$amount.target)
+		zeros <- rep(0, length=nrow(grid.DF))
+		curr.sol.MTX<-t(replicate(
+			n=rapr.params.LST[[MODE]]$single.species$amount.replicates,
+			expr={replace(zeros, sample(x=curr.pu, size=n.pu), rep(1, n.pu))}
+		))
 		# generate portfolio of random selections
 		return(
-			llply(
-				seq_len(rapr.params.LST[[MODE]]$single.species.amount.replicates),
-				function(r) {
-					species.prioritisation(
-						x=spp.subset(ru, x),
-						amount.targets=rapr.params.LST[[MODE]]$amount.target,
-						env.surrogate.targets=rapr.params.LST[[MODE]]$surrogate.target,
-						geo.surrogate.targets=rapr.params.LST[[MODE]]$surrogate.target,
-						adaptive.genetic.targets=0,
-						neutral.genetic.targets=0,
-						b=sample(curr.pu, n.pu)
-					)
-				}
+			species.prioritisation(
+				x=spp.subset(ru, x),
+				amount.targets=rapr.params.LST[[MODE]]$single.species$amount.target,
+				env.surrogate.targets=0,
+				geo.surrogate.targets=0,
+				adaptive.genetic.targets=0,
+				neutral.genetic.targets=0,
+				b=curr.sol.MTX
 			)
 		)
 	}
@@ -40,13 +40,14 @@ single.spp.surrogate.prioritisations <- llply(
 	function(x) {
 		species.prioritisation(
 				x=spp.subset(ru, x),
-				amount.targets=rapr.params.LST[[MODE]]$amount.target,
-				env.surrogate.targets=rapr.params.LST[[MODE]]$surrogate.target,
-				geo.surrogate.targets=rapr.params.LST[[MODE]]$surrogate.target,
+				amount.targets=rapr.params.LST[[MODE]]$single.species$amount.target,
+				env.surrogate.targets=rapr.params.LST[[MODE]]$single.species$surrogate.target,
+				geo.surrogate.targets=rapr.params.LST[[MODE]]$single.species$surrogate.target,
 				adaptive.genetic.targets=0,
 				neutral.genetic.targets=0,
 				Threads=gurobi.params.LST[[MODE]]$Threads,
-				MIPGap=gurobi.params.LST[[MODE]]$MIPGap
+				MIPGap=gurobi.params.LST[[MODE]]$MIPGap,
+				NumberSolutions=rapr.params.LST[[MODE]]$single.species$surrogate.replicates
 		)
 	}
 )
@@ -57,13 +58,14 @@ single.spp.genetic.prioritisations <- llply(
 	function(x) {
 		species.prioritisation(
 				x=spp.subset(ru, x),
-				amount.targets=rapr.params.LST[[MODE]]$amount.target,
+				amount.targets=rapr.params.LST[[MODE]]$single.species$amount.target,
 				env.surrogate.targets=0,
 				geo.surrogate.targets=0,
-				adaptive.genetic.targets=rapr.params.LST[[MODE]]$genetic.target,
-				neutral.genetic.targets=rapr.params.LST[[MODE]]$genetic.target,
+				adaptive.genetic.targets=rapr.params.LST[[MODE]]$single.species$genetic.target,
+				neutral.genetic.targets=rapr.params.LST[[MODE]]$single.species$genetic.target,
 				Threads=gurobi.params.LST[[MODE]]$Threads,
-				MIPGap=gurobi.params.LST[[MODE]]$MIPGap
+				MIPGap=gurobi.params.LST[[MODE]]$MIPGap,
+				NumberSolutions=rapr.params.LST[[MODE]]$single.species$genetic.replicates
 		)
 	}
 )
@@ -85,34 +87,15 @@ single.spp.DF <- ldply(
 	single.spp.prioritisations,
 	function(x) {
 		mutate(
-			ldply(x, function(y) {
-				if (!inherits(y, 'list'))
-					y <- list(y)
-				ldply(y, extractResults)
-			}),
+			ldply(x, extractResults),
 			Prioritisation=c(
-				rep('Amount',rapr.params.LST[[MODE]]$single.species.amount.replicates),
-				'Surrogate', 'Genetic')
+				rep('Amount',rapr.params.LST[[MODE]]$single.species$amount.replicates),
+				rep('Surrogate',rapr.params.LST[[MODE]]$single.species$surrogate.replicates),
+				rep('Genetic',rapr.params.LST[[MODE]]$single.species$genetic.replicates)
+			)
 		)
 	}
 )
-
-# remove all but the first amount-based prioritisation for each species to reduce disk usage
-single.spp.prioritisations <- llply(
-	seq_along(unique(spp.samples.DF$species)),
-	function(i) {
-		list(
-			single.spp.amount.prioritisations[[i]][[1]],
-			single.spp.surrogate.prioritisations[[i]],
-			single.spp.genetic.prioritisations[[i]]
-		)
-	}
-)
-
-# remove objects to clear disk usage
-rm(single.spp.amount.prioritisations)
-rm(single.spp.surrogate.prioritisations)
-rm(single.spp.genetic.prioritisations)
 
 ## save .rda
 save.session('results/.cache/06-single-species-prioritisations.rda')

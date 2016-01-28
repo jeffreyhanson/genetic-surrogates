@@ -10,12 +10,12 @@ extractResults <- function(x) {
 		pos <- which(x@data@targets$name==paste0(space.name,'_',spp.name))
 		space.index <- x@data@targets$target[pos]
 		spp.index <- x@data@targets$species[pos]
-		return(c(space.held(x, species=spp.index, space=space.index)))
+		return(c(space.held(x, NULL, species=spp.index, space=space.index)))
 	}
 	# extract amount held
 	amount.held.DF <- data.frame(
 		Species=x@data@species$name,
-		amount.held=c(amount.held(x))
+		amount.held=c(amount.held(x,NULL))
 	)
 	# extract space held
 	space.held.MTX <- space.held(x)

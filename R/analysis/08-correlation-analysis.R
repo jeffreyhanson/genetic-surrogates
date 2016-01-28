@@ -5,7 +5,7 @@ session::restore.session('results/.cache/07-multi-species-prioritisations.rda')
 # generate prioritistions
 cat("starting environmental prioritizations\n")
 env.correlation.prioritisations <- llply(
-	rapr.params.LST[[MODE]]$correlation.surrogate.targets,
+	rapr.params.LST[[MODE]]$correlation.analysis$surrogate.targets,
 	species.prioritisation,
 	x=ru,
 	amount.targets=0,
@@ -17,7 +17,7 @@ env.correlation.prioritisations <- llply(
 
 cat("starting geographic prioritizations\n")
 geo.correlation.prioritisations <- llply(
-	rapr.params.LST[[MODE]]$correlation.surrogate.targets,
+	rapr.params.LST[[MODE]]$correlation.analysis$surrogate.targets,
 	species.prioritisation,
 	x=ru,
 	amount.targets=0,
@@ -31,13 +31,13 @@ geo.correlation.prioritisations <- llply(
 env.correlation.DF <- ldply(seq_along(env.correlation.prioritisations), function(i) {
 	mutate(
 		extractResults(env.correlation.prioritisations[[i]]),
-		Surrogate.target=rapr.params.LST[[MODE]]$correlation.surrogate.targets[i]
+		Surrogate.target=rapr.params.LST[[MODE]]$correlation.analysis$surrogate.targets[i]
 	)
 })
 geo.correlation.DF <- ldply(seq_along(geo.correlation.prioritisations), function(i) {
 	mutate(
 		extractResults(geo.correlation.prioritisations[[i]]),
-		Surrogate.target=rapr.params.LST[[MODE]]$correlation.surrogate.targets[i]
+		Surrogate.target=rapr.params.LST[[MODE]]$correlation.analysis$surrogate.targets[i]
 	)
 })
 

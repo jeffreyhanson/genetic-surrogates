@@ -6,6 +6,7 @@ csl: reference-style.csl
 output:
   rmarkdown::pdf_document:
     fig_caption: yes
+    keep_tex: yes
     includes:
       in_header: [preamble-latex.tex, preamble-latex2.tex]
 ---
@@ -14,11 +15,8 @@ output:
 # set wd
 setwd('..')
 
-# load .rda files
-load('results/results.rda')
-
-# load packages
-source('R/analysis/00-initialization.R')
+# load .rda file
+session::restore.session('results/results.rda')
 
 # set options
 options(error=NULL)
@@ -26,7 +24,7 @@ options(error=NULL)
 
 ## Figures
 
-```{r, echo=FALSE, fig.width=6, fig.height=3, fig.cap='Summary of single species prioritizations. Single species prioritizations were generated using amount-based targets, amount-based and surrogate-based targets, and amount-based and genetic-based targets for each species. Violin plots show the performance of prioritizations generated using these three sets of targets. Letters denote significant differences ($P < 0.05$).'}
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.width=6, fig.height=3, fig.cap='Summary of single species prioritizations. Single species prioritizations were generated using amount-based targets, amount-based and surrogate-based targets, and amount-based and genetic-based targets for each species. Violin plots show the performance of prioritizations generated using these three sets of targets. Points indicate the average in each group. Letters denote significant differences ($P < 0.05$).'}
 # prepare data for plotting
 single.spp.PDF <- expand.grid(
 	Prioritisation=unique(single.spp.SDF$Prioritisation),
@@ -35,6 +33,7 @@ single.spp.PDF <- expand.grid(
 	letters=toupper(cld(single.spp.MCP)$mcletters$Letters),
 	letter.height=max(single.spp.SDF$value, na.rm=TRUE)+(diff(range(single.spp.SDF$value, na.rm=TRUE))*0.1)
 )
+
 # make plot
 suppressWarnings({
 	ggplot(aes(x=Metric,y=value,fill=Prioritisation),
@@ -42,6 +41,8 @@ suppressWarnings({
 		geom_violin(position=position_dodge(0.9)) +
 		geom_text(aes(x=Metric, y=letter.height, label=letters),
 			data=single.spp.PDF, position=position_dodge(0.9)) +
+		stat_summary(fun.y=mean, geom='point', size=2,
+			position=position_dodge(0.9)) +
 		scale_fill_manual(name='Prioritisation',
 			values=c('grey80','grey50','grey20')) +
 		ylab('Genetic variation secured (%)') +
@@ -50,7 +51,7 @@ suppressWarnings({
 })
 ```
 
-```{r, echo=FALSE, fig.width=8, fig.height=3, fig.cap='Multi-species prioritizations. Panel (a) shows the prioritization generated for using just amount-based targets. Panel (b) shows the prioritization generated using amount-based and surrogate based targets. Panel (c) shows the prioritization generated using amount-based and genetic-based targets.'}
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.width=8, fig.height=3, fig.cap='Multi-species prioritizations. Panel (a) shows the prioritization generated for using just amount-based targets. Panel (b) shows the prioritization generated using amount-based and surrogate based targets. Panel (c) shows the prioritization generated using amount-based and genetic-based targets.'}
 # download basemap
 data(countriesHigh)
 countries.FPLY <- countriesHigh[
@@ -100,7 +101,7 @@ do.call(
 )
 ```
 
-```{r, echo=FALSE, fig.width=6, fig.height=3, fig.cap='Summary of multi-species prioritizations. Three prioritizations were generated using amount-based targets, amount-based and surrogate-based targets, and amount-based and genetic-based targets for each species. Data shows the performance of these prioritizations based on how much genetic variation they explain. See Figure 1 caption for conventions.'}
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.width=6, fig.height=3, fig.cap='Summary of multi-species prioritizations. Three prioritizations were generated using amount-based targets, amount-based and surrogate-based targets, and amount-based and genetic-based targets for each species. Data shows the performance of these prioritizations based on how much genetic variation they explain. See Figure 1 caption for conventions.'}
 # prepare data for plotting
 multi.spp.PDF <- expand.grid(
 	Prioritisation=unique(multi.spp.SDF$Prioritisation),
@@ -116,6 +117,8 @@ suppressWarnings({
 		geom_violin(position=position_dodge(0.9)) +
 		geom_text(aes(x=Metric, y=letter.height,label=letters),
 			data=multi.spp.PDF, position=position_dodge(0.9)) +
+		stat_summary(fun.y=mean, geom='point', size=2,
+			position=position_dodge(0.9)) +
 		scale_fill_manual(name='Prioritisation',
 			values=c('grey80','grey50','grey20')) +
 		ylab('Genetic variation secured (%)') +
@@ -124,7 +127,7 @@ suppressWarnings({
 })
 ```
 
-```{r, echo=FALSE, fig.width=8, fig.height=3, fig.cap='The relationship between surrogates and genetic variation secured in prioritizations. The left panel shows the relationship between environmental surrogates and adaptive genetic variation, and the right for geographic surrogates and neutral genetic variation. Transparent gray lines denote trneds for each species, and black lines show general trends across all species.'}
+```{r, echo=FALSE,  warning=FALSE, message=FALSE, fig.width=8, fig.height=3, fig.cap='The relationship between surrogates and genetic variation secured in prioritizations. The left panel shows the relationship between environmental surrogates and adaptive genetic variation, and the right for geographic surrogates and neutral genetic variation. Transparent gray lines denote trneds for each species, and black lines show general trends across all species.'}
 ### prepare data frames for plotting
 ## environmental vs adaptive
 # random effects
