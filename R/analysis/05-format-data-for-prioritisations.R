@@ -59,7 +59,7 @@ target.DF <- make.targets(
 rd <- RapData(
 	polygon=SpatialPolygons2PolySet(grid.PLY),
 	pu=data.frame(
-		cost=rep(1, nrow(grid.DF)),
+		cost=grid.DF$pop.density,
 		area=rep(1, nrow(grid.DF)),
 		status=rep(0L, nrow(grid.DF))
 	),
@@ -78,7 +78,13 @@ rd <- RapData(
 	),
 	boundary=calcBoundaryData(grid.PLY)
 )
+
+# create RapUnsolved without cost data
 ru <- RapUnsolved(RapUnreliableOpts(), rd)
- 
+ru@data@pu$cost <- 1
+
+# create RapUnsolved with  cost data
+ru_with_cost <- RapUnsolved(RapUnreliableOpts(), rd)
+
 ## save .rda
 save.session('results/.cache/05-format-data-for-prioritisations.rda')

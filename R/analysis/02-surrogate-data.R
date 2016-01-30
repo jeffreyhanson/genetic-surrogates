@@ -38,11 +38,22 @@ grid.DF <- cbind(grid.DF, centroids.DF)
 bioclim.STK <- stack('data/BioClim_variables/bioclim_pca.tif')
 # extract mean for each cell for each principle component
 extract.DF <- grid.PPLY %>% rasterize(bioclim.STK, field='id') %>% 
-	zonal(x=bioclim.STK) %>% as.data.frame() %>% select(-1) %>%
+	zonal(x=bioclim.STK) %>%  as.data.frame() %>% select(-1) %>%
 	`names<-`(paste0('env_d',seq_len(nlayers(bioclim.STK))))
 # merge with grid.DF
 grid.DF <- cbind(grid.DF, extract.DF)
 
+## extract population density data
+# load pop data
+pop.RST <- raster('data/GRUMP_V1_Population_Density/grumpv1-popdensity.tif') %>% 
+	crop(grid.PLY) %>% projectRaster(crs=grid.PPLY@proj4string)
+# extract total for each cell
+extract2.DF <- grid.PPLY %>% rasterize(pop.RST, field='id') %>% 
+	zonal(x=pop.RST, fun='sum') %>% as.data.frame() %>%
+	select(-1) %>% `names<-`('pop.density') %>% mutate(pop.density=pop.density/1000)
+# merge with grid.DF
+grid.DF <- cbind(grid.DF, extract2.DF)
+	
 ## update @data slot in spatial objects
 grid.PLY@data <- grid.DF
 grid.PPLY@data <- grid.DF
