@@ -81,6 +81,10 @@ rd <- RapData(
 
 # create RapUnsolved without cost data
 ru <- RapUnsolved(RapUnreliableOpts(), rd)
+ru@data@pu$cost <- 1
+
+# create RapUnsolved with  cost data
+ru_with_cost <- RapUnsolved(RapUnreliableOpts(), rd)
 
 ## save .rda
 save.session('results/.cache/05-format-data-for-prioritisations.rda')
