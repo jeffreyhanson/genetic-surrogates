@@ -1,5 +1,5 @@
 ## load .rda
-session::restore.session('results/.cache/09-correlation-analysis.rda')
+session::restore.session('results/.cache/08-correlation-analysis.rda')
 
 ### Single species prioritisations
 ## statistical analysis
