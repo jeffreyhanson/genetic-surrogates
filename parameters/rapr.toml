@@ -4,23 +4,19 @@ title = "rapr parameters"
 
 	[debug."single.species"]
 	amount.target = 0.1
-	amount.replicates = 10
+	amount.replicates = 5
 	surrogate.target = 0.9
-	surrogate.replicates = 3
+	surrogate.replicates = 1
 	genetic.target = 0.9
-	genetic.replicates = 3
+	genetic.replicates = 1
 
 	[debug."multi.species"]
 	amount.target = 0.1
-	amount.replicates = 3
+	amount.replicates = 1
 	surrogate.target = 0.9
-	surrogate.replicates = 3
+	surrogate.replicates = 1
 	genetic.target = 0.9
-	genetic.replicates = 3
-
-	[debug."correlation.analysis"]
-	surrogate.targets = [0.01, 0.12, 0.23, 0.34, 0.45, 0.56, 0.67, 0.78, 0.89, 1.00]
-
+	genetic.replicates = 1
 
 [release]
 
@@ -28,18 +24,16 @@ title = "rapr parameters"
 	amount.target = 0.1
 	amount.replicates = 1000
 	surrogate.target = 0.9
-	surrogate.replicates = 10
+	surrogate.replicates = 1
 	genetic.target = 0.9
-	genetic.replicates = 10
+	genetic.replicates = 1
 
 	[release."multi.species"]
 	amount.target = 0.1
-	amount.replicates = 10
+	amount.replicates = 1
 	surrogate.target = 0.9
-	surrogate.replicates = 10
+	surrogate.replicates = 1
 	genetic.target = 0.9
-	genetic.replicates = 10
+	genetic.replicates = 1
 
-	[release."correlation.analysis"]
-	surrogate.targets = [0.01, 0.12, 0.23, 0.34, 0.45, 0.56, 0.67, 0.78, 0.89, 1.00]
 

@@ -49,19 +49,21 @@ spp.grid.FPLY <- ldply(unique(spp.samples.DF$species), function(x) {
 # plot species data
 ggplot() +
 	geom_polygon(data=countries.FPLY, aes(x=long, y=lat, group=group),
-		fill='grey20', color='grey80') +
+		fill='grey85', color='grey70') +
 	geom_polygon(data=spp.grid.FPLY, aes(x=long, y=lat, 
 		group=group, fill=presence), alpha=0.8, color='grey10') +
 	theme_classic() +
 	guides(fill=guide_legend(title='Presence')) +
 	theme(axis.ticks=element_blank(), axis.text=element_blank(),
-		axis.line=element_blank()) +
-	coord_cartesian(
-		xlim=buffered.range(grid.FPLY$long, 0.05),
-		ylim=buffered.range(grid.FPLY$lat, 0.05)
+		axis.line=element_blank(), 
+		strip.background = element_rect(fill='grey20'),
+		strip.text = element_text(color='white', face='italic'),
+		axis.title=element_blank()
 	) +
-	xlab('') +
-	ylab('') +
+	coord_cartesian(
+		xlim=buffered.range(grid.FPLY$long, 0),
+		ylim=buffered.range(grid.FPLY$lat, 0)
+	) +
 	facet_wrap(~ species, ncol=4)
 ```
 
@@ -73,44 +75,77 @@ grid.PLY$Species_richness <- grid.PLY@data %>%
 # plot species richness
 ggplot() +
 	geom_polygon(data=countries.FPLY, aes(x=long, y=lat, group=group),
-		fill='grey20', color='grey80') +
+		fill='grey85', color='grey70') +
 	geom_polygon(data=spFortify(grid.PLY), aes(x=long, y=lat, 
-		group=group, fill=Species_richness), alpha=0.8, color='grey10') +
-	guides(fill=guide_legend(title='Count (#)')) +
+		group=group, fill=Species_richness), color='grey10') +
+	scale_fill_gradientn(name='Count (#)',
+		colors=brewer.pal(9,'PuBu'),
+		guide=guide_colorbar(ticks=element_line(color='black'), border=element_line(color='black'))
+	) +
 	theme_classic() +
 	theme(axis.ticks=element_blank(), axis.text=element_blank(),
-		axis.line=element_blank()) +
-	coord_cartesian(
-		xlim=buffered.range(grid.FPLY$long, 0.05),
-		ylim=buffered.range(grid.FPLY$lat, 0.05)
+		axis.line=element_blank(), axis.title=element_blank(),
+		panel.border=element_rect(color='black', fill=NA, size=1)
 	) +
-	xlab('') +
-	ylab('') +
-	ggtitle('Species richness')
+	coord_cartesian(
+		xlim=buffered.range(grid.FPLY$long, 0),
+		ylim=buffered.range(grid.FPLY$lat, 0)
+	) + 
+	ggtitle('Species Richness')
 ```
+
+```{r, echo=FALSE, fig.width=4, fig.height=3.5, fig.cap="Opportunity cost. Squares denote planning units. The color of each planning unit represents its opportunity cost (computed as total population density)"}
+# plot opportunity costs
+ggplot() +
+	geom_polygon(data=countries.FPLY, aes(x=long, y=lat, group=group),
+		fill='grey85', color='grey70') +
+	geom_polygon(data=spFortify(grid.PLY), aes(x=long, y=lat, 
+		group=group, fill=pop.density), color='grey10') +
+	scale_fill_gradientn(name='Cost',
+		colors=brewer.pal(9, 'PuBu'),
+		guide=guide_colorbar(ticks=element_line(color='black'), border=element_line(color='black'))
+	) +
+	theme_classic() +
+	theme(axis.ticks=element_blank(), axis.text=element_blank(),
+		axis.line=element_blank(), axis.title=element_blank(),
+		panel.border=element_rect(color='black', fill=NA, size=1)
+	) +
+	coord_cartesian(
+		xlim=buffered.range(grid.FPLY$long, 0),
+		ylim=buffered.range(grid.FPLY$lat, 0)
+	) +
+	ggtitle('Opportunity cost')
+```
+
 
 ```{r, fig.width=8, fig.height=3.5, fig.cap='Climatic variation. Each panel depicts variation based on a different principle component (PC). Squares represent planning units. The color of each planning unit denotes the average PC value of pixels inside it. Planning units with more similar colors have more similar climate regimes.', echo=FALSE}
 do.call(
 	grid.arrange,
 		append(
 		llply(grep('^env\\_.*$', names(grid.DF), value=TRUE), function(x) {
+			grid.FPLY$plot_title <- paste0('PC ', substr(x, nchar(x), nchar(x)))
 			ggplot() +
 				geom_polygon(data=countries.FPLY, aes(x=long, y=lat, group=group),
-					fill='grey20', color='grey80') +
+					fill='grey85', color='grey70') +
 				geom_polygon(data=grid.FPLY, aes_string(x='long', y='lat', 
-					group='group', fill=x),
-					alpha=0.8, color='grey10') +
-				guides(fill=guide_legend(title=' ')) +
+					group='group', fill=x), color='grey10') +
 				theme_classic() +
 				theme(axis.ticks=element_blank(), axis.text=element_blank(),
-					plot.margin=unit(c(0,0,0,0),'cm'), axis.line=element_blank()) +
-				coord_cartesian(
-					xlim=buffered.range(grid.FPLY$long, 0.05),
-					ylim=buffered.range(grid.FPLY$lat, 0.05)
+					plot.margin=unit(c(0,0,0,0),'cm'), axis.line=element_blank(), 
+					axis.title=element_blank(), 
+					panel.border=element_rect(color='black', fill=NA, size=1),
+					strip.background = element_rect(fill='grey20'),
+					strip.text = element_text(color='white')
 				) +
-				xlab('') +
-				ylab('') +
-				ggtitle(paste0('PC ', substr(x, nchar(x), nchar(x))))
+				coord_cartesian(
+					xlim=buffered.range(grid.FPLY$long, 0),
+					ylim=buffered.range(grid.FPLY$lat, 0)
+				) +
+				scale_fill_gradientn(name='',
+					colors=brewer.pal(9, 'RdYlBu'),
+					guide=guide_colorbar(ticks=element_line(color='black'), border=element_line(color='black'))
+				) +
+				facet_wrap(~ plot_title)
 		}),
 		list(ncol=2)
 	)
@@ -141,6 +176,10 @@ suppressWarnings({
 		geom_point(aes(y=best_stat, x=best_k), size=4, shape=8) +
 		geom_line(aes(y=stat, x=k)) +
 		theme_classic() +
+		theme(
+			strip.background = element_rect(fill='grey20'),
+			strip.text = element_text(color='white', face='italic', size=20)
+		) +
 		xlab('Number of populations') +
 		ylab('BIC') +
 		facet_wrap(~ Species, ncol=4)
@@ -148,93 +187,88 @@ suppressWarnings({
 ```
 
 ```{r, echo=FALSE, fig.width=15, fig.height=14, fig.cap='Distribution of populations. Each panel depicts a different species. Squares denote planning units. Points denote the location of sampled individuals, and their colors denote the distribution of populations. Note that points have been slightly jittered so that individuals in close proximity are visible.'}
-# define function
-plotLST <- llply(
-	# seq_along(unique(spp.samples.DF$species)),
-	seq_along(unique(spp.samples.DF$species)[-23]), # omit spp 23 from current version
-	.fun=function(i) {
-		# init
+# prepare data
+pop.DF <- llply(
+	seq_along(unique(spp.samples.DF$species)),
+	function(i) {
 		curr.pts <- filter(
 			spp.sample.PTS@data,
 			species==unique(spp.samples.DF$species)[i]
 		) %>% mutate(
+			species=gsub('_', ' ', unique(spp.samples.DF$species)[i], fixed=TRUE),
 			population=spp.Adegenet.LST[[i]]$grp
 		)
-		# create plot
-		ggplot() +
-			geom_polygon(data=countries.FPLY, aes(x=long, y=lat, group=group),
-				fill='grey20', color='grey80') +
-			geom_polygon(data=grid.FPLY, aes_string(x='long', y='lat', 
-				group='group'), fill='transparent', color='grey10') +
-			geom_point(data=curr.pts, aes_string(x='sample.longitude', y='sample.latitude', color='population'),
-				alpha=0.3, size=3, position='jitter') +
-			guides(fill=guide_legend(title=''), color=guide_legend(title='')) +
-			theme_classic() +
-			theme(axis.ticks=element_blank(), axis.text=element_blank(),
-				plot.margin=unit(c(0,0,0,0),'cm'), axis.line=element_blank()) +
-			coord_cartesian(
-				xlim=buffered.range(grid.FPLY$long, 0.05),
-				ylim=buffered.range(grid.FPLY$lat, 0.05)
-			) +
-			xlab('') +
-			ylab('') +
-			ggtitle(gsub('_', ' ', unique(spp.samples.DF$species)[i], fixed=TRUE))
 	}
-)
-# render plot
-do.call(
-	grid.arrange,
-	append(
-		plotLST,
-		list(ncol=4)
-	)
-)
+) %>% do.call(what=rbind)
+# make plot
+ggplot() +
+	geom_polygon(data=countries.FPLY, aes(x=long, y=lat, group=group),
+		fill='grey85', color='grey75') +
+	geom_polygon(data=grid.FPLY, aes_string(x='long', y='lat', 
+		group='group'), fill='transparent', color='grey10') +
+	geom_point(data=pop.DF, aes_string(x='sample.longitude', y='sample.latitude', 
+		color='population'), alpha=0.8, size=3, position='jitter') +
+	guides(fill=guide_legend(title=''), color=guide_legend(title='')) +
+	theme_classic() +
+	theme(axis.ticks=element_blank(), axis.text=element_blank(),
+		plot.margin=unit(c(0,0,0,0),'cm'), axis.line=element_blank(), 
+		axis.title=element_blank(), 
+		strip.background = element_rect(fill='grey20'),
+		strip.text = element_text(color='white', face='italic', size=20),
+		legend.text= element_text(size=20)
+	) +
+	coord_cartesian(
+		xlim=buffered.range(grid.FPLY$long, 0),
+		ylim=buffered.range(grid.FPLY$lat, 0)
+	) +
+	facet_wrap(~ species, ncol=4)
 ```
 
 ```{r, echo=FALSE}
 plot.spp.mds <- function(i) {
-	# define function
-	make.mds.plot <- function(j,k) {
-		ggplot() +
-			geom_polygon(data=countries.FPLY, aes(x=long, y=lat, group=group),
-				fill='grey20', color='grey80') +
-			geom_polygon(data=grid.FPLY, aes_string(x='long', y='lat', 
-				group='group', fill=paste0(unique(spp.samples.DF$species)[i], '_', j, '_d',k)),
-				alpha=0.8, color='grey10') +
-			guides(fill=guide_legend(title=' ')) +
-			theme_classic() +
-			theme(axis.ticks=element_blank(), axis.text=element_blank(),
-				plot.margin=unit(c(0,0,0,0),'cm'), axis.line=element_blank()) +
-			coord_cartesian(
-				xlim=buffered.range(grid.FPLY$long, 0.05),
-				ylim=buffered.range(grid.FPLY$lat, 0.05)
-			) +
-			xlab('') +
-			ylab('') +
-			ggtitle(paste0(j,' (',k,')'))
-	}
-	# init
-	adapt.col <- paste0(unique(spp.samples.DF$species)[i], '_adaptive_d1')
-	neutral.col <- paste0(unique(spp.samples.DF$species)[i], '_neutral_d1')
-	plotLST <- list()
-	# make adaptive plot
-	if (adapt.col %in% names(grid.FPLY)) {
-		for (k in seq_len(spp.mds.LST[[i]][['adaptive']]$ndim))
-			plotLST <- append(plotLST, list(make.mds.plot('adaptive', k)))
-	} 
-	# make neutral plot
-	if (neutral.col %in% names(grid.FPLY)) {
-		for (k in seq_len(spp.mds.LST[[i]][['neutral']]$ndim))
-			plotLST <- append(plotLST, list(make.mds.plot('neutral', k)))
-	}
-	# make plot
-	do.call(
-		grid.arrange,
-		append(
-			plotLST,
-			list(ncol=4)
-		)
+	## prepare data
+	# get vector of adaptive and neutral column names
+	adapt.col <- grep(
+		paste0(unique(spp.samples.DF$species)[i], '_adaptive_d'),
+		names(grid.FPLY), value=TRUE, fixed=TRUE
 	)
+	neutral.col <- grep(
+		paste0(unique(spp.samples.DF$species)[i], '_neutral_d'),
+		names(grid.FPLY), value=TRUE, fixed=TRUE
+	)
+	curr.FPLY <- grid.FPLY[,
+		c(adapt.col, neutral.col,
+		'long','lat','group'),drop=FALSE]
+	curr.FPLY <- curr.FPLY %>% gather(d, value, contains('adaptive'), contains('neutral')) %>% mutate(
+		d=gsub(paste0(unique(spp.samples.DF$species)[i], '_'), '', d, fixed=TRUE),
+		d=gsub('_', ' ', d, fixed=TRUE)
+	)
+	for (j in seq_len(length(adapt.col)+length(neutral.col)))
+		curr.FPLY[['d']] <- gsub(as.character(j), paste0('(', j, ')'), curr.FPLY[['d']], fixed=TRUE)
+	curr.FPLY <- curr.FPLY %>% mutate(d=factor(gsub(' d(', ' (', d, fixed=TRUE)))
+	# make plot
+	ggplot() +
+		geom_polygon(data=countries.FPLY, aes(x=long, y=lat, group=group),
+			fill='grey85', color='grey70') +
+		geom_polygon(data=curr.FPLY, aes_string(x='long', y='lat', 
+			group='group', fill='value'), color='grey10') +
+		theme_classic() +
+		theme(axis.ticks=element_blank(), axis.text=element_blank(),
+			plot.margin=unit(c(0,0,0,0),'cm'), axis.line=element_blank(),
+			axis.title=element_blank(), strip.background = element_rect(fill='grey20'),
+			strip.text = element_text(color='white', size=20),
+			legend.text = element_text(size=20)
+		) +
+		coord_cartesian(
+			xlim=buffered.range(grid.FPLY$long, 0),
+			ylim=buffered.range(grid.FPLY$lat, 0)
+		) +
+		scale_fill_gradientn(name='',
+			colors=brewer.pal(9, 'RdYlBu'),
+			guide=guide_colorbar(ticks=element_line(color='black'),
+				border=element_line(color='black'), barheight=unit(7, 'cm'))
+		) +
+		facet_wrap(~ d, ncol=4)
 }
 
 calc.fig.height <- function(i) {
@@ -249,7 +283,7 @@ calc.fig.height <- function(i) {
 	if (neutral.col %in% names(grid.FPLY))
 		n.plots <- n.plots + spp.mds.LST[[i]][['neutral']]$ndim
 	# exports
-	return(ceiling(n.plots/4) * 2.8)
+	return(ceiling(n.plots/4) * 3.5)
 }
 ```
 

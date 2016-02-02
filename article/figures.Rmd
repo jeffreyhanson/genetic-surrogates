@@ -24,34 +24,7 @@ options(error=NULL)
 
 ## Figures
 
-```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.width=6, fig.height=3, fig.cap='Summary of single species prioritizations. Single species prioritizations were generated using amount-based targets, amount-based and surrogate-based targets, and amount-based and genetic-based targets for each species. Violin plots show the performance of prioritizations generated using these three sets of targets. Points indicate the average in each group. Letters denote significant differences ($P < 0.05$).'}
-# prepare data for plotting
-single.spp.PDF <- expand.grid(
-	Prioritisation=unique(single.spp.SDF$Prioritisation),
-	Metric=unique(single.spp.SDF$Metric)
-) %>% mutate(
-	letters=toupper(cld(single.spp.MCP)$mcletters$Letters),
-	letter.height=max(single.spp.SDF$value, na.rm=TRUE)+(diff(range(single.spp.SDF$value, na.rm=TRUE))*0.1)
-)
-
-# make plot
-suppressWarnings({
-	ggplot(aes(x=Metric,y=value,fill=Prioritisation),
-		data=single.spp.SDF) +
-		geom_violin(position=position_dodge(0.9)) +
-		geom_text(aes(x=Metric, y=letter.height, label=letters),
-			data=single.spp.PDF, position=position_dodge(0.9)) +
-		stat_summary(fun.y=mean, geom='point', size=2,
-			position=position_dodge(0.9)) +
-		scale_fill_manual(name='Prioritisation',
-			values=c('grey80','grey50','grey20')) +
-		ylab('Genetic variation secured (%)') +
-		xlab('') +
-		theme_classic()
-})
-```
-
-```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.width=8, fig.height=3, fig.cap='Multi-species prioritizations. Panel (a) shows the prioritization generated for using just amount-based targets. Panel (b) shows the prioritization generated using amount-based and surrogate based targets. Panel (c) shows the prioritization generated using amount-based and genetic-based targets.'}
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.width=5, fig.height=5, fig.cap='Planning unit selection frequencies. The top row of panels (a, b, c) show single-species prioritizations generated assuming equal costs. The middle row of panels (d, e, f) show multi-species prioritizations generated assuming equal costs. The bottom row of panels (g, h, i) show multi-species generated using opportunity costs. The left column of panels (a, d, g) show prioritizations generated using only amount-based targets. The middle column of panels (b, e, h) show prioritizations generated using amount- and surrogate-based targets. The right column of panels (c, f, i) show prioritizations generated using amount- and genetic-based targets.'}
 # download basemap
 data(countriesHigh)
 countries.FPLY <- countriesHigh[
@@ -62,110 +35,127 @@ countries.FPLY <- countriesHigh[
 	)
 ,] %>% spFortify
 # prepare data for plotting
-multi.spp.grid.FPLY <- grid.PLY
+grid.FPLY <- grid.PLY
+for (i in seq_along(single.spp.prioritisations))
+	grid.FPLY@data[[paste0('Single-species (equal costs).', c('Amount', 'Surrogate', 'Genetic')[i])]] <- rowMeans(sapply(single.spp.prioritisations[[i]], function(x){colMeans(x@results@selections)}))
 for (i in seq_along(multi.spp.prioritisations))
-	multi.spp.grid.FPLY@data[[paste0('v',i)]] <- selections(multi.spp.prioritisations[[i]])
-multi.spp.grid.FPLY <- spFortify(multi.spp.grid.FPLY)
-# make maps
-do.call(
-	grid.arrange,
-	append(
-		llply(
-			seq_along(multi.spp.prioritisations),
-			function(i) {
-				ggplot() +
-					geom_polygon(data=countries.FPLY, aes(x=long, y=lat, group=group),
-						fill='grey20', color='grey80') +
-					geom_polygon(data=multi.spp.grid.FPLY, aes_string(x='long', y='lat', 
-						group='group', fill=paste0('v',i)),
-						alpha=0.8, color='grey10') +
-					guides(fill=guide_legend(title=' ')) +
-					theme_classic() +
-					theme(axis.ticks=element_blank(), axis.text=element_blank(),
-						plot.margin=unit(c(0,0,0,0),'cm'), axis.line=element_blank(),
-						legend.position='none') +
-					coord_cartesian(
-						xlim=buffered.range(multi.spp.grid.FPLY$long, 0.05),
-						ylim=buffered.range(multi.spp.grid.FPLY$lat, 0.05)
-					) +
-					xlab('') +
-					ylab('') +
-					annotate('text',
-						x=min(multi.spp.grid.FPLY$long)+diff(range(multi.spp.grid.FPLY$long)*0.1),
-						y=min(multi.spp.grid.FPLY$lat)+diff(range(multi.spp.grid.FPLY$lat)*1.01),
-						label=letters[i], hjust=1, vjust=1, color='white', size=8)
-			}
-		),
-		list(nrow=1)
+	grid.FPLY@data[[paste0('Multi-species (equal costs).', c('Amount', 'Surrogate', 'Genetic')[i])]] <- colMeans(multi.spp.prioritisations[[i]]@results@selections)
+for (i in seq_along(multi.spp.prioritisations.with.cost))
+	grid.FPLY@data[[paste0('Multi-species (opportunity costs).', c('Amount', 'Surrogate', 'Genetic')[i])]] <- colMeans(multi.spp.prioritisations.with.cost[[i]]@results@selections)
+grid.FPLY <- spFortify(grid.FPLY)
+grid.FPLY <- grid.FPLY %>% gather(
+		Combination,
+		`Selection.Frequency`,
+		`Single-species (equal costs).Amount`:`Multi-species (opportunity costs).Genetic`
+	) %>% mutate(
+		Context=sapply(strsplit(as.character(Combination), '.', fixed=TRUE), `[[`, 1),
+		Prioritization=sapply(strsplit(as.character(Combination), '.', fixed=TRUE), `[[`, 2)
+	) %>% mutate(
+		Prioritization=factor(Prioritization, levels=c('Amount', 'Surrogate', 'Genetic')),
+		Context=factor(
+			gsub(' (', '\n(', Context, fixed=TRUE),
+			levels=c("Single-species\n(equal costs)", "Multi-species\n(equal costs)", 
+			"Multi-species\n(opportunity costs)"))
 	)
-)
+panel.DF <- grid.FPLY %>% select(Context, Prioritization, long, lat) %>% 
+	mutate(
+		lat=min(lat)+(diff(range(lat))*0.98),
+		long=min(long)+(diff(range(long))*0.02)
+	) %>%
+	group_by(Context,Prioritization) %>% filter(c(TRUE, rep(FALSE, length(Context)-1))) %>%
+	mutate(
+		panel.letter=paste0('(',letters[(as.integer(Context)-1)*3 + as.integer(Prioritization)],')'),
+		panel.letter=c(as.character(panel.letter[1]), rep(NA_character_, length(Context)-1))
+	)
+# make maps
+ggplot() +
+	geom_polygon(data=countries.FPLY, aes(x=long, y=lat, group=group),
+		fill='grey85', color='grey70') +
+	geom_polygon(data=grid.FPLY, aes_string(x='long', y='lat', 
+		group='group', fill='Selection.Frequency'),
+		alpha=0.8, color='grey10') +
+	geom_text(aes_string(x='long',y='lat', label='panel.letter'), data=panel.DF) +
+	theme_classic() +
+	theme(axis.ticks=element_blank(), axis.text=element_blank(),
+		plot.margin=unit(c(0,0,0,0),'cm'), axis.line=element_blank(),
+		strip.background = element_rect(fill='grey20'),
+		strip.text = element_text(color='white'),
+		legend.position='bottom', legend.key.width=unit(1.8, 'cm'),
+		legend.title=element_text(vjust=-5),
+		legend.margin=unit(c(0.1), 'cm'),
+		axis.title=element_blank()) +
+	coord_cartesian(
+		xlim=buffered.range(grid.FPLY$long, 0),
+		ylim=buffered.range(grid.FPLY$lat, 0)
+	) +
+	facet_grid(Context ~ Prioritization) +
+	scale_fill_gradientn(name='Selection Frequency (%)',
+		colors=brewer.pal(9, 'PuBu'),
+		guide=guide_colorbar(title.position='bottom', title.hjust=0.5,
+			ticks=element_line(color='black'), border=element_line(color='black'))
+	)
 ```
 
-```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.width=6, fig.height=3, fig.cap='Summary of multi-species prioritizations. Three prioritizations were generated using amount-based targets, amount-based and surrogate-based targets, and amount-based and genetic-based targets for each species. Data shows the performance of these prioritizations based on how much genetic variation they explain. See Figure 1 caption for conventions.'}
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.width=5, fig.height=5, fig.cap='The effectiveness of prioritizations at securing genetic variation. The top row of panels (a--b) show the performance of single-species prioritizations generated assuming equal costs among planning costs. The middle row of panels (c--d) show the performance of multi-species prioritizations generated assuming equal costs among planning units. The bottom row of panels (e--f) show the performance of multi-species prioritizations generated using opportunity costs. The left column of panels (a, c, d) and the right column of panels (b, d, f) show the proportion of adaptive and neutral genetic variation secured (respectively). Box plots show the effectiveness of prioritizations generated using amount-based targets, amount-based and surrogate-based targets, and amount-based and genetic-based targets for each species. Letters denote significant differences ($P < 0.05$).'}
 # prepare data for plotting
-multi.spp.PDF <- expand.grid(
-	Prioritisation=unique(multi.spp.SDF$Prioritisation),
-	Metric=unique(multi.spp.SDF$Metric)
-) %>% mutate(
-	letters=toupper(cld(multi.spp.MCP)$mcletters$Letters),
-	letter.height=max(multi.spp.SDF$value, na.rm=TRUE)+(diff(range(multi.spp.SDF$value, na.rm=TRUE))*0.1)
-)
+results.SDF <- results.SDF %>% mutate(
+		Prioritisation=factor(as.character(Prioritisation), levels=c('Amount','Surrogate','Genetic')),
+		Context=factor(as.character(Context), levels=c("single-species (equal costs)", "multi-species (equal costs)", "multi-species (opportunity costs)")),
+		Metric=factor(as.character(Metric), c("Adaptive variation", "Neutral variation"))
+	)
+results.PDF <- results.SDF %>% group_by(
+		Prioritisation, Context, Metric
+	) %>% mutate(
+		letter.height=max(value, na.rm=TRUE)+0.04,
+		Combination=paste0(Prioritisation,'.',Metric,'.',Context)
+	) %>% filter(
+		c(TRUE, rep(FALSE, length(Context)-1))
+	) %>% data.frame() %>% group_by(Context, Metric) %>% mutate(
+		panel.letter=paste0('(',letters[as.integer(Context) + (as.integer(Metric)-1)],')'),
+		panel.letter=c(as.character(panel.letter[1]), rep(NA_character_, length(Context)-1))
+	) %>% data.frame() %>% left_join(
+		data.frame(
+			letter=unname(toupper(cld(full.model.GLHT)$mcletters$Letters)),
+			Combination=as.character(names(toupper(cld(full.model.GLHT)$mcletters$Letters)))
+		) %>% mutate(Combination=as.character(Combination)),
+		by='Combination'
+	) %>% data.frame()
+results.SDF <- results.SDF %>% mutate(
+	Context=sapply(as.character(Context), function(x) {paste0(toupper(substr(x, 1, 1)), substr(x, 2, nchar(x)))}),
+	Context=factor(
+		gsub(' (', '\n(', Context, fixed=TRUE),
+		levels=c("Single-species\n(equal costs)",
+		"Multi-species\n(equal costs)", 
+		"Multi-species\n(opportunity costs)"))
+	)
+results.PDF <- results.PDF %>% mutate(
+	Context=sapply(as.character(Context), function(x) {paste0(toupper(substr(x, 1, 1)), substr(x, 2, nchar(x)))}),
+	Context=factor(
+		gsub(' (', '\n(', Context, fixed=TRUE),
+		levels=c("Single-species\n(equal costs)",
+		"Multi-species\n(equal costs)", 
+		"Multi-species\n(opportunity costs)"))
+	)
 # make plot
 suppressWarnings({
-	ggplot(aes(x=Metric,y=value,fill=Prioritisation),
-		data=multi.spp.SDF) +
-		geom_violin(position=position_dodge(0.9)) +
-		geom_text(aes(x=Metric, y=letter.height,label=letters),
-			data=multi.spp.PDF, position=position_dodge(0.9)) +
-		stat_summary(fun.y=mean, geom='point', size=2,
-			position=position_dodge(0.9)) +
+	ggplot(aes(x=Prioritisation,y=value),
+		data=results.SDF) +
+		geom_boxplot(position=position_dodge(0.9)) +
+		geom_text(aes(x=Prioritisation, y=letter.height, label=letter),
+			data=results.PDF, position=position_dodge(0.9)) +
+		geom_text(aes(x=0.6, y=1.03, label=panel.letter),
+			data=results.PDF) +
 		scale_fill_manual(name='Prioritisation',
 			values=c('grey80','grey50','grey20')) +
 		ylab('Genetic variation secured (%)') +
 		xlab('') +
-		theme_classic()
+		ylim(c(NA, 1.05)) +
+		theme_classic() +
+		theme(strip.background = element_rect(fill='grey20'),
+			strip.text = element_text(color='white'),
+			panel.border = element_rect(color='black', fill=NA),
+			axis.text.x=element_text(angle=45, hjust=1, vjust=1)) +
+		facet_grid(Context ~ Metric)
 })
 ```
 
-```{r, echo=FALSE,  warning=FALSE, message=FALSE, fig.width=8, fig.height=3, fig.cap='The relationship between surrogates and genetic variation secured in prioritizations. The left panel shows the relationship between environmental surrogates and adaptive genetic variation, and the right for geographic surrogates and neutral genetic variation. Transparent gray lines denote trneds for each species, and black lines show general trends across all species.'}
-### prepare data frames for plotting
-## environmental vs adaptive
-# random effects
-env.correlation.RPDF <- expand.grid(Surrogate.target=seq(min(env.correlation.DF$Surrogate.target), max(env.correlation.DF$Surrogate.target), length.out=100),
-	Species=unique(env.correlation.DF$Species))
-env.correlation.RPDF$r.ranef <- fixef(env.correlation.NLMM)[[1]] + ranef(env.correlation.NLMM)$Species$r[env.correlation.RPDF$Species]
-env.correlation.RPDF$fit <- 1 - (1 - 0) * exp(- env.correlation.RPDF$r.ranef * env.correlation.RPDF$Surrogate.target)
-# fixed effects
-env.correlation.FPDF <- data.frame(Surrogate.target=seq(min(env.correlation.DF$Surrogate.target), max(env.correlation.DF$Surrogate.target), length.out=100))
-env.correlation.FPDF$fit <- 1 - (1 - 0) * exp(- fixef(env.correlation.NLMM)[[1]] * env.correlation.FPDF$Surrogate.target)
-
-## geographic vs neutral
-# random effects
-geo.correlation.RPDF <- expand.grid(Surrogate.target=seq(min(geo.correlation.DF$Surrogate.target), max(geo.correlation.DF$Surrogate.target), length.out=100),
-	Species=unique(geo.correlation.DF$Species))
-geo.correlation.RPDF$r.ranef <- fixef(geo.correlation.NLMM)[[1]] + ranef(geo.correlation.NLMM)$Species$r[geo.correlation.RPDF$Species]
-geo.correlation.RPDF$fit <- 1 - (1 - 0) * exp(- geo.correlation.RPDF$r.ranef * geo.correlation.RPDF$Surrogate.target)
-# fixed effects
-geo.correlation.FPDF <- data.frame(Surrogate.target=seq(min(geo.correlation.DF$Surrogate.target), max(geo.correlation.DF$Surrogate.target), length.out=100))
-geo.correlation.FPDF$fit <- 1 - (1 - 0) * exp(- fixef(geo.correlation.NLMM)[[1]] * geo.correlation.FPDF$Surrogate.target)
-
-### make plots
-suppressWarnings({
-	p1 <- ggplot() +
-		geom_point(aes(x=Surrogate.target, y=adaptive.held), data=env.correlation.DF) +
-		geom_line(aes(x=Surrogate.target,y=fit,group=Species), data=env.correlation.RPDF, alpha=0.3) +
-		geom_line(aes(x=Surrogate.target,y=fit), data=env.correlation.FPDF, size=1.5) +
-		xlab('Environmental variation secured (%)') +
-		ylab('Adaptive genetic\nvariation secured (%)') +
-		theme_classic()
-	p2 <- ggplot() +
-		geom_point(aes(x=Surrogate.target, y=neutral.held), data=geo.correlation.DF) +
-		geom_line(aes(x=Surrogate.target,y=fit,group=Species), data=geo.correlation.RPDF, alpha=0.3) +
-		geom_line(aes(x=Surrogate.target,y=fit), data=geo.correlation.FPDF, size=1.5) +
-		xlab('Geographic variation secured (%)') +
-		ylab('Neutral genetic\nvariation secured (%)') +
-		theme_classic()
-	grid.arrange(p1, p2, nrow=1)
-})
-```
- 

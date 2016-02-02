@@ -17,7 +17,6 @@ if (length(args)>0) {
 # load CRAN packages
 suppressMessages(library(stats))
 suppressMessages(library(data.table))
-suppressMessages(library(ggplot2))
 suppressMessages(library(grid))
 suppressMessages(library(gridExtra))
 suppressMessages(library(plotrix))
@@ -40,6 +39,7 @@ suppressMessages(library(maptools))
 suppressMessages(library(RcppTOML))
 suppressMessages(library(adegenet))
 suppressMessages(library(lme4))
+suppressMessages(library(RColorBrewer))
 
 ## load github packages
 # devtools::install_github('paleo13/raspr')
@@ -48,6 +48,9 @@ suppressMessages(library(rapr))
 suppressMessages(library(bayescanr))
 # devtools::install_github('paleo13/structurer')
 suppressMessages(library(structurer))
+# devtools::install_github('paleo13/ggplot2')
+suppressMessages(library(ggplot2))
+
 
 # set pander options
 panderOptions('knitr.auto.asis', FALSE)
