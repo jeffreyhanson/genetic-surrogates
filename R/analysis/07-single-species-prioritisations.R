@@ -1,13 +1,16 @@
 ## load .rda
-session::restore.session('results/.cache/05-format-data-for-prioritisations.rda')
+session::restore.session('results/.cache/06-surrogacy-prioritizations.rda')
 
-## load parameters
-rapr.params.LST <- parseTOML('parameters/rapr.toml')
-gurobi.params.LST <- parseTOML('parameters/gurobi.toml')
-
-### single species analysis
-## generate RapSolved objects
-# amount-based prioritisations
+#### single species analysis
+### generate RapSolved objects
+## amount-based prioritisations
+# prepare cluster object
+clust <- makeCluster(gurobi.params.LST[[MODE]]$Threads, type='SOCK')
+clusterEvalQ(clust, {library(rapr)})
+clusterExport(clust, c('spp.samples.DF','grid.DF','rapr.params.LST',
+	'MODE', 'species.prioritisation', 'ru'))
+registerDoParallel(clust)
+# main analysis
 single.spp.amount.prioritisations <- llply(
 	seq_along(unique(spp.samples.DF$species)),
 	function(x) {
@@ -31,10 +34,13 @@ single.spp.amount.prioritisations <- llply(
 				b=curr.sol.MTX
 			)
 		)
-	}
+	},
+	.parallel=TRUE
 )
+# kill cluster
+clust <- stopCluster(clust)
 
-# surrogate-based priortisations
+## surrogate-based priortisations
 single.spp.surrogate.prioritisations <- llply(
 	seq_along(unique(spp.samples.DF$species)),
 	function(x) {
@@ -52,7 +58,7 @@ single.spp.surrogate.prioritisations <- llply(
 	}
 )
 
-# genetic-based prioritisations
+## genetic-based prioritisations
 single.spp.genetic.prioritisations <- llply(
 	seq_along(unique(spp.samples.DF$species)),
 	function(x) {
@@ -70,6 +76,7 @@ single.spp.genetic.prioritisations <- llply(
 	}
 )
 
+## post-processing
 # combine lists of seperate prioritisations
 single.spp.prioritisations <- llply(
 	seq_along(unique(spp.samples.DF$species)),
@@ -98,4 +105,4 @@ single.spp.DF <- ldply(
 )
 
 ## save .rda
-save.session('results/.cache/06-single-species-prioritisations.rda')
+save.session('results/.cache/07-single-species-prioritisations.rda')

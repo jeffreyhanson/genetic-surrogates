@@ -48,11 +48,15 @@ article/supporting_information.pdf: article/supporting_information.Rmd article/p
 # commands for running analysis
 analysis: results/results.rda
 
-results/results.rda: results/.cache/09-*.rda R/analysis/10-*.R
+results/results.rda: results/.cache/10-*.rda R/analysis/11-*.R
+	R CMD BATCH --no-restore --no-save R/analysis/11-*.R
+	mv *.Rout results/.cache/
+
+results/.cache/10-*.rda: results/.cache/09-*.rda R/analysis/10-*.R
 	R CMD BATCH --no-restore --no-save R/analysis/10-*.R
 	mv *.Rout results/.cache/
 
-results/.cache/09-*.rda: results/.cache/08-*.rda R/analysis/09-*.R
+results/.cache/09-*.rda: results/.cache/08-*.rda R/analysis/09-*.R parameters/rapr.toml parameters/gurobi.toml
 	R CMD BATCH --no-restore --no-save R/analysis/09-*.R
 	mv *.Rout results/.cache/
 

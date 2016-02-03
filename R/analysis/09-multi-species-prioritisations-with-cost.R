@@ -1,5 +1,5 @@
 ## load .rda
-session::restore.session('results/.cache/07-multi-species-prioritisations-no-cost.rda')
+session::restore.session('results/.cache/08-multi-species-prioritisations-no-cost.rda')
 
 ## multispecies analysis
 # make prioritisations
@@ -41,4 +41,4 @@ multi.spp.with.cost.DF <- ldply(
 )
 
 ## save .rda
-save.session('results/.cache/08-multi-species-prioritisations-with-cost.rda')
+save.session('results/.cache/09-multi-species-prioritisations-with-cost.rda')

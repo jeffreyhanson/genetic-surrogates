@@ -1,7 +1,7 @@
 article
 =======
 
-## Main files
+### Main files
 * article.Rmd
 	+ Main R Markdown document for article
 * Endnote_lib.bib
@@ -13,7 +13,7 @@ article
 * reference-style.csl
 	+ Referencing style
 
-## Formatting files
+### Formatting files
 * preamble-latex.tex
 	+ LaTEX file included before contents of article.Rmd
 * postamble-latex.tex
