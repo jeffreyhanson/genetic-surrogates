@@ -3,10 +3,7 @@ Are environmental and geographic effective surrogates for genetic variation in c
 
 Jeffrey O. Hanson, Jonathan R. Rhodes, Cynthia Riginos, Hugh P. Possingham, Richard A. Fuller
 
-^{1}School of Biological Sciences, The University of Queensland, Brisbane, QLD, Australia 
-^{2}School of Geography, Planning and Environmental Management, The University of Queensland, Brisbane, QLD, Australia
-
-Correspondance should be addressed to jeffrey.hanson@uqconnect.edu.au
+Correspondance should be addressed to [jeffrey.hanson@uqconnect.edu.au](mailto:jeffrey.hanson@uqconnect.edu.au)
 
 Source code for the analysis in the manuscript entitled 'Are environmental and geographic effective surrogates for genetic variation in conservation planning?'. 
 
@@ -17,7 +14,7 @@ To rerun all computational analyses, run `make all`
 * article
 	+ files to create article
 * parameters
-	+ TOML files containing parameters used to run analysis.
+	+ TOML files containing parameters used to run analysis
 * data
 	+ raw data used for article
 * R
