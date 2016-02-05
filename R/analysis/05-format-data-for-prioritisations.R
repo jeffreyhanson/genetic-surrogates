@@ -1,5 +1,5 @@
 ## load .rda
-session::restore.session('results/.cache/04-identify-adaptive-loci.rda')
+session::restore.session('results/.cache/04-bayescan-analysis.rda')
 
 # generate attribute spaces for geographic and environmental data
 surrogate.ASL <- llply(

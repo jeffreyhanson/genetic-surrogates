@@ -1,11 +1,10 @@
 ## load .rda
-session::restore.session('results/.cache/03-population-clustering-analysis.rda')
+session::restore.session('results/.cache/03-adegenet-analysis.rda')
 
 ## load parameters
 bayescan.params.LST <- parseTOML('parameters/bayescan.toml')
-nmds.params.LST <- parseTOML('parameters/nmds.toml')
+mds.params.LST <- parseTOML('parameters/nmds.toml')
 
-## analysis
 # subset out loci with polymorphisms that have really low or really high frequency
 spp.BayeScanData.sample.loci.subset.LST <- llply(
 	spp.BayeScanData.sample.subset.LST,
@@ -39,9 +38,9 @@ spp.BayeScan.sample.loci.subset.LST <- llply(
 )
 
 # init snow cluster
-clust <- makeCluster(nmds.params.LST[[MODE]]$threads, type='SOCK')
+clust <- makeCluster(mds.params.LST[[MODE]]$threads, type='SOCK')
 clusterEvalQ(clust, {library(structurer);library(bayescanr);library(plyr)})
-clusterExport(clust, c('MODE', 'spp.BayeScanData.LST', 'spp.BayeScan.sample.loci.subset.LST', 'nmds.params.LST'))
+clusterExport(clust, c('MODE', 'spp.BayeScanData.LST', 'spp.BayeScan.sample.loci.subset.LST', 'mds.params.LST'))
 registerDoParallel(clust)
 
 # run mds
@@ -67,15 +66,15 @@ spp.mds.LST <- llply(
 			# init
 			cat('\tstarting',j,'loci \n')
 			curr.stress <- 1.0
-			curr.k <- nmds.params.LST[[MODE]]$min.k
+			curr.k <- mds.params.LST[[MODE]]$min.k
 			# find mds with suitable k
-			while (curr.stress > nmds.params.LST[[MODE]]$max.stress & curr.k <= nmds.params.LST[[MODE]]$max.k) {
+			while (curr.stress > mds.params.LST[[MODE]]$max.stress & curr.k <= mds.params.LST[[MODE]]$max.k) {
 				cat('\t\tk=',curr.k,'\n')
 				curr.mds <- mds(
 					bayescanr:::loci.subset(curr.spp, curr.spp.type==j),
 					metric='gower',
 					k=curr.k,
-					trymax=nmds.params.LST[[MODE]]$trymax,
+					trymax=mds.params.LST[[MODE]]$trymax,
 					wascores=FALSE,
 					autotransform=FALSE,
 					noshare=FALSE
@@ -131,4 +130,4 @@ for (i in seq_along(unique(spp.samples.DF$species))) {
 grid.PLY@data <- grid.DF
 
 ## save .rda
-save.session('results/.cache/04-identify-adaptive-loci.rda')
+save.session('results/.cache/04-bayescan-analysis.rda')
