@@ -1,0 +1,32 @@
+title = "adegenet parameters"
+
+[debug] 
+	[debug."find.clusters"]
+	threads = 1
+	stat = "BIC"
+	choose.n.clust = false
+	criterion = "diffNgroup"
+	max.n.clust = 10
+	n.iter = 1000
+	n.start = 1000
+	pca.select = "percVar"
+	perc.pca = 90
+	
+	[debug."dapc"]
+	probability.threshold = 0.75
+
+[release]
+	[release."find.clusters"]
+	threads = 21
+	stat = "BIC"
+	choose.n.clust = false
+	criterion = "diffNgroup"
+	max.n.clust = 10
+	n.iter = 1000
+	n.start = 1000
+	pca.select = "percVar"
+	perc.pca = 90
+	
+	[release."dapc"]
+	probability.threshold = 0.75
+

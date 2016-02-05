@@ -2,33 +2,41 @@
 session::restore.session('results/.cache/02-surrogate-data.rda')
 
 ## load parameters
-mclust.params.LST <- parseTOML('parameters/mclust.toml')
+adegenet.params.LST <- parseTOML('parameters/adegenet.toml')
 
-### mclust analyses
+### adegenet analyses
 # run clustering analyses
-clust <- makeCluster(mclust.params.LST[[MODE]]$threads, type='SOCK')
-clusterEvalQ(clust, {library(structurer);library(mclust)})
-clusterExport(clust, c('mclust.params.LST','MODE', 'spp.StructureData.LST', 'spp.samples.DF'))
+## run analyses
+clust <- makeCluster(adegenet.params.LST[[MODE]]$find.clusters$threads, type='SOCK')
+clusterEvalQ(clust, {library(structurer);library(adegenet)})
+clusterExport(clust, c('adegenet.params.LST','MODE', 'spp.StructureData.LST', 'spp.samples.DF'))
 registerDoParallel(clust)
-spp.Mclust.LST <- llply(
+spp.Adegenet.LST <- llply(
 	seq_along(spp.StructureData.LST),
 	.fun=function(i) {
-		# init
-		curr.MTX <- spp.StructureData.LST[[i]]@matrix
-		# impute missing data if apropriate
-		if (any(is.na(curr.MTX)))
-			curr.MTX <- imputeData(curr.MTX)
-		# run cluster analysis
+		# run adegenet analysis
 		return(
-			Mclust(
-				curr.MTX,
-				G=mclust.params.LST[[MODE]]$G
+			find.clusters(
+				suppressWarnings(df2genind(spp.StructureData.LST[[i]]@matrix, ploidy=1, type="PA")),
+				stat = adegenet.params.LST[[MODE]]$find.clusters$stat,
+				choose.n.clust = adegenet.params.LST[[MODE]]$find.clusters$choose.n.clust,
+				criterion = adegenet.params.LST[[MODE]]$find.clusters$criterion,
+				max.n.clust = adegenet.params.LST[[MODE]]$find.clusters$max.n.clust,
+				n.iter = adegenet.params.LST[[MODE]]$find.clusters$n.iter,
+				n.start = adegenet.params.LST[[MODE]]$find.clusters$n.start,
+				pca.select = adegenet.params.LST[[MODE]]$find.clusters$pca.select,
+				perc.pca = adegenet.params.LST[[MODE]]$find.clusters$perc.pca
 			)
 		)
 	},
 	.parallel=TRUE
 )
 clust <- stopCluster(clust)
+
+# run dapc to compute membership probabilities
+
+
+
 
 # assign individuals to populations if they have probability to a single population above threshold
 spp.BayeScanData.sample.subset.LST <- llply(
