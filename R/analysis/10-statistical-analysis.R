@@ -3,10 +3,10 @@ session::restore.session('results/.cache/09-multi-species-prioritisations-with-c
 
 #### Statistical analysis
 ### surrogacy analysis
-mod.form = ~ a - (a - 0) * exp(-r * input)
-mod.fun = deriv(mod.form, namevec=c('a','r'), function.arg=c('input','a','r'))
-env.correlation.NLMM <- nlmer(adaptive.held ~ mod.fun(Surrogate.target,a,r) ~ (a+r)|Species, data=env.correlation.DF, start=c(a=1,r=1), control=nlmerControl(optimizer='bobyqa'))
-geo.correlation.NLMM <- nlmer(neutral.held ~ mod.fun(Surrogate.target,a,r) ~ (a+r)|Species, data=geo.correlation.DF, start=c(a=1,r=1), control=nlmerControl(optimizer='bobyqa'))
+# mod.form = ~ a - (a - 0) * exp(-r * input)
+# mod.fun = deriv(mod.form, namevec=c('a','r'), function.arg=c('input','a','r'))
+# env.correlation.NLMM <- nlmer(adaptive.held ~ mod.fun(Surrogate.target,a,r) ~ (a+r)|Species, data=env.correlation.DF, start=c(a=1,r=1), control=nlmerControl(optimizer='bobyqa'))
+# geo.correlation.NLMM <- nlmer(neutral.held ~ mod.fun(Surrogate.target,a,r) ~ (a+r)|Species, data=geo.correlation.DF, start=c(a=1,r=1), control=nlmerControl(optimizer='bobyqa'))
 
 ### test for differeces among scenarios
 ## prepare data
