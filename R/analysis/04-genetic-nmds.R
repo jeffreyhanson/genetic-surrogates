@@ -1,9 +1,9 @@
 ## load .rda
-session::restore.session('results/.cache/03-adegenet-analysis.rda')
+session::restore.session('results/.cache/03-population-clustering-analysis.rda')
 
 ## load parameters
 bayescan.params.LST <- parseTOML('parameters/bayescan.toml')
-mds.params.LST <- parseTOML('parameters/nmds.toml')
+nmds.params.LST <- parseTOML('parameters/nmds.toml')
 
 # subset out loci with polymorphisms that have really low or really high frequency
 spp.BayeScanData.sample.loci.subset.LST <- llply(
@@ -38,13 +38,13 @@ spp.BayeScan.sample.loci.subset.LST <- llply(
 )
 
 # init snow cluster
-clust <- makeCluster(mds.params.LST[[MODE]]$threads, type='SOCK')
+clust <- makeCluster(nmds.params.LST[[MODE]]$threads, type='SOCK')
 clusterEvalQ(clust, {library(structurer);library(bayescanr);library(plyr)})
-clusterExport(clust, c('MODE', 'spp.BayeScanData.LST', 'spp.BayeScan.sample.loci.subset.LST', 'mds.params.LST'))
+clusterExport(clust, c('MODE', 'spp.BayeScanData.LST', 'spp.BayeScan.sample.loci.subset.LST', 'nmds.params.LST'))
 registerDoParallel(clust)
 
 # run mds
-spp.mds.LST <- llply(
+spp.nmds.LST <- llply(
 	seq_along(spp.BayeScanData.LST),
 	.fun=function(i) {
 		# subset loci for species
@@ -59,30 +59,30 @@ spp.mds.LST <- llply(
 			spp.BayeScan.sample.loci.subset.LST[[i]]@results@summary$type=='adaptive',
 			'adaptive'
 		)
-		# run mds over neutral and/or adaptive loci
+		# run nmds over neutral and/or adaptive loci
 		return(`names<-`(llply(c('adaptive', 'neutral'), function(j) {
 			if (sum(curr.spp.type==j)==0)
 				return(NULL)
 			# init
 			cat('\tstarting',j,'loci \n')
 			curr.stress <- 1.0
-			curr.k <- mds.params.LST[[MODE]]$min.k
+			curr.k <- nmds.params.LST[[MODE]]$min.k
 			# find mds with suitable k
-			while (curr.stress > mds.params.LST[[MODE]]$max.stress & curr.k <= mds.params.LST[[MODE]]$max.k) {
+			while (curr.stress > nmds.params.LST[[MODE]]$max.stress & curr.k <= nmds.params.LST[[MODE]]$max.k) {
 				cat('\t\tk=',curr.k,'\n')
-				curr.mds <- mds(
+				curr.nmds <- mds(
 					bayescanr:::loci.subset(curr.spp, curr.spp.type==j),
 					metric='gower',
 					k=curr.k,
-					trymax=mds.params.LST[[MODE]]$trymax,
+					trymax=nmds.params.LST[[MODE]]$trymax,
 					wascores=FALSE,
 					autotransform=FALSE,
 					noshare=FALSE
 				)
-				curr.stress <- curr.mds$stress
+				curr.stress <- curr.nmds$stress
 				curr.k <- curr.k + 1
 			}
-			return(curr.mds)
+			return(curr.nmds)
 		}), c('adaptive','neutral')))
 	},
 	.parallel=TRUE
@@ -91,16 +91,16 @@ spp.mds.LST <- llply(
 # kill cluster
 clust <- stopCluster(clust)
 
-# store mds rotations for each sample
+# storen mds rotations for each sample
 spp.samples.DF <- ldply(seq_along(unique(spp.samples.DF$species)), .fun=function(i) {
 	x <- filter(spp.samples.DF, species==unique(spp.samples.DF$species)[i])
 	for (j in c('adaptive', 'neutral')) {
-		if (!is.null(spp.mds.LST[[i]][[j]])) {
+		if (!is.null(spp.nmds.LST[[i]][[j]])) {
 			x <- cbind(
 				x,
 				`names<-`(
-					as.data.frame(spp.mds.LST[[i]][[j]]$points),
-					paste0(j,'_d',seq_len(spp.mds.LST[[i]][[j]]$ndim))
+					as.data.frame(spp.nmds.LST[[i]][[j]]$points),
+					paste0(j,'_d',seq_len(spp.nmds.LST[[i]][[j]]$ndim))
 				)
 			)
 		}
@@ -108,12 +108,12 @@ spp.samples.DF <- ldply(seq_along(unique(spp.samples.DF$species)), .fun=function
 	return(x)
 })
 
-# store mds average rotation for each grid
+# store nmds average rotation for each grid
 for (i in seq_along(unique(spp.samples.DF$species))) {
 	for (j in c('adaptive', 'neutral')) {
-		if(!is.null(spp.mds.LST[[i]][[j]])) {
+		if(!is.null(spp.nmds.LST[[i]][[j]])) {
 			curr.sub <- filter(spp.samples.DF, species==unique(spp.samples.DF$species)[i])
-			for (k in seq_len(spp.mds.LST[[i]][[j]]$ndim)) {
+			for (k in seq_len(spp.nmds.LST[[i]][[j]]$ndim)) {
 				curr.vals <- tapply(
 					curr.sub[[paste0(j,'_d',k)]],
 					curr.sub$cell,
@@ -130,4 +130,4 @@ for (i in seq_along(unique(spp.samples.DF$species))) {
 grid.PLY@data <- grid.DF
 
 ## save .rda
-save.session('results/.cache/04-bayescan-analysis.rda')
+save.session('results/.cache/04-genetic-nmds.rda')
