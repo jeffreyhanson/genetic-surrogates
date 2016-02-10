@@ -1,5 +1,9 @@
 ## load .rda
-session::restore.session('results/.cache/06-surrogacy-prioritizations.rda')
+session::restore.session('results/.cache/05-format-data-for-prioritisations.rda')
+
+## load parameters
+rapr.params.LST <- parseTOML('parameters/rapr.toml')
+gurobi.params.LST <- parseTOML('parameters/gurobi.toml')
 
 #### single species analysis
 ### generate RapSolved objects

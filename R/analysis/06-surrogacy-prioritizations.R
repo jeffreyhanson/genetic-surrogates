@@ -22,13 +22,63 @@ env.correlation.prioritisations <- llply(
 					adaptive.genetic.targets=0,
 					neutral.genetic.targets=0,
 					Threads=gurobi.params.LST[[MODE]]$Threads,
-					MIPGap=gurobi.params.LST[[MODE]]$MIPGap
+					MIPGap=gurobi.params.LST[[MODE]]$MIPGap,
+					NumberSolutions=rapr.params.LST[[MODE]]$surrogacy.analysis$surrogate.optimal.replicates
 				)
 			}
 		)
 	},
-	.progress='text'
+	.progress='text',
+	.parallel=FALSE
 )
+
+cat("starting random prioritizations for the environmental surrogate prioritizations \n")
+clust <- makeCluster(gurobi.params.LST[[MODE]]$Threads, type='SOCK')
+clusterEvalQ(clust, {library(rapr)})
+clusterExport(clust, c('spp.samples.DF','grid.DF','rapr.params.LST',
+	'MODE', 'species.prioritisation', 'ru', 'env.correlation.prioritisations'))
+registerDoParallel(clust)
+env.random.prioritisations <- llply(
+	seq_along(unique(spp.samples.DF$species)),
+	function(i) {
+		llply(
+			seq_along(rapr.params.LST[[MODE]]$surrogacy.analysis$surrogate.target),
+			function(j) {
+				# extract number of planning units
+				curr.optim_n <- table(rowSums(env.correlation.prioritisations[[i]][[j]]@results@selections))
+				curr.optim_p <- curr.optim_n / sum(curr.optim_n)
+				# identify which planning units are occupied by the species
+				curr.pu <- which(grid.DF[[unique(spp.samples.DF$species)[[i]]]]==1)
+				zeros <- rep(0, length=nrow(grid.DF))
+				# generate portfolio of random selections
+				curr.random_n <- as.numeric(sample(
+					names(curr.optim_n),
+					size=rapr.params.LST[[MODE]]$surrogacy.analysis$surrogate.random.replicates,
+					replace=TRUE, prob=as.numeric(curr.optim_p)
+				))
+				curr.sol.MTX<-t(sapply(
+					curr.random_n,
+					function(n) {replace(zeros, sample(x=curr.pu, size=n), rep(1, n))}
+				))
+				# generate RapSolved object
+				species.prioritisation(
+					x=spp.subset(ru, i),
+					amount.targets=0.0001,
+					env.surrogate.targets=0,
+					geo.surrogate.targets=0,
+					adaptive.genetic.targets=0,
+					neutral.genetic.targets=0,
+					b=curr.sol.MTX
+				)
+			}
+		)
+	},
+	.progress='text',
+	.parallel=TRUE
+)
+# kill cluster
+clust <- stopCluster(clust)
+
 
 cat("starting geographic surrogacy prioritizations\n")
 geo.correlation.prioritisations <- llply(
@@ -45,21 +95,85 @@ geo.correlation.prioritisations <- llply(
 					adaptive.genetic.targets=0,
 					neutral.genetic.targets=0,
 					Threads=gurobi.params.LST[[MODE]]$Threads,
-					MIPGap=gurobi.params.LST[[MODE]]$MIPGap
+					MIPGap=gurobi.params.LST[[MODE]]$MIPGap,
+					NumberSolutions=rapr.params.LST[[MODE]]$surrogacy.analysis$surrogate.optimal.replicates
 				)
 			}
 		)
 	},
-	.progress='text'
+	.progress='text',
+	.parallel=FALSE
 )
+
+cat("starting random prioritizations for the geographic surrogate prioritizations \n")
+clust <- makeCluster(gurobi.params.LST[[MODE]]$Threads, type='SOCK')
+clusterEvalQ(clust, {library(rapr)})
+clusterExport(clust, c('spp.samples.DF','grid.DF','rapr.params.LST',
+	'MODE', 'species.prioritisation', 'ru', 'geo.correlation.prioritisations'))
+registerDoParallel(clust)
+geo.random.prioritisations <- llply(
+	seq_along(unique(spp.samples.DF$species)),
+	function(i) {
+		llply(
+			seq_along(rapr.params.LST[[MODE]]$surrogacy.analysis$surrogate.target),
+			function(j) {
+				# extract number of planning units
+				curr.optim_n <- table(rowSums(geo.correlation.prioritisations[[i]][[j]]@results@selections))
+				curr.optim_p <- curr.optim_n / sum(curr.optim_n)
+				# identify which planning units are occupied by the species
+				curr.pu <- which(grid.DF[[unique(spp.samples.DF$species)[[i]]]]==1)
+				zeros <- rep(0, length=nrow(grid.DF))
+				# generate portfolio of random selections
+				curr.random_n <- as.numeric(sample(
+					names(curr.optim_n),
+					size=rapr.params.LST[[MODE]]$surrogacy.analysis$surrogate.random.replicates,
+					replace=TRUE, prob=as.numeric(curr.optim_p)
+				))
+				curr.sol.MTX<-t(sapply(
+					curr.random_n,
+					function(n) {replace(zeros, sample(x=curr.pu, size=n), rep(1, n))}
+				))
+				# generate RapSolved object
+				species.prioritisation(
+					x=spp.subset(ru, i),
+					amount.targets=0.01,
+					env.surrogate.targets=0,
+					geo.surrogate.targets=0,
+					adaptive.genetic.targets=0,
+					neutral.genetic.targets=0,
+					b=curr.sol.MTX
+				)
+			}
+		)
+	},
+	.progress='text',
+	.parallel=TRUE
+)
+# kill cluster
+clust <- stopCluster(clust)
 
 # extract results
 env.correlation.DF <- ldply(
 	seq_along(env.correlation.prioritisations), 
 	function(i) {
 		mutate(
-			ldply(env.correlation.prioritisations[[i]], extractResults),
-			Surrogate.target=rapr.params.LST[[MODE]]$surrogacy.analysis$surrogate.target
+			rbind(
+				mutate(
+					ldply(env.correlation.prioritisations[[i]], extractResults),
+					Surrogate.target=rapr.params.LST[[MODE]]$surrogacy.analysis$surrogate.target,
+					Method='Optimal'
+				),
+				mutate(
+					ldply(env.random.prioritisations[[i]], extractResults),
+					Surrogate.target=rep(
+						rapr.params.LST[[MODE]]$surrogacy.analysis$surrogate.target,
+						each=rapr.params.LST[[MODE]]$surrogacy.analysis$surrogate.random.replicates
+					),
+					Method='Random'
+				)
+			),
+			Type='Environmental',
+			genetic.held=adaptive.held
 		)
 	}
 )
@@ -68,11 +182,28 @@ geo.correlation.DF <- ldply(
 	seq_along(geo.correlation.prioritisations), 
 	function(i) {
 		mutate(
-			ldply(geo.correlation.prioritisations[[i]], extractResults),
-			Surrogate.target=rapr.params.LST[[MODE]]$surrogacy.analysis$surrogate.target
+			rbind(
+				mutate(
+					ldply(geo.correlation.prioritisations[[i]], extractResults),
+					Surrogate.target=rapr.params.LST[[MODE]]$surrogacy.analysis$surrogate.target,
+					Method='Optimal'
+					),
+				mutate(
+					ldply(geo.random.prioritisations[[i]], extractResults),
+					Surrogate.target=rep(
+						rapr.params.LST[[MODE]]$surrogacy.analysis$surrogate.target,
+						each=rapr.params.LST[[MODE]]$surrogacy.analysis$surrogate.random.replicates
+					),
+					Method='Random'
+				)
+			),
+			Type='Geographic',
+			genetic.held=neutral.held
 		)
 	}
 )
+
+correlation.DF <- rbind(env.correlation.DF, geo.correlation.DF)
 
 ## save .rda
 save.session('results/.cache/06-surrogacy-prioritizations.rda')

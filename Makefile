@@ -52,19 +52,19 @@ results/results.rda: results/.cache/10-*.rda R/analysis/11-*.R
 	R CMD BATCH --no-restore --no-save R/analysis/11-*.R
 	mv *.Rout results/.cache/
 
-results/.cache/10-*.rda: results/.cache/09-*.rda R/analysis/10-*.R
+results/.cache/10-*.rda: results/.cache/06-*.rda results/.cache/07-*.rda results/.cache/08-*.rda results/.cache/09-*.rda R/analysis/10-*.R
 	R CMD BATCH --no-restore --no-save R/analysis/10-*.R
 	mv *.Rout results/.cache/
 
-results/.cache/09-*.rda: results/.cache/08-*.rda R/analysis/09-*.R parameters/rapr.toml parameters/gurobi.toml
+results/.cache/09-*.rda: results/.cache/05-*.rda R/analysis/09-*.R parameters/rapr.toml parameters/gurobi.toml
 	R CMD BATCH --no-restore --no-save R/analysis/09-*.R
 	mv *.Rout results/.cache/
 
-results/.cache/08-*.rda: results/.cache/07-*.rda R/analysis/08-*.R parameters/rapr.toml parameters/gurobi.toml
+results/.cache/08-*.rda: results/.cache/05-*.rda R/analysis/08-*.R parameters/rapr.toml parameters/gurobi.toml
 	R CMD BATCH --no-restore --no-save R/analysis/08-*.R
 	mv *.Rout results/.cache/
 
-results/.cache/07-*.rda: results/.cache/06-*.rda R/analysis/07-*.R parameters/rapr.toml parameters/gurobi.toml
+results/.cache/07-*.rda: results/.cache/05-*.rda R/analysis/07-*.R parameters/rapr.toml parameters/gurobi.toml
 	R CMD BATCH --no-restore --no-save R/analysis/07-*.R
 	mv *.Rout results/.cache/
 
