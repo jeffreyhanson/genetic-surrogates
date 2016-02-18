@@ -80,7 +80,7 @@ results/.cache/04-*.rda: results/.cache/03-*.rda R/analysis/04-*.R parameters/ba
 	R CMD BATCH --no-restore --no-save R/analysis/04-*.R
 	mv *.Rout results/.cache/
 
-results/.cache/03-*.rda: results/.cache/02-*.rda R/analysis/03-*.R parameters/adegenet.toml
+results/.cache/03-*.rda: results/.cache/02-*.rda R/analysis/03-*.R parameters/mclust.toml parameters/nmds.toml
 	R CMD BATCH --no-restore --no-save R/analysis/03-*.R
 	mv *.Rout results/.cache/
 

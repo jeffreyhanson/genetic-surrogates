@@ -11,12 +11,12 @@ correlation.DF$Surrogate.target <- as.factor(correlation.DF$Surrogate.target)
 correlation.DF$Surrogate.target.Method.Type <- with(correlation.DF, interaction(Surrogate.target, Method, Type))
 
 # fit models
-full.correlation.GLMM <- glmer(genetic.held ~ Surrogate.target*Method*Type + (Surrogate.target + Method + Type|Species), data=correlation.DF, family='binomial')
+full.correlation.GLMM <- glmer(genetic.held ~ Surrogate.target*Method*Type + (1|Species), data=correlation.DF, family='binomial')
 sub.correlation.GLMM <- drop1(full.correlation.GLMM, test='Chisq', scale=~.)
-null.correlation.GLMM <- glmer(genetic.held ~ 1 + (1|Species), data=env.correlation.DF, family='binomial')
+null.correlation.GLMM <- glmer(genetic.held ~ 1 + (1|Species), data=correlation.DF, family='binomial')
 
 # posthoc analysis
-posthoc.correlation.GLMM <- glmer(genetic.held ~ Surrogate.target.Method.Type + (Surrogate.target.Method.Type|Species), data=correlation.DF, family='binomial')
+posthoc.correlation.GLMM <- glmer(genetic.held ~ Surrogate.target.Method.Type + (1|Species), data=correlation.DF)
 posthoc.correlation.GLHT <- summary(
 	glht(posthoc.correlation.GLMM,
 		linfct=mcp(Surrogate.target.Method.Type='Tukey')),

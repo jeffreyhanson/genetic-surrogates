@@ -73,7 +73,6 @@ env.random.prioritisations <- llply(
 			}
 		)
 	},
-	.progress='text',
 	.parallel=TRUE
 )
 # kill cluster
@@ -146,7 +145,6 @@ geo.random.prioritisations <- llply(
 			}
 		)
 	},
-	.progress='text',
 	.parallel=TRUE
 )
 # kill cluster
@@ -160,7 +158,10 @@ env.correlation.DF <- ldply(
 			rbind(
 				mutate(
 					ldply(env.correlation.prioritisations[[i]], extractResults),
-					Surrogate.target=rapr.params.LST[[MODE]]$surrogacy.analysis$surrogate.target,
+					Surrogate.target=rep(
+						rapr.params.LST[[MODE]]$surrogacy.analysis$surrogate.target,
+						each=rapr.params.LST[[MODE]]$surrogacy.analysis$surrogate.optimal.replicates
+					),
 					Method='Optimal'
 				),
 				mutate(
@@ -185,7 +186,10 @@ geo.correlation.DF <- ldply(
 			rbind(
 				mutate(
 					ldply(geo.correlation.prioritisations[[i]], extractResults),
-					Surrogate.target=rapr.params.LST[[MODE]]$surrogacy.analysis$surrogate.target,
+					Surrogate.target=rep(
+						rapr.params.LST[[MODE]]$surrogacy.analysis$surrogate.target,
+						each=rapr.params.LST[[MODE]]$surrogacy.analysis$surrogate.optimal.replicates
+					),
 					Method='Optimal'
 					),
 				mutate(

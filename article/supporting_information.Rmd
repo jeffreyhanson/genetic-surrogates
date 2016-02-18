@@ -152,39 +152,58 @@ do.call(
 )
 ```
 
-```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.width=9.5, fig.height=10, fig.cap='Relative support ($BIC$) for the number of populations in each species. Each panel denotes a different species. Asterisks indicate the number of populations with the most support (see text for methodological details).'}
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.width=9.5, fig.height=10, fig.cap='Relative support ($BIC$) for the number of populations in each species. Each panel denotes a different species. Each line denotes a different model parametrization. Asterisks indicate the model and number of populations with the most support.'}
 # format data
-bic.buff <- laply(spp.Adegenet.LST, `[[`, 'Kstat') %>%
-	c() %>% range() %>% diff %>% `*`(0.05)
 bic.DF <- ldply(
 	seq_along(unique(spp.samples.DF$species)),
 	.fun=function(i) {
-		data.frame(
-			k=as.numeric(gsub('K=', '', names(spp.Adegenet.LST[[i]]$Kstat), fixed=TRUE)),
-			stat=unname(spp.Adegenet.LST[[i]]$Kstat),
-			best_k=as.numeric(gsub('K=', '', names(spp.Adegenet.LST[[i]]$stat), fixed=TRUE)),
-			best_stat=unname(spp.Adegenet.LST[[i]]$stat) + bic.buff,
-			asterisk_col=c('black',rep('transparent', length(spp.Adegenet.LST[[i]]$Kstat)-1)),
-			Species=gsub('_', ' ', unique(spp.samples.DF$species)[i], fixed=TRUE)
+		curr.MTX <- spp.Mclust.LST[[i]]$mclust$BIC
+		attr(curr.MTX, 'dim') <- c(nrow(curr.MTX), ncol(curr.MTX))
+		attr(curr.MTX, 'dimnames') <- list(
+			seq_len(nrow(curr.MTX)),
+			attr(curr.MTX, 'modelNames')
+		)
+		class(curr.MTX) <- 'matrix'
+		curr.DF <- curr.MTX %>% as.data.frame %>% 
+			mutate(G=attr(curr.MTX, 'G')) %>% 
+			gather(Model,BIC,-G)
+		curr.DF$BIC=curr.DF$BIC*-1
+		return(
+			mutate(
+				curr.DF,
+				Species=gsub('_', ' ', unique(spp.samples.DF$species)[i], fixed=TRUE),
+				best_G=curr.DF[which.min(curr.DF$BIC),'G'][[1]],
+				best_stat=min(curr.DF$BIC,na.rm=TRUE),
+				asterisk_col=c('black', rep(NA_character_, length(Species)-1))
+			)
 		)
 	}
 )
+# define ggplot2 color wheel function
+gg_color_hue <- function(n) {
+	hues <- seq(15, 375, length=n+1)
+	hcl(h=hues, l=65, c=100)[1:n]
+}
 # make plot
 suppressWarnings({
 	ggplot(data=bic.DF) +
-		geom_point(aes(y=stat, x=k)) +
-		geom_point(aes(y=best_stat, x=best_k), size=4, shape=8) +
-		geom_line(aes(y=stat, x=k)) +
+		geom_point(aes(y=BIC, x=G, color=Model)) +
+		geom_line(aes(y=BIC, x=G, color=Model)) +
+		geom_point(aes(y=best_stat, x=best_G), size=4, shape=8) +
 		theme_classic() +
+		scale_y_reverse()+
 		theme(
 			strip.background = element_rect(fill='grey20'),
 			strip.text = element_text(color='white', face='italic', size=20)
 		) +
 		xlab('Number of populations') +
 		ylab('BIC') +
-		facet_wrap(~ Species, ncol=4)
+		scale_linetype_manual(value=rep(c('solid','dashed'),each=7)) +
+		scale_color_manual(value=rep(gg_color_hue(7),2) +
+		facet_wrap(~ Species, ncol=4, scales='free_y')
 })
 ```
+
 
 ```{r, echo=FALSE, fig.width=15, fig.height=14, fig.cap='Distribution of populations. Each panel depicts a different species. Squares denote planning units. Points denote the location of sampled individuals, and their colors denote the distribution of populations. Note that points have been slightly jittered so that individuals in close proximity are visible.'}
 # prepare data
@@ -408,6 +427,45 @@ knitr::kable(
 ```{r, echo=FALSE}
 knitr::kable(
 	format.table(
+		filter(
+			ldply(
+				seq_along(unique(spp.samples.DF$species)), 
+				function(i) {
+					ldply(
+						seq_along(spp.nmds.LST[[i]]),
+						function(j) {
+						rbind(
+							data.frmae(
+								Species=paste0('\\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[i]),'}'),
+								Loci='all',
+								k=spp.Mclust.LST[[i]]$nmds$ndim,
+								Stress=spp.Mclust.LST[[i]]$nmds$stress,
+								Converged=spp.Mclust.LST[[i]]$nmds$converged
+							),
+							data.frame(
+								Species=paste0('\\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[i]),'}'),
+								Loci=names(spp.nmds.LST[[i]])[j],
+								k=ifelse(is.null(spp.nmds.LST[[i]][[j]]), NA_integer_, spp.nmds.LST[[i]][[j]]$ndim),
+								Stress=ifelse(is.null(spp.nmds.LST[[i]][[j]]), NA_real_, spp.nmds.LST[[i]][[j]]$stress),
+								Converged=ifelse(is.null(spp.nmds.LST[[i]][[j]]), NA, spp.nmds.LST[[i]][[j]]$converged)
+							)
+					})
+				}
+			),
+			!is.na(Stress)
+		),
+		omit=c('Loci','Converged')
+	),
+	digits=2,
+	caption='Summary of non-metric multi-dimensional scaling (MDS) analyses on genetic variation for each species. The analyses on all loci were used to transform the binary presence/absence polymorphism data to continuous variables to train Gaussian mixture models and ultimately identify adaptive loci. The analyses on adaptive and neutral loci were used to transform the polymorphism data to identify main gradients of this variation.',
+	col.names=c('Species', 'Loci Type', 'k', 'NMDS Stress', 'Converged'),
+	align=c('l', 'c', 'c', 'c', 'c')
+)
+```
+
+```{r, echo=FALSE}
+knitr::kable(
+	format.table(
 		ldply(
 			seq_along(unique(spp.samples.DF$species)), 
 			function(i) {
@@ -430,35 +488,3 @@ knitr::kable(
 	caption='Loci classifications for each species. Each row denotes a sampled loci for a given species, and the evidence for it being under selection based on outputs from the program \\texttt{Bayescan}.'
 )
 ```
-
-```{r, echo=FALSE}
-knitr::kable(
-	format.table(
-		filter(
-			ldply(
-				seq_along(unique(spp.samples.DF$species)), 
-				function(i) {
-					ldply(
-						seq_along(spp.nmds.LST[[i]]),
-						function(j) {
-						data.frame(
-							Species=paste0('\\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[i]),'}'),
-							Loci=names(spp.nmds.LST[[i]])[j],
-							k=ifelse(is.null(spp.nmds.LST[[i]][[j]]), NA_integer_, spp.nmds.LST[[i]][[j]]$ndim),
-							Stress=ifelse(is.null(spp.nmds.LST[[i]][[j]]), NA_real_, spp.nmds.LST[[i]][[j]]$stress),
-							Converged=ifelse(is.null(spp.nmds.LST[[i]][[j]]), NA, spp.nmds.LST[[i]][[j]]$converged)
-						)
-					})
-				}
-			),
-			!is.na(Stress)
-		),
-		omit=c('Loci','Converged')
-	),
-	digits=2,
-	caption='Summary of non-metric multi-dimensional scaling (MDS) analyses on genetic variation for each species.',
-	col.names=c('Species', 'Loci Type', 'k', 'NMDS Stress', 'Converged'),
-	align=c('l', 'c', 'c', 'c', 'c')
-)
-```
-
