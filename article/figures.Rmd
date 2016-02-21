@@ -16,7 +16,7 @@ output:
 setwd('..')
 
 # load .rda file
-session::restore.session('results/results.rda')
+try(session::restore.session('results/results.rda'))
 
 # set options
 options(error=NULL)
@@ -26,55 +26,43 @@ options(error=NULL)
 
 ```{r, echo=FALSE, fig.width=8, fig.height=3, fig.cap='The relationship between surrogates and genetic variation secured in prioritizations. Panel (a) shows the relationship between environmental surrogates and adaptive genetic variation. Panel (b) shows that for geographic surrogates and neutral genetic variation. Transparent gray lines denote trends for each species, and black lines show general trends across all species.'}
 ### prepare data frames for plotting
-## environmental vs adaptive
-# random effects
-env.correlation.RPDF <- expand.grid(
-	Surrogate.type='Environmental variation',
-	Surrogate.target=seq(min(env.correlation.DF$Surrogate.target), max(env.correlation.DF$Surrogate.target), length.out=100),
-	Species=unique(env.correlation.DF$Species)
-)
-env.correlation.RPDF$a.ranef <- fixef(env.correlation.NLMM)[[1]] + ranef(env.correlation.NLMM)$Species$a[env.correlation.RPDF$Species]
-env.correlation.RPDF$r.ranef <- fixef(env.correlation.NLMM)[[2]] + ranef(env.correlation.NLMM)$Species$r[env.correlation.RPDF$Species]
-env.correlation.RPDF$fit <- env.correlation.RPDF$a.ranef - (env.correlation.RPDF$a.ranef - 0) * exp(- env.correlation.RPDF$r.ranef * env.correlation.RPDF$Surrogate.target)
-# fixed effects
-env.correlation.FPDF <- data.frame(Surrogate.target=seq(min(env.correlation.DF$Surrogate.target), max(env.correlation.DF$Surrogate.target), length.out=100))
-env.correlation.FPDF$fit <- fixef(env.correlation.NLMM)[[1]] - (fixef(env.correlation.NLMM)[[1]] - 0) * exp(- fixef(env.correlation.NLMM)[[2]] * env.correlation.FPDF$Surrogate.target)
-## geographic vs neutral
-# random effects
-geo.correlation.RPDF <- expand.grid(
-	Surrogate.type='Geographic variation',
-	Surrogate.target=seq(min(geo.correlation.DF$Surrogate.target), max(geo.correlation.DF$Surrogate.target), length.out=100),
-	Species=unique(geo.correlation.DF$Species)
-)
-geo.correlation.RPDF$a.ranef <- fixef(geo.correlation.NLMM)[[1]] + ranef(geo.correlation.NLMM)$Species$a[geo.correlation.RPDF$Species]
-geo.correlation.RPDF$r.ranef <- fixef(geo.correlation.NLMM)[[2]] + ranef(geo.correlation.NLMM)$Species$r[geo.correlation.RPDF$Species]
-geo.correlation.RPDF$fit <- geo.correlation.RPDF$a.ranef - (geo.correlation.RPDF$a.ranef - 0) * exp(- geo.correlation.RPDF$r.ranef * geo.correlation.RPDF$Surrogate.target)
-# fixed effects
-geo.correlation.FPDF <- data.frame(Surrogate.target=seq(min(geo.correlation.DF$Surrogate.target), max(geo.correlation.DF$Surrogate.target), length.out=100))
-geo.correlation.FPDF$fit <- fixef(geo.correlation.NLMM)[[1]] - (fixef(geo.correlation.NLMM)[[1]] - 0) * exp(- fixef(geo.correlation.NLMM)[[2]] * geo.correlation.FPDF$Surrogate.target)
+#env.correlation.PDF <- filter(correlation.DF, Type='Environmental')
+#
+#%>% left_join(
+#		data.frame(
+#			letter=unname(toupper(cld(full.model.GLHT)$mcletters$Letters)),
+#			Combination=as.character(names(toupper(cld(full.model.GLHT)$mcletters$Letters)))
+#		) %>% mutate(Combination=as.character(Combination)),
+#		by='Combination'
+#	) %>% data.frame()
 
+
+#geo.correlation.PDF <- filter(correlation.DF, Type='Geographic')
 ### make plots
-suppressWarnings({
-	p1 <- ggplot() +
-		geom_point(aes(x=Surrogate.target, y=adaptive.held), data=env.correlation.DF) +
-		geom_line(aes(x=Surrogate.target,y=fit,group=Species), data=env.correlation.RPDF, alpha=0.3) +
-		geom_line(aes(x=Surrogate.target,y=fit), data=env.correlation.FPDF, size=1.5) +
-		geom_text(aes(x=0.6, y=1.03, label='(a)')) +
-		xlab('Environmental variation secured (%)') +
-		ylab('Adaptive genetic\nvariation secured (%)') +
-		theme_classic()
-	p2 <- ggplot() +
-		geom_point(aes(x=Surrogate.target, y=neutral.held), data=geo.correlation.DF) +
-		geom_line(aes(x=Surrogate.target,y=fit,group=Species), data=geo.correlation.RPDF, alpha=0.3) +
-		geom_line(aes(x=Surrogate.target,y=fit), data=geo.correlation.FPDF, size=1.5) +
-		geom_text(aes(x=0.6, y=1.03, label='(b)')) +
-		xlab('Geographic variation secured (%)') +
-		ylab('Neutral genetic\nvariation secured (%)') +
-		theme_classic()
-	grid.arrange(p1, p2, nrow=1)
-})
-```
+#suppressWarnings({
+#	p1 <- ggplot() +
+#		geom_boxplot(aes(x=Surrogate.target, y=genetic.held, color=Method, group=Method), data=env.correlation.DF) +
+#		geom_text(aes(x=Surrogate.target, y=letter.height, label=letter),
+#			data=results.PDF, position=position_dodge(0.9)) +
+#		geom_text(aes(x=0.6, y=1.03, label='(a)')) +
+#		xlab('Environmental variation secured (%)') +
+#		ylab('Adaptive genetic\nvariation secured (%)') +
+#		theme_classic()
+#	p2 <- ggplot() +
+#		geom_boxplot(aes(x=Surrogate.target, y=neutral.held, color=Method), data=geo.correlation.DF) +
+#		geom_text(aes(x=Surrogate.target, y=letter.height, label=letter),
+#			data=results.PDF, position=position_dodge(0.9)) +
+#		geom_text(aes(x=0.6, y=1.03, label='(b)')) +
+#		xlab('Geographic variation secured (%)') +
+#		ylab('Neutral genetic\nvariation secured (%)') +
+#		theme_classic()
+#	grid.arrange(p1, p2, nrow=1)
+# })
 
+
+plot(1)
+
+```
 
 
 ```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.width=5, fig.height=5, fig.cap='Planning unit selection frequencies. The top row of panels (a, b, c) show single-species prioritizations generated assuming equal costs. The middle row of panels (d, e, f) show multi-species prioritizations generated assuming equal costs. The bottom row of panels (g, h, i) show multi-species generated using opportunity costs. The left column of panels (a, d, g) show prioritizations generated using only amount-based targets. The middle column of panels (b, e, h) show prioritizations generated using amount- and surrogate-based targets. The right column of panels (c, f, i) show prioritizations generated using amount- and genetic-based targets.'}
@@ -168,8 +156,8 @@ results.PDF <- results.SDF %>% group_by(
 		panel.letter=c(as.character(panel.letter[1]), rep(NA_character_, length(Context)-1))
 	) %>% data.frame() %>% left_join(
 		data.frame(
-			letter=unname(toupper(cld(full.model.GLHT)$mcletters$Letters)),
-			Combination=as.character(names(toupper(cld(full.model.GLHT)$mcletters$Letters)))
+			letter=unname(toupper(cld(posthoc.model.GLHT)$mcletters$Letters)),
+			Combination=as.character(names(toupper(cld(posthoc.model.GLHT)$mcletters$Letters)))
 		) %>% mutate(Combination=as.character(Combination)),
 		by='Combination'
 	) %>% data.frame()

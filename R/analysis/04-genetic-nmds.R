@@ -67,12 +67,18 @@ spp.nmds.LST <- llply(
 			cat('\tstarting',j,'loci \n')
 			curr.stress <- 1.0
 			curr.k <- nmds.params.LST[[MODE]]$min.k
+			# construct distance matrix
+			curr.loci <- bayescanr:::loci.subset(curr.spp, curr.spp.type==j)
+			curr.dist.MTX <- daisy(
+				cbind(curr.loci,1),
+				metric='gower',
+				type=list(asymm=seq_len(ncol(curr.loci)+1))
+			)
 			# find mds with suitable k
 			while (curr.stress > nmds.params.LST[[MODE]]$max.stress & curr.k <= nmds.params.LST[[MODE]]$max.k) {
 				cat('\t\tk=',curr.k,'\n')
 				curr.nmds <- mds(
-					bayescanr:::loci.subset(curr.spp, curr.spp.type==j),
-					metric='gower',
+					comm=curr.dist.MTX,
 					k=curr.k,
 					trymax=nmds.params.LST[[MODE]]$trymax,
 					wascores=FALSE,

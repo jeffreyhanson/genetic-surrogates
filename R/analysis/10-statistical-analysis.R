@@ -11,12 +11,12 @@ correlation.DF$Surrogate.target <- as.factor(correlation.DF$Surrogate.target)
 correlation.DF$Surrogate.target.Method.Type <- with(correlation.DF, interaction(Surrogate.target, Method, Type))
 
 # fit models
-full.correlation.GLMM <- glmer(genetic.held ~ Surrogate.target*Method*Type + (1|Species), data=correlation.DF, family='binomial')
+full.correlation.GLMM <- glmer(genetic.held ~ Surrogate.target*Method*Type + (1|Species), data=correlation.DF, family='binomial', nAGQ=20, control=glmerControl(optimizer=c('bobyqa', 'optimx'), optCtrl=list(maxfun=5e+4, method='nlminb', itnmax=1e+4)))
 sub.correlation.GLMM <- drop1(full.correlation.GLMM, test='Chisq', scale=~.)
-null.correlation.GLMM <- glmer(genetic.held ~ 1 + (1|Species), data=correlation.DF, family='binomial')
+null.correlation.GLMM <- glmer(genetic.held ~ 1 + (1|Species), data=correlation.DF, family='binomial', nAGQ=20, control=glmerControl(optimizer=c('bobyqa', 'optimx'), optCtrl=list(maxfun=5e+4, method='nlminb', itnmax=1e+4)))
 
 # posthoc analysis
-posthoc.correlation.GLMM <- glmer(genetic.held ~ Surrogate.target.Method.Type + (1|Species), data=correlation.DF)
+posthoc.correlation.GLMM <- glmer(genetic.held ~ Surrogate.target.Method.Type + (1|Species), family='binomial', data=correlation.DF, nAGQ=20, control=glmerControl(optimizer=c('bobyqa', 'optimx'), optCtrl=list(maxfun=5e+4, method='nlminb', itnmax=1e+4)))
 posthoc.correlation.GLHT <- summary(
 	glht(posthoc.correlation.GLMM,
 		linfct=mcp(Surrogate.target.Method.Type='Tukey')),
@@ -52,8 +52,8 @@ results.SDF <- rbind.fill(list(single.spp.SDF, multi.spp.SDF, multi.spp.with.cos
 ## main analysis
 # model
 full.model.GLMM <- glmer(value ~ Prioritisation*Metric*Context + (1 | Species), family='binomial', data=results.SDF, nAGQ=20, control=glmerControl(optimizer=c('bobyqa', 'optimx'), optCtrl=list(maxfun=5e+4, method='nlminb', itnmax=1e+4)))
-min.model.GLMM <- drop1(full.model1.GLMM, scale=~., test='LRT')
-null.model.GLMM <- update(full.model.GLMM, .~ 1)
+min.model.GLMM <- drop1(full.model.GLMM, scale=~., test='Chisq')
+null.model.GLMM <- update(full.model.GLMM, .~ 1 + (1|Species))
 
 ## post-hoc
 posthoc.model.GLMM <- glmer(value ~ Prioritisation.Metric.Context + (1 | Species), family='binomial', data=results.SDF, nAGQ=20, control=glmerControl(optimizer=c('bobyqa', 'optimx'), optCtrl=list(maxfun=5e+4, method='nlminb', itnmax=1e+4)))

@@ -13,15 +13,20 @@ clusterExport(clust, c('nmds.params.LST','mclust.params.LST','MODE', 'spp.Struct
 registerDoParallel(clust)
 spp.Mclust.LST <- llply(
 	seq_along(spp.StructureData.LST),
-	.fun=function(i) {
+		.fun=function(i) {
+		## construct distance matrix
+		curr.dist.MTX <- daisy(
+			cbind(spp.StructureData.LST[[i]]@matrix,1),
+			metric='gower',
+			type=list(asymm=seq_len(ncol(spp.StructureData.LST[[i]]@matrix)+1))
+		)
 		## run mds with acceptable stress
 		curr.stress <- 1.0
 		curr.k <- nmds.params.LST[[MODE]]$min.k
 		# find mds with suitable k
 		while (curr.stress > nmds.params.LST[[MODE]]$max.stress & curr.k <= nmds.params.LST[[MODE]]$max.k) {
 			curr.nmds <- metaMDS(
-				spp.StructureData.LST[[i]]@matrix,
-				metric='gower',
+				comm=curr.dist.MTX,
 				k=curr.k,
 				trymax=nmds.params.LST[[MODE]]$trymax,
 				wascores=FALSE,

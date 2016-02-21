@@ -19,7 +19,7 @@ All data and code is stored in an online repository (\url{www.github.com/paleo13
 setwd('..')
 
 # load .rda file
-session::restore.session('results/results.rda')
+try(session::restore.session('results/results.rda'))
 
 # set options
 options(error=NULL)
@@ -187,8 +187,7 @@ gg_color_hue <- function(n) {
 # make plot
 suppressWarnings({
 	ggplot(data=bic.DF) +
-		geom_point(aes(y=BIC, x=G, color=Model)) +
-		geom_line(aes(y=BIC, x=G, color=Model)) +
+		geom_line(aes(y=BIC, x=G, color=Model, linetype=Model)) +
 		geom_point(aes(y=best_stat, x=best_G), size=4, shape=8) +
 		theme_classic() +
 		scale_y_reverse()+
@@ -198,8 +197,8 @@ suppressWarnings({
 		) +
 		xlab('Number of populations') +
 		ylab('BIC') +
-		scale_linetype_manual(value=rep(c('solid','dashed'),each=7)) +
-		scale_color_manual(value=rep(gg_color_hue(7),2) +
+		scale_linetype_manual(values=rep(c('solid','dashed'),each=7)) +
+		scale_color_manual(values=rep(gg_color_hue(7),2)) +
 		facet_wrap(~ Species, ncol=4, scales='free_y')
 })
 ```
@@ -215,7 +214,7 @@ pop.DF <- llply(
 			species==unique(spp.samples.DF$species)[i]
 		) %>% mutate(
 			species=gsub('_', ' ', unique(spp.samples.DF$species)[i], fixed=TRUE),
-			population=spp.Adegenet.LST[[i]]$grp
+			population=apply(spp.Mclust.LST[[i]]$mclust$z, 1, which.max)
 		)
 	}
 ) %>% do.call(what=rbind)
@@ -242,6 +241,11 @@ ggplot() +
 	) +
 	facet_wrap(~ species, ncol=4)
 ```
+
+```{r, echo=FALSE, fig.width=15, fig.height=14, fig.cap='Population membership probabilities. Each panel depicts a different species. Each vertical bar represents a different individual, and colors show the probability that it belongs to different populations. This type of plot is also known as a \texttt{Structure} plot.'}
+plot(1)
+```
+
 
 ```{r, echo=FALSE}
 plot.spp.nmds <- function(i) {
@@ -435,7 +439,7 @@ knitr::kable(
 						seq_along(spp.nmds.LST[[i]]),
 						function(j) {
 						rbind(
-							data.frmae(
+							data.frame(
 								Species=paste0('\\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[i]),'}'),
 								Loci='all',
 								k=spp.Mclust.LST[[i]]$nmds$ndim,
@@ -449,6 +453,7 @@ knitr::kable(
 								Stress=ifelse(is.null(spp.nmds.LST[[i]][[j]]), NA_real_, spp.nmds.LST[[i]][[j]]$stress),
 								Converged=ifelse(is.null(spp.nmds.LST[[i]][[j]]), NA, spp.nmds.LST[[i]][[j]]$converged)
 							)
+						)
 					})
 				}
 			),
