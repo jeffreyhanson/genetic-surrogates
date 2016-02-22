@@ -19,7 +19,7 @@ spp.Mclust.LST <- llply(
 			bayescanr::BayeScanData(
 				spp.StructureData.LST[[i]]@matrix,
 				primers=spp.StructureData.LST[[i]]@loci.names,
-				populations=rep(1, length(spp.StructureData.LST[[i]]@matrix)),
+				populations=rep('1', length(spp.StructureData.LST[[i]]@matrix)),
 				labels=spp.StructureData.LST[[i]]@sample.names
 			),
 			metric='gower',
