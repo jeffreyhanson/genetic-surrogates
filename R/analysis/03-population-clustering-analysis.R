@@ -15,8 +15,13 @@ spp.Mclust.LST <- llply(
 	seq_along(spp.StructureData.LST),
 		.fun=function(i) {
 		## generate ordination
-		curr.nmds <- nmds(
-			bayescanr::BayeScanData(spp.StructureData.LST[[i]]@matrix),
+		curr.nmds <- bayescanr::nmds(
+			bayescanr::BayeScanData(
+				spp.StructureData.LST[[i]]@matrix,
+				primers=spp.StructureData.LST[[i]]@loci.names,
+				populations=rep(1, length(spp.StructureData.LST[[i]]@matrix)),
+				labels=spp.StructureData.LST[[i]]@sample.names
+			),
 			metric='gower',
 			max.stress=nmds.params.LST[[MODE]]$max.stress,
 			min.k=nmds.params.LST[[MODE]]$min.k,

@@ -65,7 +65,7 @@ spp.nmds.LST <- llply(
 				return(NULL)
 			# return nmds
 			return(
-				curr.nmds <- nmds(
+				curr.nmds <- bayescanr::nmds(
 					bayescanr:::loci.subset(curr.spp, curr.spp.type==j),
 					metric='gower',
 					max.stress=nmds.params.LST[[MODE]]$max.stress,
