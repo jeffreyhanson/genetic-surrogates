@@ -41,6 +41,7 @@ suppressMessages(library(optimx))
 suppressMessages(library(lme4))
 suppressMessages(library(RColorBrewer))
 suppressMessages(library(mclust))
+suppressMessages(library(cluster))
 
 ## load github packages
 # devtools::install_github('paleo13/raspr')

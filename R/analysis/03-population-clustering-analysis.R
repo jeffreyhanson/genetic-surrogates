@@ -8,34 +8,21 @@ nmds.params.LST <- parseTOML('parameters/nmds.toml')
 ### mclust analyses
 ## run analyses
 clust <- makeCluster(mclust.params.LST[[MODE]]$threads, type='SOCK')
-clusterEvalQ(clust, {library(structurer);library(mclust);library(vegan)})
+clusterEvalQ(clust, {library(structurer);library(cluster);library(mclust);library(vegan)})
 clusterExport(clust, c('nmds.params.LST','mclust.params.LST','MODE', 'spp.StructureData.LST', 'spp.samples.DF'))
 registerDoParallel(clust)
 spp.Mclust.LST <- llply(
 	seq_along(spp.StructureData.LST),
 		.fun=function(i) {
-		## construct distance matrix
-		curr.dist.MTX <- daisy(
-			cbind(spp.StructureData.LST[[i]]@matrix,1),
+		## generate ordination
+		curr.nmds <- nmds(
+			bayescanr::BayeScanData(spp.StructureData.LST[[i]]@matrix),
 			metric='gower',
-			type=list(asymm=seq_len(ncol(spp.StructureData.LST[[i]]@matrix)+1))
+			max.stress=nmds.params.LST[[MODE]]$max.stress,
+			min.k=nmds.params.LST[[MODE]]$min.k,
+			max.k=nmds.params.LST[[MODE]]$max.k,
+			trymax=nmds.params.LST[[MODE]]$trymax
 		)
-		## run mds with acceptable stress
-		curr.stress <- 1.0
-		curr.k <- nmds.params.LST[[MODE]]$min.k
-		# find mds with suitable k
-		while (curr.stress > nmds.params.LST[[MODE]]$max.stress & curr.k <= nmds.params.LST[[MODE]]$max.k) {
-			curr.nmds <- metaMDS(
-				comm=curr.dist.MTX,
-				k=curr.k,
-				trymax=nmds.params.LST[[MODE]]$trymax,
-				wascores=FALSE,
-				autotransform=FALSE,
-				noshare=FALSE
-			)
-			curr.stress <- curr.nmds$stress
-			curr.k <- curr.k + 1
-		}
 		## run mclust
 		return(
 			list(

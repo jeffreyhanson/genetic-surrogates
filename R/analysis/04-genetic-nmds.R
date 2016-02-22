@@ -39,7 +39,7 @@ spp.BayeScan.sample.loci.subset.LST <- llply(
 
 # init snow cluster
 clust <- makeCluster(nmds.params.LST[[MODE]]$threads, type='SOCK')
-clusterEvalQ(clust, {library(structurer);library(bayescanr);library(plyr)})
+clusterEvalQ(clust, {library(structurer);library(bayescanr);library(cluster);library(plyr);library(vegan)})
 clusterExport(clust, c('MODE', 'spp.BayeScanData.LST', 'spp.BayeScan.sample.loci.subset.LST', 'nmds.params.LST'))
 registerDoParallel(clust)
 
@@ -63,32 +63,17 @@ spp.nmds.LST <- llply(
 		return(`names<-`(llply(c('adaptive', 'neutral'), function(j) {
 			if (sum(curr.spp.type==j)==0)
 				return(NULL)
-			# init
-			cat('\tstarting',j,'loci \n')
-			curr.stress <- 1.0
-			curr.k <- nmds.params.LST[[MODE]]$min.k
-			# construct distance matrix
-			curr.loci <- bayescanr:::loci.subset(curr.spp, curr.spp.type==j)
-			curr.dist.MTX <- daisy(
-				cbind(curr.loci,1),
-				metric='gower',
-				type=list(asymm=seq_len(ncol(curr.loci)+1))
-			)
-			# find mds with suitable k
-			while (curr.stress > nmds.params.LST[[MODE]]$max.stress & curr.k <= nmds.params.LST[[MODE]]$max.k) {
-				cat('\t\tk=',curr.k,'\n')
-				curr.nmds <- mds(
-					comm=curr.dist.MTX,
-					k=curr.k,
-					trymax=nmds.params.LST[[MODE]]$trymax,
-					wascores=FALSE,
-					autotransform=FALSE,
-					noshare=FALSE
+			# return nmds
+			return(
+				curr.nmds <- nmds(
+					bayescanr:::loci.subset(curr.spp, curr.spp.type==j),
+					metric='gower',
+					max.stress=nmds.params.LST[[MODE]]$max.stress,
+					min.k=nmds.params.LST[[MODE]]$min.k,
+					max.k=nmds.params.LST[[MODE]]$max.k,
+					trymax=nmds.params.LST[[MODE]]$trymax
 				)
-				curr.stress <- curr.nmds$stress
-				curr.k <- curr.k + 1
-			}
-			return(curr.nmds)
+			)
 		}), c('adaptive','neutral')))
 	},
 	.parallel=TRUE
