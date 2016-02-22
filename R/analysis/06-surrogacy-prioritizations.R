@@ -18,9 +18,9 @@ env.correlation.prioritisations <- llply(
 					x=spp.subset(ru, i),
 					amount.targets=0,
 					env.surrogate.targets=j,
-					geo.surrogate.targets=0,
-					adaptive.genetic.targets=0,
-					neutral.genetic.targets=0,
+					geo.surrogate.targets=NA,
+					adaptive.genetic.targets=NA,
+					neutral.genetic.targets=NA,
 					Threads=gurobi.params.LST[[MODE]]$Threads,
 					MIPGap=gurobi.params.LST[[MODE]]$MIPGap,
 					NumberSolutions=rapr.params.LST[[MODE]]$surrogacy.analysis$surrogate.optimal.replicates
@@ -64,10 +64,10 @@ env.random.prioritisations <- llply(
 				species.prioritisation(
 					x=spp.subset(ru, i),
 					amount.targets=0.0001,
-					env.surrogate.targets=0,
-					geo.surrogate.targets=0,
-					adaptive.genetic.targets=0,
-					neutral.genetic.targets=0,
+					env.surrogate.targets=NA,
+					geo.surrogate.targets=NA,
+					adaptive.genetic.targets=NA,
+					neutral.genetic.targets=NA,
 					b=curr.sol.MTX
 				)
 			}
@@ -89,10 +89,10 @@ geo.correlation.prioritisations <- llply(
 				species.prioritisation(
 					x=spp.subset(ru, i),
 					amount.targets=0,
-					env.surrogate.targets=0,
+					env.surrogate.targets=NA,
 					geo.surrogate.targets=j,
-					adaptive.genetic.targets=0,
-					neutral.genetic.targets=0,
+					adaptive.genetic.targets=NA,
+					neutral.genetic.targets=NA,
 					Threads=gurobi.params.LST[[MODE]]$Threads,
 					MIPGap=gurobi.params.LST[[MODE]]$MIPGap,
 					NumberSolutions=rapr.params.LST[[MODE]]$surrogacy.analysis$surrogate.optimal.replicates
@@ -135,11 +135,11 @@ geo.random.prioritisations <- llply(
 				# generate RapSolved object
 				species.prioritisation(
 					x=spp.subset(ru, i),
-					amount.targets=0.01,
-					env.surrogate.targets=0,
-					geo.surrogate.targets=0,
-					adaptive.genetic.targets=0,
-					neutral.genetic.targets=0,
+					amount.targets=0.0001,
+					env.surrogate.targets=NA,
+					geo.surrogate.targets=NA,
+					adaptive.genetic.targets=NA,
+					neutral.genetic.targets=NA,
 					b=curr.sol.MTX
 				)
 			}

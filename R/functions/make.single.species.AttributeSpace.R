@@ -23,8 +23,8 @@ make.single.species.AttributeSpace <- function(site.data,species.data,n.species,
 				replicate(
 					n.species,
 					DemandPoints(
-						points=SimplePoints(coords=matrix(-9999, ncol=ncol(site.data))),
-						weights=rep(-9999)
+						points=SimplePoints(coords=matrix(rep(c(-9999, -9998), each=ncol(site.data)), byrow=TRUE, ncol=ncol(site.data))),
+						weights=c(1, 1)
 					)
 				),
 				spp.pos,

@@ -24,18 +24,26 @@ spp.sample.PTS <- SpatialPointsDataFrame(
 )
 spp.sample.PPTS <- spTransform(spp.sample.PTS, europeEA)
 
-## extract geographic data
+## geographic data
+# extract it
 centroids.DF <- grid.PPLY %>%
 	spTransform(europeED) %>%
 	gCentroid(byid=TRUE) %>%
 	slot('coords') %>%
 	as.data.frame() %>%
 	`names<-`(paste0('geo_d',1:2))
+# zscore it
+centroids.DF <- sweep(centroids.DF, 2, MARGIN=2, FUN='-', colMeans(centroids.DF))
+centroids.DF <- sweep(centroids.DF, 2, MARGIN=2, FUN='/', apply(centroids.DF, 2, sd))
+# append to main data.frame
 grid.DF <- cbind(grid.DF, centroids.DF)
 
 ## extract climatic data
 # load climatic data
 bioclim.STK <- stack('data/BioClim_variables/bioclim_pca.tif')
+# zscore layers --note that they already have unit sd
+bioclim.means <- cellStats(bioclim.STK, 'mean')
+bioclim.STK <- (bioclim.STK - bioclim.means)
 # extract mean for each cell for each principle component
 extract.DF <- grid.PPLY %>% rasterize(bioclim.STK, field='id') %>% 
 	zonal(x=bioclim.STK) %>%  as.data.frame() %>% select(-1) %>%

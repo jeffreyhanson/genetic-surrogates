@@ -9,12 +9,12 @@ gurobi.params.LST <- parseTOML('parameters/gurobi.toml')
 # make prioritisations
 multi.spp.prioritisations <- llply(
 	list(
-		list(rapr.params.LST[[MODE]]$multi.species$amount.target,0,0,
+		list(rapr.params.LST[[MODE]]$multi.species$amount.target,NA,NA,
 			rapr.params.LST[[MODE]]$multi.species$amount.replicates),
 		list(rapr.params.LST[[MODE]]$multi.species$amount.target,
-			rapr.params.LST[[MODE]]$multi.species$surrogate.target,0,
+			rapr.params.LST[[MODE]]$multi.species$surrogate.target,NA,
 			rapr.params.LST[[MODE]]$multi.species$surrogate.replicates), 
-		list(rapr.params.LST[[MODE]]$multi.species$amount.target,0,
+		list(rapr.params.LST[[MODE]]$multi.species$amount.target,NA,
 			rapr.params.LST[[MODE]]$multi.species$genetic.target,
 			rapr.params.LST[[MODE]]$multi.species$genetic.replicates)
 	), 

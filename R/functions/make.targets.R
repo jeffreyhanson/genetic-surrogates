@@ -34,13 +34,13 @@ make.targets <- function(
 	# adaptive spaces
 	adaptive.targets.DF <- ldply(seq_along(adaptive.spaces), .fun=function(i) {
 		# get species position
-		spp.pos <- which(sapply(adaptive.spaces[[i]]@demand.points, function(y) {y@weights[1]})>0)
+		spp.pos <- which(sapply(adaptive.spaces[[i]]@demand.points, function(y) {length(y@weights)})>2)
 		# return data.frame
 		spp.DF <- data.frame(
 			species=seq_along(species),
 			target=rep(i+2, length(species)),
 			proportion=replace(
-				rep(0, length(species)),
+				rep(NA_real_, length(species)),
 				spp.pos,
 				space.target
 			),
@@ -55,13 +55,13 @@ make.targets <- function(
 	# neutral
 	neutral.targets.DF <- ldply(seq_along(neutral.spaces), .fun=function(i) {
 		# get species position
-		spp.pos <- which(sapply(neutral.spaces[[i]]@demand.points, function(y) {y@weights[1]})>0)
+		spp.pos <- which(sapply(neutral.spaces[[i]]@demand.points, function(y) {length(y@weights)})>2)
 		# return data.frame
 		spp.DF <- data.frame(
 			species=seq_along(species),
 			target=rep(i+length(adaptive.spaces)+2, length(species)),
 			proportion=replace(
-				rep(0, length(species)),
+				rep(NA_real_, length(species)),
 				spp.pos,
 				space.target
 			),

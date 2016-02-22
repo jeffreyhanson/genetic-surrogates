@@ -31,10 +31,10 @@ single.spp.amount.prioritisations <- llply(
 			species.prioritisation(
 				x=spp.subset(ru, x),
 				amount.targets=rapr.params.LST[[MODE]]$single.species$amount.target,
-				env.surrogate.targets=0,
-				geo.surrogate.targets=0,
-				adaptive.genetic.targets=0,
-				neutral.genetic.targets=0,
+				env.surrogate.targets=NA,
+				geo.surrogate.targets=NA,
+				adaptive.genetic.targets=NA,
+				neutral.genetic.targets=NA,
 				b=curr.sol.MTX
 			)
 		)
@@ -53,8 +53,8 @@ single.spp.surrogate.prioritisations <- llply(
 				amount.targets=rapr.params.LST[[MODE]]$single.species$amount.target,
 				env.surrogate.targets=rapr.params.LST[[MODE]]$single.species$surrogate.target,
 				geo.surrogate.targets=rapr.params.LST[[MODE]]$single.species$surrogate.target,
-				adaptive.genetic.targets=0,
-				neutral.genetic.targets=0,
+				adaptive.genetic.targets=NA,
+				neutral.genetic.targets=NA,
 				Threads=gurobi.params.LST[[MODE]]$Threads,
 				MIPGap=gurobi.params.LST[[MODE]]$MIPGap,
 				NumberSolutions=rapr.params.LST[[MODE]]$single.species$surrogate.replicates
@@ -69,8 +69,8 @@ single.spp.genetic.prioritisations <- llply(
 		species.prioritisation(
 				x=spp.subset(ru, x),
 				amount.targets=rapr.params.LST[[MODE]]$single.species$amount.target,
-				env.surrogate.targets=0,
-				geo.surrogate.targets=0,
+				env.surrogate.targets=NA,
+				geo.surrogate.targets=NA,
 				adaptive.genetic.targets=rapr.params.LST[[MODE]]$single.species$genetic.target,
 				neutral.genetic.targets=rapr.params.LST[[MODE]]$single.species$genetic.target,
 				Threads=gurobi.params.LST[[MODE]]$Threads,
