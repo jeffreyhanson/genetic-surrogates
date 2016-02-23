@@ -58,7 +58,7 @@ spp.samples.DF <- ldply(
 		by='cell'
 )
 
-## remove indidivduals that are all NAs
+## remove individuals that are all NAs
 for (i in seq_along(spp.StructureData.LST)) {
 	# find individuals that are all NAs
 	curr.invalid <- which(rowSums(is.na(spp.StructureData.LST[[i]]@matrix))==ncol(spp.StructureData.LST[[i]]@matrix))

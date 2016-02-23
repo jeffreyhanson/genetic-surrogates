@@ -34,6 +34,12 @@ countries.FPLY <- countriesHigh[
 	)
 ,] %>% spFortify
 grid.FPLY <- spFortify(grid.PLY)
+
+# define ggplot2 color wheel function
+gg_color_hue <- function(n) {
+	hues <- seq(15, 375, length=n+1)
+	hcl(h=hues, l=65, c=100)[1:n]
+}
 ```
 
 ```{r, echo=FALSE, fig.width=9.5, fig.height=10, out.width='7.5in', out.height='8.5in', fig.cap='Species distributions. Squares represent planning units. For a given species, planning units that were found to be inhabited are denoted with bright blue.'}
@@ -54,8 +60,11 @@ ggplot() +
 		group=group, fill=presence), alpha=0.8, color='grey10') +
 	theme_classic() +
 	guides(fill=guide_legend(title='Presence')) +
-	theme(axis.ticks=element_blank(), axis.text=element_blank(),
-		axis.line=element_blank(), 
+	theme(
+		line = element_blank(), rect = element_blank(), 
+		text = element_blank(), axis.ticks.length = unit(0, "cm"),
+		legend.position = "none", panel.margin = unit(0, "lines"),
+		plot.margin = unit(c(0, 0, 0, 0), "lines"),
 		strip.background = element_rect(fill='grey20'),
 		strip.text = element_text(color='white', face='italic'),
 		axis.title=element_blank()
@@ -83,8 +92,11 @@ ggplot() +
 		guide=guide_colorbar(ticks=element_line(color='black'), border=element_line(color='black'))
 	) +
 	theme_classic() +
-	theme(axis.ticks=element_blank(), axis.text=element_blank(),
-		axis.line=element_blank(), axis.title=element_blank(),
+	theme(
+		line = element_blank(), rect = element_blank(), 
+		text = element_blank(), axis.ticks.length = unit(0, "cm"),
+		legend.position = "none", panel.margin = unit(0, "lines"),
+		plot.margin = unit(c(0, 0, 0, 0), "lines"),
 		panel.border=element_rect(color='black', fill=NA, size=1)
 	) +
 	coord_cartesian(
@@ -106,8 +118,11 @@ ggplot() +
 		guide=guide_colorbar(ticks=element_line(color='black'), border=element_line(color='black'))
 	) +
 	theme_classic() +
-	theme(axis.ticks=element_blank(), axis.text=element_blank(),
-		axis.line=element_blank(), axis.title=element_blank(),
+	theme(
+		line = element_blank(), rect = element_blank(), 
+		text = element_blank(), axis.ticks.length = unit(0, "cm"),
+		legend.position = "none", panel.margin = unit(0, "lines"),
+		plot.margin = unit(c(0, 0, 0, 0), "lines"),
 		panel.border=element_rect(color='black', fill=NA, size=1)
 	) +
 	coord_cartesian(
@@ -130,9 +145,11 @@ do.call(
 				geom_polygon(data=grid.FPLY, aes_string(x='long', y='lat', 
 					group='group', fill=x), color='grey10') +
 				theme_classic() +
-				theme(axis.ticks=element_blank(), axis.text=element_blank(),
-					plot.margin=unit(c(0,0,0,0),'cm'), axis.line=element_blank(), 
-					axis.title=element_blank(), 
+				theme(
+					line = element_blank(), rect = element_blank(), 
+					text = element_blank(), axis.ticks.length = unit(0, "cm"),
+					legend.position = "none", panel.margin = unit(0, "lines"),
+					plot.margin = unit(c(0, 0, 0, 0), "lines"),
 					panel.border=element_rect(color='black', fill=NA, size=1),
 					strip.background = element_rect(fill='grey20'),
 					strip.text = element_text(color='white')
@@ -179,11 +196,6 @@ bic.DF <- ldply(
 		)
 	}
 )
-# define ggplot2 color wheel function
-gg_color_hue <- function(n) {
-	hues <- seq(15, 375, length=n+1)
-	hcl(h=hues, l=65, c=100)[1:n]
-}
 # make plot
 suppressWarnings({
 	ggplot(data=bic.DF) +
@@ -204,46 +216,139 @@ suppressWarnings({
 ```
 
 
-```{r, echo=FALSE, fig.width=15, fig.height=14, fig.cap='Distribution of populations. Each panel depicts a different species. Squares denote planning units. Points denote the location of sampled individuals, and their colors denote the distribution of populations. Note that points have been slightly jittered so that individuals in close proximity are visible.'}
+```{r, echo=FALSE, fig.width=15, fig.height=14, fig.cap='Distribution of populations. Each panel depicts a different species. Squares denote planning units. Pie charts denote the location of sampled individuals, and colors denote the probability that they belong to different populations. Note that pie charts have been jittered to make individuals in close proximity visible.'}
 # prepare data
-pop.DF <- llply(
+pop.probs.DF <- llply(
 	seq_along(unique(spp.samples.DF$species)),
 	function(i) {
 		curr.pts <- filter(
 			spp.sample.PTS@data,
 			species==unique(spp.samples.DF$species)[i]
 		) %>% mutate(
-			species=gsub('_', ' ', unique(spp.samples.DF$species)[i], fixed=TRUE),
-			population=apply(spp.Mclust.LST[[i]]$mclust$z, 1, which.max)
-		)
+			Individual=seq_along(species)
+		) 	
+		curr.probs <- spp.Mclust.LST[[i]]$mclust$z %>%
+			as.data.frame() %>%
+			mutate(
+				species=unique(spp.samples.DF$species)[i],
+				Individual=seq_along(species)) %>%
+			gather(Population,Probability,-species,-Individual) %>%
+			mutate(Population=as.numeric(gsub('V', '', Population, fixed=TRUE))) %>%
+			left_join(curr.pts, by=c('species','Individual')) %>%
+			mutate(species=gsub('_', ' ', species, fixed=TRUE)) %>%
+			arrange(species,Individual,Population)
+		return(curr.probs)
 	}
 ) %>% do.call(what=rbind)
-# make plot
-ggplot() +
-	geom_polygon(data=countries.FPLY, aes(x=long, y=lat, group=group),
-		fill='grey85', color='grey75') +
-	geom_polygon(data=grid.FPLY, aes_string(x='long', y='lat', 
-		group='group'), fill='transparent', color='grey10') +
-	geom_point(data=pop.DF, aes_string(x='sample.longitude', y='sample.latitude', 
-		color='population'), alpha=0.8, size=3, position='jitter') +
-	guides(fill=guide_legend(title=''), color=guide_legend(title='')) +
-	theme_classic() +
-	theme(axis.ticks=element_blank(), axis.text=element_blank(),
-		plot.margin=unit(c(0,0,0,0),'cm'), axis.line=element_blank(), 
-		axis.title=element_blank(), 
-		strip.background = element_rect(fill='grey20'),
-		strip.text = element_text(color='white', face='italic', size=20),
-		legend.text= element_text(size=20)
-	) +
-	coord_cartesian(
-		xlim=buffered.range(grid.FPLY$long, 0),
-		ylim=buffered.range(grid.FPLY$lat, 0)
-	) +
-	facet_wrap(~ species, ncol=4)
+# create legend colors
+legend.CHR <- `names<-`(
+	gg_color_hue(n_distinct(pop.probs.DF$Population)),
+	as.character(unique(pop.probs.DF$Population))
+)
+# create grobs
+grobLST <- llply(
+	seq_along(unique(pop.probs.DF$species)),
+	function(i) {
+		# init
+		curr.spp.DF <- filter(pop.probs.DF, species==unique(pop.probs.DF$species)[i])
+		# create base mapmap
+		curr.GROB <- ggplot(data=curr.spp.DF) +
+			geom_polygon(data=countries.FPLY, aes(x=long, y=lat, group=group),
+				fill='grey85', color='grey75') +
+			geom_polygon(data=grid.FPLY, aes_string(x='long', y='lat', 
+				group='group'), fill='grey70', color='grey10') +
+			guides(fill=guide_legend(title=''), color=guide_legend(title='')) +
+			theme_classic() +
+			theme(
+				line = element_blank(), rect = element_blank(), 
+				text = element_blank(), axis.ticks.length = unit(0, "cm"),
+				legend.position = "none", panel.margin = unit(0, "lines"),
+				plot.margin = unit(c(0, 0, 0, 0), "lines"),
+				strip.background = element_rect(fill='grey20'),
+				strip.text = element_text(color='white', face='italic', size=20),
+				legend.text= element_text(size=20)
+			) +
+			coord_cartesian(
+				xlim=buffered.range(grid.FPLY$long, 0),
+				ylim=buffered.range(grid.FPLY$lat, 0)
+			) +
+			scale_fill_manual(
+				name='',
+				values=legend.CHR[seq_len(n_distinct(curr.spp.DF$Population))]
+			)
+		# create bbox object
+		bbox <- c(ggplot_build(curr.GROB)$panel$ranges[[1]]$x.range,
+			ggplot_build(curr.GROB)$panel$ranges[[1]]$y.range)
+		names(bbox) <- c('ll.lon', 'ur.lon', 'll.lat', 'ur.lat')
+		# render grob
+		grid.newpage()
+		pushViewport(viewport(layout=grid.layout(100,100)))
+		vplayout <- function(x,y) viewport(layout.pos.row=x, layout.pos.col=y)
+		print(curr.GROB, vp=vplayout(1:100,1:100))
+		# add in pies
+		for (j in unique(curr.spp.DF$cell)) {
+			# init
+			curr.cell.DF <- filter(curr.spp.DF, cell==j) %>% 
+				group_by(cell, Population) %>%
+				summarize(
+					grid.longitude=mean(grid.longitude), 
+					grid.latitude=mean(grid.latitude),
+					Probability=mean(Probability)
+				) %>% data.frame()
+			curr.lon <- (curr.cell.DF$grid.longitude[1]-bbox['ll.lon'])/abs(bbox['ur.lon']-bbox['ll.lon'])
+			curr.lat <- (curr.cell.DF$grid.latitude[1]-bbox['ll.lat'])/abs(bbox['ur.lat']-bbox['ll.lat'])
+			# create pie chart for individual
+			curr.pie <- ggplot(curr.cell.DF, aes(x="", y=Probability, fill=factor(Population))) +
+				geom_bar(width=0.75, color='grey20', stat='identity') +
+				coord_polar(theta='y') +
+				theme(
+					line = element_blank(), rect = element_blank(), 
+					text = element_blank(), axis.ticks.length = unit(0, "cm"),
+					legend.position = "none", panel.margin = unit(0, "lines"),
+					plot.margin = unit(c(0, 0, 0, 0), "lines"), complete = TRUE
+				) +
+				scale_fill_manual(
+					name='',
+					values=legend.CHR[seq_len(n_distinct(curr.spp.DF$Population))]
+				)
+			# render pie
+			print(curr.pie, vp=viewport(x=curr.lon, y=curr.lat, width=0.05, height=0.05))
+		}
+	}
+)
 ```
 
 ```{r, echo=FALSE, fig.width=15, fig.height=14, fig.cap='Population membership probabilities. Each panel depicts a different species. Each vertical bar represents a different individual, and colors show the probability that it belongs to different populations. This type of plot is also known as a \texttt{Structure} plot.'}
-plot(1)
+# prepare data
+pop.probs.DF <- ldply(
+	seq_along(spp.StructureData.LST),
+	function(i) {
+		spp.Mclust.LST[[i]]$mclust$z
+			as.data.frame() %>%
+			mutate(Species=unique(spp.samples.DF$species)[i]) %>%
+			gather(Population,Probability,-Species) %>%
+			mutate(Population=as.numeric(gsub('V', '', Population, fixed=TRUE)),
+				Individual=seq_along(Population)
+				) %>%
+			return()
+	}
+)
+# make plot
+ggplot(
+		aes(x=Individual, y=Probability, fill=Population)
+		data=pop.probs.DF) +
+	geom_bar() +
+	theme_classic() +
+	theme(
+		strip.background = element_rect(fill='grey20'),
+		strip.text = element_text(color='white', face='italic'),
+		
+		
+		
+	) +
+	xlab('') +
+	ylab('Probability of population membership (%)') +
+	facet_wrap(~ Species)
 ```
 
 
@@ -276,8 +381,11 @@ plot.spp.nmds <- function(i) {
 		geom_polygon(data=curr.FPLY, aes_string(x='long', y='lat', 
 			group='group', fill='value'), color='grey10') +
 		theme_classic() +
-		theme(axis.ticks=element_blank(), axis.text=element_blank(),
-			plot.margin=unit(c(0,0,0,0),'cm'), axis.line=element_blank(),
+		theme(
+			line = element_blank(), rect = element_blank(), 
+			text = element_blank(), axis.ticks.length = unit(0, "cm"),
+			legend.position = "none", panel.margin = unit(0, "lines"),
+			plot.margin = unit(c(0, 0, 0, 0), "lines"),
 			axis.title=element_blank(), strip.background = element_rect(fill='grey20'),
 			strip.text = element_text(color='white', size=20),
 			legend.text = element_text(size=20)
