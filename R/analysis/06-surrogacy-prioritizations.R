@@ -177,7 +177,12 @@ env.correlation.DF <- ldply(
 			genetic.held=adaptive.held
 		)
 	}
+) %>% mutate(
+	genetic.held=replace(genetic.held, which(genetic.held<0), 0),
+	adaptive.held=replace(adaptive.held, which(adaptive.held<0), 0),
+	neutral.held=replace(neutral.held, which(neutral.held<0),0)
 )
+
 
 geo.correlation.DF <- ldply(
 	seq_along(geo.correlation.prioritisations), 
@@ -205,7 +210,12 @@ geo.correlation.DF <- ldply(
 			genetic.held=neutral.held
 		)
 	}
+) %>% mutate(
+	genetic.held=replace(genetic.held, which(genetic.held<0), 0),
+	adaptive.held=replace(adaptive.held, which(adaptive.held<0), 0),
+	neutral.held=replace(neutral.held, which(neutral.held<0),0)
 )
+
 
 correlation.DF <- rbind(env.correlation.DF, geo.correlation.DF)
 

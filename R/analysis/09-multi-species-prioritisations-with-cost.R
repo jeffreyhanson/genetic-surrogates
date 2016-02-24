@@ -42,7 +42,12 @@ multi.spp.with.cost.DF <- ldply(
 			Prioritisation=c('Amount','Surrogate','Genetic')[i]
 		)
 	}
+)  %>% mutate(
+	genetic.held=replace(genetic.held, which(genetic.held<0), 0),
+	adaptive.held=replace(adaptive.held, which(adaptive.held<0), 0),
+	neutral.held=replace(neutral.held, which(neutral.held<0),0)
 )
+
 
 ## save .rda
 save.session('results/.cache/09-multi-species-prioritisations-with-cost.rda')

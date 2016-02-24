@@ -106,7 +106,12 @@ single.spp.DF <- ldply(
 			)
 		)
 	}
+)  %>% mutate(
+	genetic.held=replace(genetic.held, which(genetic.held<0), 0),
+	adaptive.held=replace(adaptive.held, which(adaptive.held<0), 0),
+	neutral.held=replace(neutral.held, which(neutral.held<0),0)
 )
+
 
 ## save .rda
 save.session('results/.cache/07-single-species-prioritisations.rda')
