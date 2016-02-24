@@ -61,10 +61,7 @@ ggplot() +
 	theme_classic() +
 	guides(fill=guide_legend(title='Presence')) +
 	theme(
-		line = element_blank(), rect = element_blank(), 
-		text = element_blank(), axis.ticks.length = unit(0, "cm"),
-		legend.position = "none", panel.margin = unit(0, "lines"),
-		plot.margin = unit(c(0, 0, 0, 0), "lines"),
+		axis.ticks=element_blank(), axis.text=element_blank(), axis.line=element_blank(), plot.margin = unit(c(0, 0, 0, 0), "lines"),
 		strip.background = element_rect(fill='grey20'),
 		strip.text = element_text(color='white', face='italic'),
 		axis.title=element_blank()
@@ -76,37 +73,32 @@ ggplot() +
 	facet_wrap(~ species, ncol=4)
 ```
 
-```{r, echo=FALSE, fig.width=4, fig.height=3.5, fig.cap="Species richness. Squares denote planning units. Planning units with a brighter color are inhabited by more species."}
+```{r, echo=FALSE, fig.width=4, fig.height=2.5, fig.cap="Species richness. Squares denote planning units. Planning units with a brighter color are inhabited by more species."}
 # calculate species richness
 grid.PLY$Species_richness <- grid.PLY@data %>%
 	select(5:(4+n_distinct(spp.samples.DF$species))) %>% as.matrix() %>% rowSums()
-
 # plot species richness
 ggplot() +
 	geom_polygon(data=countries.FPLY, aes(x=long, y=lat, group=group),
 		fill='grey85', color='grey70') +
 	geom_polygon(data=spFortify(grid.PLY), aes(x=long, y=lat, 
 		group=group, fill=Species_richness), color='grey10') +
-	scale_fill_gradientn(name='Count (#)',
+	scale_fill_gradientn(name='Richness (#)',
 		colors=brewer.pal(9,'PuBu'),
 		guide=guide_colorbar(ticks=element_line(color='black'), border=element_line(color='black'))
 	) +
 	theme_classic() +
 	theme(
-		line = element_blank(), rect = element_blank(), 
-		text = element_blank(), axis.ticks.length = unit(0, "cm"),
-		legend.position = "none", panel.margin = unit(0, "lines"),
-		plot.margin = unit(c(0, 0, 0, 0), "lines"),
+		axis.ticks=element_blank(), axis.text=element_blank(), axis.line=element_blank(), plot.margin = unit(c(0, 0, 0, 0), "lines"), axis.title=element_blank(),
 		panel.border=element_rect(color='black', fill=NA, size=1)
 	) +
 	coord_cartesian(
 		xlim=buffered.range(grid.FPLY$long, 0),
 		ylim=buffered.range(grid.FPLY$lat, 0)
-	) + 
-	ggtitle('Species Richness')
+	)
 ```
 
-```{r, echo=FALSE, fig.width=4, fig.height=3.5, fig.cap="Opportunity cost. Squares denote planning units. The color of each planning unit represents its opportunity cost (computed as total population density)"}
+```{r, echo=FALSE, fig.width=4, fig.height=2.5, fig.cap="Opportunity cost. Squares denote planning units. The color of each planning unit represents its opportunity cost (computed as total population density)"}
 # plot opportunity costs
 ggplot() +
 	geom_polygon(data=countries.FPLY, aes(x=long, y=lat, group=group),
@@ -119,17 +111,13 @@ ggplot() +
 	) +
 	theme_classic() +
 	theme(
-		line = element_blank(), rect = element_blank(), 
-		text = element_blank(), axis.ticks.length = unit(0, "cm"),
-		legend.position = "none", panel.margin = unit(0, "lines"),
-		plot.margin = unit(c(0, 0, 0, 0), "lines"),
+		axis.ticks=element_blank(), axis.text=element_blank(), axis.line=element_blank(), plot.margin = unit(c(0, 0, 0, 0), "lines"), axis.title=element_blank(),
 		panel.border=element_rect(color='black', fill=NA, size=1)
 	) +
 	coord_cartesian(
 		xlim=buffered.range(grid.FPLY$long, 0),
 		ylim=buffered.range(grid.FPLY$lat, 0)
-	) +
-	ggtitle('Opportunity cost')
+	)
 ```
 
 
@@ -146,10 +134,7 @@ do.call(
 					group='group', fill=x), color='grey10') +
 				theme_classic() +
 				theme(
-					line = element_blank(), rect = element_blank(), 
-					text = element_blank(), axis.ticks.length = unit(0, "cm"),
-					legend.position = "none", panel.margin = unit(0, "lines"),
-					plot.margin = unit(c(0, 0, 0, 0), "lines"),
+					axis.ticks=element_blank(), axis.text=element_blank(), axis.line=element_blank(), plot.margin = unit(c(0, 0, 0, 0), "lines"), axis.title=element_blank(),
 					panel.border=element_rect(color='black', fill=NA, size=1),
 					strip.background = element_rect(fill='grey20'),
 					strip.text = element_text(color='white')
@@ -216,7 +201,7 @@ suppressWarnings({
 ```
 
 
-```{r, echo=FALSE, fig.width=15, fig.height=14, fig.cap='Distribution of populations. Each panel depicts a different species. Squares denote planning units. Pie charts denote the location of sampled individuals, and colors denote the probability that they belong to different populations. Note that pie charts have been jittered to make individuals in close proximity visible.'}
+```{r, echo=FALSE}
 # prepare data
 pop.probs.DF <- llply(
 	seq_along(unique(spp.samples.DF$species)),
@@ -245,112 +230,201 @@ legend.CHR <- `names<-`(
 	gg_color_hue(n_distinct(pop.probs.DF$Population)),
 	as.character(unique(pop.probs.DF$Population))
 )
-# create grobs
-grobLST <- llply(
-	seq_along(unique(pop.probs.DF$species)),
-	function(i) {
+# create function
+plot.spp.pop.probs <- function(i) {
+	# init
+	prop <- 0.85
+	curr.spp.DF <- filter(pop.probs.DF, species==unique(pop.probs.DF$species)[i])
+	# create base map grob
+	curr.GROB <- ggplot(data=curr.spp.DF) +
+		geom_polygon(data=countries.FPLY, aes(x=long, y=lat, group=group),
+			fill='grey85', color='grey75') +
+		geom_polygon(data=grid.FPLY, aes_string(x='long', y='lat', 
+			group='group'), fill='grey70', color='grey10') +
+		guides(fill=guide_legend(title=''), color=guide_legend(title='')) +
+		theme_classic() +
+		theme(
+			axis.title=element_blank(), axis.text=element_blank(),
+			axis.line=element_blank(), axis.ticks=element_blank(),
+			axis.ticks.length = unit(0, "cm"),
+			legend.position = "none", panel.margin = unit(0, "lines"),
+			plot.margin = unit(c(0, 0, 0, 0), "lines"),
+			strip.background = element_rect(fill='grey20'),
+			strip.text = element_text(color='white', face='italic', size=20),
+			legend.text= element_text(size=20)
+		) + 
+		coord_cartesian(
+			xlim=buffered.range(grid.FPLY$long, 0),
+			ylim=buffered.range(grid.FPLY$lat, 0)
+		) +
+		scale_fill_manual(
+			name='',
+			values=legend.CHR[seq_len(n_distinct(curr.spp.DF$Population))]
+		)
+	# create header grob
+	curr.GROBH <- ggplot() +
+			geom_text(aes(x=0,y=0,label=species),
+				data=curr.spp.DF[1,,drop=FALSE],
+				color='white', fontface='italic', size=4) +
+		theme_classic() +
+		theme(
+			axis.title=element_blank(), axis.text=element_blank(),
+			axis.line=element_blank(), axis.ticks=element_blank(),
+			axis.ticks.length = unit(0, "cm"),
+			legend.position = "none", panel.margin = unit(0, "lines"),
+			plot.margin = unit(c(0, 0, 0, 0), "lines"),
+			panel.background=element_rect(fill='grey20')
+		) +
+		coord_cartesian(xlim=c(-1,1), ylim=c(-1,1))
+	# create bbox object
+	bbox <- c(ggplot_build(curr.GROB)$panel$ranges[[1]]$x.range,
+		ggplot_build(curr.GROB)$panel$ranges[[1]]$y.range)
+		names(bbox) <- c('ll.lon', 'ur.lon', 'll.lat', 'ur.lat')
+	# render grob
+	grid.newpage()
+	pushViewport(viewport(layout=grid.layout(2,1, heights=unit(c(1-prop, prop), "npc"))))
+	print(curr.GROBH, vp=viewport(layout.pos.row=1, layout.pos.col=1))
+	print(curr.GROB, vp=viewport(layout.pos.row=2, layout.pos.col=1))
+	# add in pies
+	for (j in unique(curr.spp.DF$cell)) {
 		# init
-		curr.spp.DF <- filter(pop.probs.DF, species==unique(pop.probs.DF$species)[i])
-		# create base mapmap
-		curr.GROB <- ggplot(data=curr.spp.DF) +
-			geom_polygon(data=countries.FPLY, aes(x=long, y=lat, group=group),
-				fill='grey85', color='grey75') +
-			geom_polygon(data=grid.FPLY, aes_string(x='long', y='lat', 
-				group='group'), fill='grey70', color='grey10') +
-			guides(fill=guide_legend(title=''), color=guide_legend(title='')) +
-			theme_classic() +
+		curr.cell.DF <- filter(curr.spp.DF, cell==j) %>% 
+			group_by(cell, Population) %>%
+			summarize(
+				grid.longitude=mean(grid.longitude), 
+				grid.latitude=mean(grid.latitude),
+				Probability=mean(Probability)
+			) %>% data.frame()
+		curr.lon <- (curr.cell.DF$grid.longitude[1]-bbox['ll.lon'])/abs(bbox['ur.lon']-bbox['ll.lon'])
+		curr.lat <- ((curr.cell.DF$grid.latitude[1]-bbox['ll.lat'])/abs(bbox['ur.lat']-bbox['ll.lat']))*prop
+		# create pie chart for individual
+		curr.pie <- ggplot(curr.cell.DF, aes(x="", y=Probability, fill=factor(Population))) +
+			geom_bar(width=0.75, color='grey20', stat='identity') +
+			coord_polar(theta='y') +
 			theme(
 				line = element_blank(), rect = element_blank(), 
 				text = element_blank(), axis.ticks.length = unit(0, "cm"),
 				legend.position = "none", panel.margin = unit(0, "lines"),
-				plot.margin = unit(c(0, 0, 0, 0), "lines"),
-				strip.background = element_rect(fill='grey20'),
-				strip.text = element_text(color='white', face='italic', size=20),
-				legend.text= element_text(size=20)
-			) +
-			coord_cartesian(
-				xlim=buffered.range(grid.FPLY$long, 0),
-				ylim=buffered.range(grid.FPLY$lat, 0)
+				plot.margin = unit(c(0, 0, 0, 0), "lines"), complete = TRUE
 			) +
 			scale_fill_manual(
 				name='',
 				values=legend.CHR[seq_len(n_distinct(curr.spp.DF$Population))]
 			)
-		# create bbox object
-		bbox <- c(ggplot_build(curr.GROB)$panel$ranges[[1]]$x.range,
-			ggplot_build(curr.GROB)$panel$ranges[[1]]$y.range)
-		names(bbox) <- c('ll.lon', 'ur.lon', 'll.lat', 'ur.lat')
-		# render grob
-		grid.newpage()
-		pushViewport(viewport(layout=grid.layout(100,100)))
-		vplayout <- function(x,y) viewport(layout.pos.row=x, layout.pos.col=y)
-		print(curr.GROB, vp=vplayout(1:100,1:100))
-		# add in pies
-		for (j in unique(curr.spp.DF$cell)) {
-			# init
-			curr.cell.DF <- filter(curr.spp.DF, cell==j) %>% 
-				group_by(cell, Population) %>%
-				summarize(
-					grid.longitude=mean(grid.longitude), 
-					grid.latitude=mean(grid.latitude),
-					Probability=mean(Probability)
-				) %>% data.frame()
-			curr.lon <- (curr.cell.DF$grid.longitude[1]-bbox['ll.lon'])/abs(bbox['ur.lon']-bbox['ll.lon'])
-			curr.lat <- (curr.cell.DF$grid.latitude[1]-bbox['ll.lat'])/abs(bbox['ur.lat']-bbox['ll.lat'])
-			# create pie chart for individual
-			curr.pie <- ggplot(curr.cell.DF, aes(x="", y=Probability, fill=factor(Population))) +
-				geom_bar(width=0.75, color='grey20', stat='identity') +
-				coord_polar(theta='y') +
-				theme(
-					line = element_blank(), rect = element_blank(), 
-					text = element_blank(), axis.ticks.length = unit(0, "cm"),
-					legend.position = "none", panel.margin = unit(0, "lines"),
-					plot.margin = unit(c(0, 0, 0, 0), "lines"), complete = TRUE
-				) +
-				scale_fill_manual(
-					name='',
-					values=legend.CHR[seq_len(n_distinct(curr.spp.DF$Population))]
-				)
-			# render pie
-			print(curr.pie, vp=viewport(x=curr.lon, y=curr.lat, width=0.05, height=0.05))
-		}
+		# render pie
+		print(curr.pie, vp=viewport(x=curr.lon, y=curr.lat, width=0.075, height=0.075))
 	}
-)
+}
 ```
 
-```{r, echo=FALSE, fig.width=15, fig.height=14, fig.cap='Population membership probabilities. Each panel depicts a different species. Each vertical bar represents a different individual, and colors show the probability that it belongs to different populations. This type of plot is also known as a \texttt{Structure} plot.'}
-# prepare data
-pop.probs.DF <- ldply(
-	seq_along(spp.StructureData.LST),
-	function(i) {
-		spp.Mclust.LST[[i]]$mclust$z
-			as.data.frame() %>%
-			mutate(Species=unique(spp.samples.DF$species)[i]) %>%
-			gather(Population,Probability,-Species) %>%
-			mutate(Population=as.numeric(gsub('V', '', Population, fixed=TRUE)),
-				Individual=seq_along(Population)
-				) %>%
-			return()
-	}
-)
-# make plot
-ggplot(
-		aes(x=Individual, y=Probability, fill=Population)
-		data=pop.probs.DF) +
-	geom_bar() +
-	theme_classic() +
-	theme(
-		strip.background = element_rect(fill='grey20'),
-		strip.text = element_text(color='white', face='italic'),
-		
-		
-		
-	) +
-	xlab('') +
-	ylab('Probability of population membership (%)') +
-	facet_wrap(~ Species)
+
+```{r, echo=FALSE, fig.width=3.5, fig.height=2.5, fig.cap=paste0('Distribution of \\textit{',gsub('_',' ',unique(spp.samples.DF$species)[1], fixed=TRUE),'} populations. Squares denote planning units. Pie charts denote quadrats where individuals were sampled, and colors denote the average probability that individuals in the quadrat belong to different populations on average.')}
+plot.spp.pop.probs(1)
 ```
 
+```{r, echo=FALSE, fig.width=3.5, fig.height=2.5, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[2],fixed=TRUE),'} populations. See Figure SX caption for conventions.')}
+if (2 <= general.params.LST[[MODE]]$n.spp) plot.spp.pop.probs(2)
+```
+
+```{r, echo=FALSE, fig.width=3.5, fig.height=2.5, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[3],fixed=TRUE),'} populations. See Figure SX caption for conventions.')}
+if (3 <= general.params.LST[[MODE]]$n.spp) plot.spp.pop.probs(3)
+```
+
+```{r, echo=FALSE, fig.width=3.5, fig.height=2.5, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[4],fixed=TRUE),'} populations. See Figure SX caption for conventions.')}
+if (4 <= general.params.LST[[MODE]]$n.spp) plot.spp.pop.probs(4)
+```
+
+```{r, echo=FALSE, fig.width=3.5, fig.height=2.5, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[5],fixed=TRUE),'} populations. See Figure SX caption for conventions.')}
+if (5 <= general.params.LST[[MODE]]$n.spp) plot.spp.pop.probs(5)
+```
+
+```{r, echo=FALSE, fig.width=3.5, fig.height=2.5, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[6],fixed=TRUE),'} populations. See Figure SX caption for conventions.')}
+if (6 <= general.params.LST[[MODE]]$n.spp) plot.spp.pop.probs(6)
+```
+
+```{r, echo=FALSE, fig.width=3.5, fig.height=2.5, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[7],fixed=TRUE),'} populations. See Figure SX caption for conventions.')}
+if (7 <= general.params.LST[[MODE]]$n.spp) plot.spp.pop.probs(7)
+```
+
+```{r, echo=FALSE, fig.width=3.5, fig.height=2.5, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[8],fixed=TRUE),'} populations. See Figure SX caption for conventions.')}
+if (8 <= general.params.LST[[MODE]]$n.spp) plot.spp.pop.probs(8)
+```
+
+```{r, echo=FALSE, fig.width=3.5, fig.height=2.5, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[9],fixed=TRUE),'} populations. See Figure SX caption for conventions.')}
+if (9 <= general.params.LST[[MODE]]$n.spp) plot.spp.pop.probs(9)
+```
+
+```{r, echo=FALSE, fig.width=3.5, fig.height=2.5, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[10],fixed=TRUE),'} populations. See Figure SX caption for conventions.')}
+if (10 <= general.params.LST[[MODE]]$n.spp) plot.spp.pop.probs(10)
+```
+
+```{r, echo=FALSE, fig.width=3.5, fig.height=2.5, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[11],fixed=TRUE),'} populations. See Figure SX caption for conventions.')}
+if (12 <= general.params.LST[[MODE]]$n.spp) plot.spp.pop.probs(11)
+```
+
+```{r, echo=FALSE, fig.width=3.5, fig.height=2.5, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[12],fixed=TRUE),'} populations. See Figure SX caption for conventions.')}
+if (12 <= general.params.LST[[MODE]]$n.spp) plot.spp.pop.probs(12)
+```
+
+```{r, echo=FALSE, fig.width=3.5, fig.height=2.5, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[13],fixed=TRUE),'} populations. See Figure SX caption for conventions.')}
+if (13 <= general.params.LST[[MODE]]$n.spp) plot.spp.pop.probs(13)
+```
+
+```{r, echo=FALSE, fig.width=3.5, fig.height=2.5, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[14],fixed=TRUE),'} populations. See Figure SX caption for conventions.')}
+if (14 <= general.params.LST[[MODE]]$n.spp) plot.spp.pop.probs(14)
+```
+
+```{r, echo=FALSE, fig.width=3.5, fig.height=2.5, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[15],fixed=TRUE),'} populations. See Figure SX caption for conventions.')}
+if (15 <= general.params.LST[[MODE]]$n.spp) plot.spp.pop.probs(15)
+```
+
+```{r, echo=FALSE, fig.width=3.5, fig.height=2.5, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[16],fixed=TRUE),'} populations. See Figure SX caption for conventions.')}
+if (16 <= general.params.LST[[MODE]]$n.spp) plot.spp.pop.probs(16)
+```
+
+```{r, echo=FALSE, fig.width=3.5, fig.height=2.5, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[17],fixed=TRUE),'} populations. See Figure SX caption for conventions.')}
+if (17 <= general.params.LST[[MODE]]$n.spp) plot.spp.pop.probs(17)
+```
+
+```{r, echo=FALSE, fig.width=3.5, fig.height=2.5, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[18],fixed=TRUE),'} populations. See Figure SX caption for conventions.')}
+if (18 <= general.params.LST[[MODE]]$n.spp) plot.spp.pop.probs(18)
+```
+
+```{r, echo=FALSE, fig.width=3.5, fig.height=2.5, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[19],fixed=TRUE),'} populations. See Figure SX caption for conventions.')}
+if (19 <= general.params.LST[[MODE]]$n.spp) plot.spp.pop.probs(19)
+```
+
+```{r, echo=FALSE, fig.width=3.5, fig.height=2.5, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[20],fixed=TRUE),'} populations. See Figure SX caption for conventions.')}
+if (20 <= general.params.LST[[MODE]]$n.spp) plot.spp.pop.probs(20)
+```
+
+```{r, echo=FALSE, fig.width=3.5, fig.height=2.5, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[21],fixed=TRUE),'} populations. See Figure SX caption for conventions.')}
+if (21 <= general.params.LST[[MODE]]$n.spp) plot.spp.pop.probs(21)
+```
+
+```{r, echo=FALSE, fig.width=3.5, fig.height=2.5, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[22],fixed=TRUE),'} populations. See Figure SX caption for conventions.')}
+if (22 <= general.params.LST[[MODE]]$n.spp) plot.spp.pop.probs(22)
+```
+
+```{r, echo=FALSE, fig.width=3.5, fig.height=2.5, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[23],fixed=TRUE),'} populations. See Figure SX caption for conventions.')}
+if (23 <= general.params.LST[[MODE]]$n.spp) plot.spp.pop.probs(23)
+```
+
+```{r, echo=FALSE, fig.width=3.5, fig.height=2.5, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[24],fixed=TRUE),'} populations. See Figure SX caption for conventions.')}
+if (24 <= general.params.LST[[MODE]]$n.spp) plot.spp.pop.probs(24)
+```
+
+```{r, echo=FALSE, fig.width=3.5, fig.height=2.5, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[25],fixed=TRUE),'} populations. See Figure SX caption for conventions.')}
+if (25 <= general.params.LST[[MODE]]$n.spp) plot.spp.pop.probs(25)
+```
+
+```{r, echo=FALSE, fig.width=3.5, fig.height=2.5, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[26],fixed=TRUE),'} populations. See Figure SX caption for conventions.')}
+if (26 <= general.params.LST[[MODE]]$n.spp) plot.spp.pop.probs(26)
+```
+
+```{r, echo=FALSE, fig.width=3.5, fig.height=2.5, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[27],fixed=TRUE),'} populations. See Figure SX caption for conventions.')}
+if (27 <= general.params.LST[[MODE]]$n.spp) plot.spp.pop.probs(27)
+```
 
 ```{r, echo=FALSE}
 plot.spp.nmds <- function(i) {
@@ -382,13 +456,10 @@ plot.spp.nmds <- function(i) {
 			group='group', fill='value'), color='grey10') +
 		theme_classic() +
 		theme(
-			line = element_blank(), rect = element_blank(), 
-			text = element_blank(), axis.ticks.length = unit(0, "cm"),
-			legend.position = "none", panel.margin = unit(0, "lines"),
-			plot.margin = unit(c(0, 0, 0, 0), "lines"),
-			axis.title=element_blank(), strip.background = element_rect(fill='grey20'),
-			strip.text = element_text(color='white', size=20),
-			legend.text = element_text(size=20)
+			axis.ticks=element_blank(), axis.text=element_blank(), axis.line=element_blank(), plot.margin = unit(c(0, 0, 0, 0), "lines"), axis.title=element_blank(),
+			panel.border=element_rect(color='black', fill=NA, size=1),
+			strip.background = element_rect(fill='grey20'),
+			strip.text = element_text(color='white', size=20)
 		) +
 		coord_cartesian(
 			xlim=buffered.range(grid.FPLY$long, 0),

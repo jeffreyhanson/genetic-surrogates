@@ -24,43 +24,27 @@ options(error=NULL)
 
 ## Figures
 
-```{r, echo=FALSE, fig.width=8, fig.height=3, fig.cap='The relationship between surrogates and genetic variation secured in prioritizations. Panel (a) shows the relationship between environmental surrogates and adaptive genetic variation. Panel (b) shows that for geographic surrogates and neutral genetic variation. Transparent gray lines denote trends for each species, and black lines show general trends across all species.'}
-### prepare data frames for plotting
-#env.correlation.PDF <- filter(correlation.DF, Type='Environmental')
-#
-#%>% left_join(
-#		data.frame(
-#			letter=unname(toupper(cld(full.model.GLHT)$mcletters$Letters)),
-#			Combination=as.character(names(toupper(cld(full.model.GLHT)$mcletters$Letters)))
-#		) %>% mutate(Combination=as.character(Combination)),
-#		by='Combination'
-#	) %>% data.frame()
+```{r, echo=FALSE, fig.width=8, fig.height=3, fig.cap='The relationship between surrogates and genetic variation secured in prioritizations. Panel (a) shows the relationship between environmental surrogates and adaptive genetic variation. Panel (b) shows that for geographic surrogates and neutral genetic variation. Box-plots show variation in the proportion of genetic variation secured using different surrogate-based targets. Lines show the general trends.'}
+# make figure
+p1 <- ggplot(mapping=aes(x=factor(Surrogate.target),y=genetic.held, color=Method)) +
+	geom_boxplot(data=env.correlation.DF) +
+	xlab('Environmental surrogate target (%)') + 
+	ylab('Adaptive genetic variation secured (%)') +
+	geom_text(aes(x=0.05, y=0.9, label='(a)')) +
+	geom_line(data=data.frame(summarize(group_by(env.correlation.DF, Surrogate.target, Method), genetic.held=mean(genetic.held)))) +
+	scale_color_manual(name='Prioritization', values=c('Optimal'='black', 'Random'='grey50'))
 
+p2 <- ggplot2(mapping=aes(x=factor(Surrogate.target),y=genetic.held, color=Method)) +
+	geom_boxplot(data=geo.correlation.DF) +
+	xlab('Geographic surrogate target (%)') + 
+	ylab('Neutral genetic variation secured (%)') +
+	geom_text(aes(x=0.05, y=0.9, label='(b)')) +
+	geom_line(data=data.frame(summarize(group_by(geo.correlation.DF, Surrogate.target, Method), genetic.held=mean(genetic.held)))) +
+	theme_classic() +
+	scale_color_manual(name='Prioritization', values=c('Optimal'='black', 'Random'='grey50'))
 
-#geo.correlation.PDF <- filter(correlation.DF, Type='Geographic')
-### make plots
-#suppressWarnings({
-#	p1 <- ggplot() +
-#		geom_boxplot(aes(x=Surrogate.target, y=genetic.held, color=Method, group=Method), data=env.correlation.DF) +
-#		geom_text(aes(x=Surrogate.target, y=letter.height, label=letter),
-#			data=results.PDF, position=position_dodge(0.9)) +
-#		geom_text(aes(x=0.6, y=1.03, label='(a)')) +
-#		xlab('Environmental variation secured (%)') +
-#		ylab('Adaptive genetic\nvariation secured (%)') +
-#		theme_classic()
-#	p2 <- ggplot() +
-#		geom_boxplot(aes(x=Surrogate.target, y=neutral.held, color=Method), data=geo.correlation.DF) +
-#		geom_text(aes(x=Surrogate.target, y=letter.height, label=letter),
-#			data=results.PDF, position=position_dodge(0.9)) +
-#		geom_text(aes(x=0.6, y=1.03, label='(b)')) +
-#		xlab('Geographic variation secured (%)') +
-#		ylab('Neutral genetic\nvariation secured (%)') +
-#		theme_classic()
-#	grid.arrange(p1, p2, nrow=1)
-# })
-
-
-plot(1)
+# render figure
+grid.arrange(p1,p2,nrow=1)
 
 ```
 
