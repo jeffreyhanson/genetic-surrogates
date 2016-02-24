@@ -49,6 +49,9 @@ spp.BayeScanData.sample.subset.LST <- llply(
 	.fun=function(i) {
 		# get population identities
 		probs<-spp.Mclust.LST[[i]]$mclust$z
+		# if only one population return null
+		if (ncol(probs)==1)
+			return(NULL)
 		ids <- apply(probs, 1, which.max)
 		# identify individuals with uncertain population membership
 		ids[which(apply(probs, 1, function(x) {max(x) < mclust.params.LST[[MODE]]$probability.threshold}))] <- NA_integer_
