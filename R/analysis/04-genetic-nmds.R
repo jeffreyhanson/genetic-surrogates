@@ -10,7 +10,7 @@ spp.BayeScanData.sample.loci.subset.LST <- llply(
 	spp.BayeScanData.sample.subset.LST,
 	function(x) {
 		# skip if null
-		if (is.null(spp.BayeScanData.sample.loci.subset.LST[[i]]))
+		if (is.null(x))
 			return(NULL)
 		# else remove abundant or rare loci
 		freqs <- colMeans(x@matrix, na.rm=TRUE)
