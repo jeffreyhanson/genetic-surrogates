@@ -57,7 +57,7 @@ spp.nmds.LST <- llply(
 	.fun=function(i) {
 		# subset loci for species
 		cat('starting species',i,'\n')
-		if (is.null(spp.BayeScanData.sample.loci.subset.LST[[i]])) {
+		if (is.null(spp.BayeScan.sample.loci.subset.LST[[i]])) {
 			# all loci are neutral since only 1 population
 			curr.spp <- spp.BayeScanData.LST[[i]]
 			# manually classify loci as neutral or adaptive
