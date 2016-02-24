@@ -24,14 +24,14 @@ options(error=NULL)
 
 ## Figures
 
-```{r, echo=FALSE, fig.width=8, fig.height=3, fig.cap='The relationship between surrogates and genetic variation secured in prioritizations. Panel (a) shows the relationship between environmental surrogates and adaptive genetic variation. Panel (b) shows that for geographic surrogates and neutral genetic variation. Box-plots show variation in the proportion of genetic variation secured using different surrogate-based targets. Lines show the general trends.'}
+```{r, echo=FALSE, fig.width=8, fig.height=3, fig.cap='The relationship between surrogates and genetic variation secured in prioritizations. Panel (a) shows the relationship between environmental surrogate targets used to generate a prioritization and the proportion of adaptive genetic variation it secures. Similarly, panel (b) shows that for geographic surrogate targets and neutral genetic variation. Box-plots show inter-specific variation in the proportion of genetic variation secured using different surrogate-based targets. Lines indicate the general trends in the data.'}
 # make figure
 p1 <- ggplot(mapping=aes(x=factor(Surrogate.target),y=genetic.held, color=Method)) +
 	geom_boxplot(data=env.correlation.DF) +
 	xlab('Environmental surrogate target (%)') + 
 	ylab('Adaptive genetic variation secured (%)') +
 	geom_text(aes(x=0.05, y=0.9, label='(a)')) +
-	geom_line(data=data.frame(summarize(group_by(env.correlation.DF, Surrogate.target, Method), genetic.held=mean(genetic.held)))) +
+	geom_line(data=data.frame(summarize(group_by(env.correlation.DF, Surrogate.target, Method), genetic.held=median(genetic.held)))) +
 	scale_color_manual(name='Prioritization', values=c('Optimal'='black', 'Random'='grey50'))
 
 p2 <- ggplot2(mapping=aes(x=factor(Surrogate.target),y=genetic.held, color=Method)) +
@@ -39,7 +39,7 @@ p2 <- ggplot2(mapping=aes(x=factor(Surrogate.target),y=genetic.held, color=Metho
 	xlab('Geographic surrogate target (%)') + 
 	ylab('Neutral genetic variation secured (%)') +
 	geom_text(aes(x=0.05, y=0.9, label='(b)')) +
-	geom_line(data=data.frame(summarize(group_by(geo.correlation.DF, Surrogate.target, Method), genetic.held=mean(genetic.held)))) +
+	geom_line(data=data.frame(summarize(group_by(geo.correlation.DF, Surrogate.target, Method), genetic.held=median(genetic.held)))) +
 	theme_classic() +
 	scale_color_manual(name='Prioritization', values=c('Optimal'='black', 'Random'='grey50'))
 
