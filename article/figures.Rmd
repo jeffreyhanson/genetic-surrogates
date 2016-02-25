@@ -24,27 +24,62 @@ options(error=NULL)
 
 ## Figures
 
-```{r, echo=FALSE, fig.width=8, fig.height=3, fig.cap='The relationship between surrogates and genetic variation secured in prioritizations. Panel (a) shows the relationship between environmental surrogate targets used to generate a prioritization and the proportion of adaptive genetic variation it secures. Similarly, panel (b) shows that for geographic surrogate targets and neutral genetic variation. Box-plots show inter-specific variation in the proportion of genetic variation secured using different surrogate-based targets. Lines indicate the general trends in the data.'}
-# make figure
-p1 <- ggplot(mapping=aes(x=factor(Surrogate.target),y=genetic.held, color=Method)) +
-	geom_boxplot(data=env.correlation.DF) +
-	xlab('Environmental surrogate target (%)') + 
-	ylab('Adaptive genetic variation secured (%)') +
-	geom_text(aes(x=0.05, y=0.9, label='(a)')) +
-	geom_line(data=data.frame(summarize(group_by(env.correlation.DF, Surrogate.target, Method), genetic.held=median(genetic.held)))) +
-	scale_color_manual(name='Prioritization', values=c('Optimal'='black', 'Random'='grey50'))
+```{r, echo=FALSE, fig.width=6, fig.height=4.5, fig.cap='The relationship between surrogates and genetic variation secured in prioritizations. Panel (a) shows the relationship between environmental surrogate targets used to generate a prioritization and the proportion of adaptive genetic variation it secures. Similarly, panel (b) shows that for geographic surrogate targets and neutral genetic variation. Box-plots show inter-specific variation in the proportion of genetic variation secured using different surrogate-based targets. Letters indicate significant differences ($P < 0.05$).'}
+# prepare data
+env.correlation.DF$Surrogate.target <- factor(env.correlation.DF$Surrogate.target)
+env.correlation.DF2 <- env.correlation.DF %>%
+	group_by(Surrogate.target, Method, Type) %>% 
+	summarize(genetic.held=max(genetic.held)+0.1) %>%
+	ungroup() %>% mutate(Combination=as.character(paste0(Surrogate.target,'.',Method,'.',Type))) %>% 
+	left_join(
+		data.frame(
+			letter=unname(toupper(cld(posthoc.correlation.GLHT)$mcletters$Letters)),
+			Combination=as.character(names(toupper(cld(posthoc.correlation.GLHT)$mcletters$Letters))),
+			stringsAsFactors=FALSE
+		),
+		by='Combination'
+	) %>% data.frame()
+geo.correlation.DF$Surrogate.target <- factor(geo.correlation.DF$Surrogate.target)
+geo.correlation.DF2 <- geo.correlation.DF %>%
+	group_by(Surrogate.target, Method, Type) %>% 
+	summarize(genetic.held=max(genetic.held)+0.1) %>%
+	ungroup() %>% mutate(Combination=as.character(paste0(Surrogate.target,'.',Method,'.',Type))) %>% 
+	left_join(
+		data.frame(
+			letter=unname(toupper(cld(posthoc.correlation.GLHT)$mcletters$Letters)),
+			Combination=as.character(names(toupper(cld(posthoc.correlation.GLHT)$mcletters$Letters))),
+			stringsAsFactors=FALSE
+		),
+		by='Combination'
+	) %>% data.frame()
 
-p2 <- ggplot2(mapping=aes(x=factor(Surrogate.target),y=genetic.held, color=Method)) +
-	geom_boxplot(data=geo.correlation.DF) +
-	xlab('Geographic surrogate target (%)') + 
-	ylab('Neutral genetic variation secured (%)') +
-	geom_text(aes(x=0.05, y=0.9, label='(b)')) +
-	geom_line(data=data.frame(summarize(group_by(geo.correlation.DF, Surrogate.target, Method), genetic.held=median(genetic.held)))) +
+# make figure
+p1 <- ggplot(aes(x=Surrogate.target,y=genetic.held, color=Method),
+		data=env.correlation.DF) +
+	geom_boxplot(position=position_dodge(0.9)) +
+	xlab('Environmental surrogate target (%)') + 
+	ylab('Adaptive genetic\nvariation secured (%)') +
+	geom_text(aes(x=0.75, y=1, label='(a)'), color='black', size=5) +
 	theme_classic() +
-	scale_color_manual(name='Prioritization', values=c('Optimal'='black', 'Random'='grey50'))
+	theme(legend.position=c(0.225,0.8)) +
+	scale_color_manual(name='Prioritization', values=c('Optimal'='black', 'Random'='grey50')) +
+	geom_text(aes(x=Surrogate.target, y=genetic.held, color=Method, label=letter),
+		data=env.correlation.DF2, position=position_dodge(0.9))
+
+p2 <- ggplot(aes(x=Surrogate.target,y=genetic.held, color=Method),
+			data=geo.correlation.DF) +
+	geom_boxplot(position=position_dodge(0.9)) +
+	xlab('Geographic surrogate target (%)') + 
+	ylab('Neutral genetic\nvariation secured (%)') +
+	geom_text(aes(x=0.75, y=1, label='(b)'), color='black', size=5) +
+	theme_classic() +
+	theme(legend.position='none') +
+	scale_color_manual(name='Prioritization', values=c('Optimal'='black', 'Random'='grey50')) +
+	geom_text(aes(x=Surrogate.target, y=genetic.held, color=Method, label=letter),
+		data=geo.correlation.DF2, position=position_dodge(0.9))
 
 # render figure
-grid.arrange(p1,p2,nrow=1)
+grid.arrange(p1,p2,nrow=2)
 
 ```
 
@@ -131,7 +166,7 @@ results.SDF <- results.SDF %>% mutate(
 results.PDF <- results.SDF %>% group_by(
 		Prioritisation, Context, Metric
 	) %>% mutate(
-		letter.height=max(value, na.rm=TRUE)+0.04,
+		letter.height=max(value, na.rm=TRUE)+0.1,
 		Combination=paste0(Prioritisation,'.',Metric,'.',Context)
 	) %>% filter(
 		c(TRUE, rep(FALSE, length(Context)-1))
@@ -161,6 +196,7 @@ results.PDF <- results.PDF %>% mutate(
 		"Multi-species\n(equal costs)", 
 		"Multi-species\n(opportunity costs)"))
 	)
+
 # make plot
 suppressWarnings({
 	ggplot(aes(x=Prioritisation,y=value),
@@ -168,13 +204,13 @@ suppressWarnings({
 		geom_boxplot(position=position_dodge(0.9)) +
 		geom_text(aes(x=Prioritisation, y=letter.height, label=letter),
 			data=results.PDF, position=position_dodge(0.9)) +
-		geom_text(aes(x=0.6, y=1.03, label=panel.letter),
+		geom_text(aes(x=0.7, y=1, label=panel.letter),
 			data=results.PDF) +
 		scale_fill_manual(name='Prioritisation',
 			values=c('grey80','grey50','grey20')) +
 		ylab('Genetic variation secured (%)') +
 		xlab('') +
-		ylim(c(NA, 1.05)) +
+		scale_y_continuous(breaks=c(0,0.25,0.5,0.75,1), limits=c(NA, 1.2)) +
 		theme_classic() +
 		theme(strip.background = element_rect(fill='grey20'),
 			strip.text = element_text(color='white'),
