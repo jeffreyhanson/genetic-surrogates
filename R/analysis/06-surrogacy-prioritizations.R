@@ -23,7 +23,8 @@ env.correlation.prioritisations <- llply(
 					neutral.genetic.targets=NA,
 					Threads=gurobi.params.LST[[MODE]]$Threads,
 					MIPGap=gurobi.params.LST[[MODE]]$MIPGap,
-					NumberSolutions=rapr.params.LST[[MODE]]$surrogacy.analysis$surrogate.optimal.replicates
+					NumberSolutions=rapr.params.LST[[MODE]]$surrogacy.analysis$surrogate.optimal.replicates,
+					MultipleSolutionsMethod='solution.pool'
 				)
 			}
 		)
@@ -95,7 +96,8 @@ geo.correlation.prioritisations <- llply(
 					neutral.genetic.targets=NA,
 					Threads=gurobi.params.LST[[MODE]]$Threads,
 					MIPGap=gurobi.params.LST[[MODE]]$MIPGap,
-					NumberSolutions=rapr.params.LST[[MODE]]$surrogacy.analysis$surrogate.optimal.replicates
+					NumberSolutions=rapr.params.LST[[MODE]]$surrogacy.analysis$surrogate.optimal.replicates,
+					MultipleSolutionsMethod='solution.pool'
 				)
 			}
 		)

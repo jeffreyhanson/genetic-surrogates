@@ -28,7 +28,8 @@ multi.spp.prioritisations <- llply(
 			neutral.genetic.targets=y[[3]],
 			Threads=gurobi.params.LST[[MODE]]$Threads,
 			MIPGap=gurobi.params.LST[[MODE]]$MIPGap,
-			NumberSolutions=y[[4]]
+			NumberSolutions=y[[4]],
+			MultipleSolutionsMethod='solution.pool'
 		)
 	}
 )

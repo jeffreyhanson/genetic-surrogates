@@ -57,7 +57,8 @@ single.spp.surrogate.prioritisations <- llply(
 				neutral.genetic.targets=NA,
 				Threads=gurobi.params.LST[[MODE]]$Threads,
 				MIPGap=gurobi.params.LST[[MODE]]$MIPGap,
-				NumberSolutions=rapr.params.LST[[MODE]]$single.species$surrogate.replicates
+				NumberSolutions=rapr.params.LST[[MODE]]$single.species$surrogate.replicates,
+				MultipleSolutionsMethod='solution.pool'
 		)
 	}
 )
@@ -75,7 +76,8 @@ single.spp.genetic.prioritisations <- llply(
 				neutral.genetic.targets=rapr.params.LST[[MODE]]$single.species$genetic.target,
 				Threads=gurobi.params.LST[[MODE]]$Threads,
 				MIPGap=gurobi.params.LST[[MODE]]$MIPGap,
-				NumberSolutions=rapr.params.LST[[MODE]]$single.species$genetic.replicates
+				NumberSolutions=rapr.params.LST[[MODE]]$single.species$genetic.replicates,
+				MultipleSolutionsMethod='solution.pool'
 		)
 	}
 )

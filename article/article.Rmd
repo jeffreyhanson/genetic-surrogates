@@ -37,6 +37,8 @@ try(session::restore.session('results/results.rda'))
 # set options
 options(error=NULL)
 ```
+<!-- add line numbers -->
+\begin{linenumbers}
 
 
 <!--  title page -->
@@ -44,11 +46,8 @@ Short running title: Genetic surrogates in conservation \newline
 Word count: XXXXX \newline
 Number of references: XXXX \newline
 Number of figures, table and text boxes: 4 \newline
-
 \newpage
 
-<!-- add line numbers -->
-\begin{linenumbers}
 
 ## Introduction
 <!--  main text -->

@@ -60,6 +60,11 @@ To rerun all computational analyses, run `make all`
 	+ session
 	+ snow
 	+ vegan
+* R GitHub packages
+	+ paleo13/bayescanr
+	+ paleo13/structurer
+	+ paleo13/rgurobi
+	+ paleo13/rapr
 * LaTeX packages
 	+ amsfonts
 	+ amsmath

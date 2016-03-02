@@ -52,7 +52,8 @@ suppressMessages(library(bayescanr))
 suppressMessages(library(structurer))
 # devtools::install_github('paleo13/ggplot2')
 suppressMessages(library(ggplot2))
-
+# devtools::install_github('paleo13/rgurobi')
+suppressMessages(library(rgurobi))
 
 # set pander options
 panderOptions('knitr.auto.asis', FALSE)
