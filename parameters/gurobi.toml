@@ -6,5 +6,5 @@ MIPGap = 0.9
 
 [release]
 Threads = 21
-MIPGap = 0.05
+MIPGap = 0.1
 
