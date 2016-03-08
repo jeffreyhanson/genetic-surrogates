@@ -4,6 +4,9 @@ load('results/.cache/08-multi-species-prioritisations-no-cost.rda')
 load('results/.cache/07-single-species-prioritisations.rda')
 load('results/.cache/06-surrogacy-prioritizations.rda')
 
+### set MKL threads
+setMKLthreads(general.params.LST[[MODE]]$threads)
+
 #### Statistical analysis
 ### surrogacy analysis
 # prepare data
@@ -61,6 +64,9 @@ posthoc.model.GLHT <- summary(
 	glht(posthoc.model.GLMM,
 		linfct=mcp(Prioritisation.Metric.Context='Tukey')),
 	adjusted('bonferroni'))
- 
+
+## reset threads
+setMKLthreads(1)
+
 ## save .rda
 save.session('results/.cache/10-statistical-analysis.rda')
