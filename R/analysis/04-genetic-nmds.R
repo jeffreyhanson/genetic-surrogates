@@ -33,7 +33,7 @@ spp.BayeScan.sample.loci.subset.LST <- llply(
 		run.BayeScan(
 			spp.BayeScanData.sample.loci.subset.LST[[i]],
 			fdr=bayescan.params.LST[[MODE]]$fdr,
-			threads=bayescan.params.LST[[MODE]]$threads,
+			threads=general.params.LST[[MODE]]$threads,
 			n=bayescan.params.LST[[MODE]]$n,
 			thin=bayescan.params.LST[[MODE]]$thin,
 			nbp=bayescan.params.LST[[MODE]]$nbp,
@@ -46,7 +46,7 @@ spp.BayeScan.sample.loci.subset.LST <- llply(
 )
 
 # init snow cluster
-clust <- makeCluster(nmds.params.LST[[MODE]]$threads, type='SOCK')
+clust <- makeCluster(general.params.LST[[MODE]]$threads, type='SOCK')
 clusterEvalQ(clust, {library(structurer);library(bayescanr);library(cluster);library(plyr);library(vegan)})
 clusterExport(clust, c('MODE', 'spp.BayeScanData.LST', 'spp.BayeScan.sample.loci.subset.LST', 'nmds.params.LST'))
 registerDoParallel(clust)

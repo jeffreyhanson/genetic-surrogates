@@ -9,7 +9,7 @@ gurobi.params.LST <- parseTOML('parameters/gurobi.toml')
 ### generate RapSolved objects
 ## amount-based prioritisations
 # prepare cluster object
-clust <- makeCluster(gurobi.params.LST[[MODE]]$Threads, type='SOCK')
+clust <- makeCluster(general.params.LST[[MODE]]$threads, type='SOCK')
 clusterEvalQ(clust, {library(rapr)})
 clusterExport(clust, c('spp.samples.DF','grid.DF','rapr.params.LST',
 	'MODE', 'species.prioritisation', 'ru'))
@@ -55,7 +55,7 @@ single.spp.surrogate.prioritisations <- llply(
 				geo.surrogate.targets=rapr.params.LST[[MODE]]$single.species$surrogate.target,
 				adaptive.genetic.targets=NA,
 				neutral.genetic.targets=NA,
-				Threads=gurobi.params.LST[[MODE]]$Threads,
+				Threads=general.params.LST[[MODE]]$threads,
 				MIPGap=gurobi.params.LST[[MODE]]$MIPGap,
 				NumberSolutions=rapr.params.LST[[MODE]]$single.species$surrogate.replicates,
 				MultipleSolutionsMethod='benders.cuts'
@@ -74,10 +74,9 @@ single.spp.genetic.prioritisations <- llply(
 				geo.surrogate.targets=NA,
 				adaptive.genetic.targets=rapr.params.LST[[MODE]]$single.species$genetic.target,
 				neutral.genetic.targets=rapr.params.LST[[MODE]]$single.species$genetic.target,
-				Threads=gurobi.params.LST[[MODE]]$Threads,
+				Threads=general.params.LST[[MODE]]$threads,
 				MIPGap=gurobi.params.LST[[MODE]]$MIPGap,
-				NumberSolutions=rapr.params.LST[[MODE]]$single.species$genetic.replicates,
-				MultipleSolutionsMethod='benders.cuts'
+				NumberSolutions=rapr.params.LST[[MODE]]$single.species$genetic.replicates
 		)
 	}
 )

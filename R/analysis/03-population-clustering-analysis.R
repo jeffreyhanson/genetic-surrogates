@@ -7,7 +7,7 @@ nmds.params.LST <- parseTOML('parameters/nmds.toml')
 
 ### mclust analyses
 ## run analyses
-clust <- makeCluster(mclust.params.LST[[MODE]]$threads, type='SOCK')
+clust <- makeCluster(general.params.LST[[MODE]]$threads, type='SOCK')
 clusterEvalQ(clust, {library(structurer);library(cluster);library(mclust);library(vegan)})
 clusterExport(clust, c('nmds.params.LST','mclust.params.LST','MODE', 'spp.StructureData.LST', 'spp.samples.DF'))
 registerDoParallel(clust)

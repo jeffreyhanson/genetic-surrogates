@@ -1,10 +1,8 @@
 title = "gurobi parameters"
 
 [debug]
-Threads = 1
 MIPGap = 0.9
 
 [release]
-Threads = 21
 MIPGap = 0.1
 

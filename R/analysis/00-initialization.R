@@ -65,22 +65,6 @@ set.seed(500)
 select <- dplyr::select
 
 ### Load functions
-paths <- c(
-	'genetic.surrogates-internal.R',
-	'data.R',
-	'misc.R',
-	'BayeScanResults.R',
-	'generics.R',
-	'BayeScanData.R',
-	'BayeScanOpts.R',
-	'BayeScan.R',
-	'extractResults.R',
-	'format.table.R',
-	'make.multi.species.AttributeSpace.R',
-	'make.single.species.AttributeSpace.R',
-	'make.targets.R',
-	'species.prioritisation.R'
-)
 for (x in dir(file.path('R', 'functions'), full.names=TRUE)) source(x)
 
 ### set parameters

@@ -26,10 +26,9 @@ multi.spp.prioritisations.with.cost <- llply(
 			geo.surrogate.targets=y[[2]],
 			adaptive.genetic.targets=y[[3]],
 			neutral.genetic.targets=y[[3]],
-			Threads=gurobi.params.LST[[MODE]]$Threads,
+			Threads=general.params.LST[[MODE]]$threads,
 			MIPGap=gurobi.params.LST[[MODE]]$MIPGap,
-			NumberSolutions=y[[4]],
-			MultipleSolutionsMethod='solution.pool'
+			NumberSolutions=y[[4]]
 		)
 	}
 )
