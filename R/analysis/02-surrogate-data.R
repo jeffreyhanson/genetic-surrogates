@@ -86,4 +86,4 @@ pca.DF <- read.table('data/BioClim_variables/pca.TXT', skip=80) %>% `names<-`(
 )
 
 ## save .rda
-save.session('results/.cache/02-surrogate-data.rda')
+save.session('results/.cache/02-surrogate-data.rda', compress='xz')

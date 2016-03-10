@@ -1,5 +1,5 @@
 ## load .rda
-session::restore.session('results/.cache/04-genetic-nmds.rda')
+session::restore.session('results/.cache/05-genetic-nmds.rda')
 
 # generate attribute spaces for geographic and environmental data
 surrogate.ASL <- llply(
@@ -87,4 +87,4 @@ ru@data@pu$cost <- 1
 ru_with_cost <- RapUnsolved(RapUnreliableOpts(), rd)
 
 ## save .rda
-save.session('results/.cache/05-format-data-for-prioritisations.rda')
+save.session('results/.cache/06-format-data-for-prioritisations.rda', compress='xz')

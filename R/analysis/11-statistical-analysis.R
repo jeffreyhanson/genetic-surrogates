@@ -1,8 +1,8 @@
 ## load .rda
-session::restore.session('results/.cache/09-multi-species-prioritisations-with-cost.rda')
-load('results/.cache/08-multi-species-prioritisations-no-cost.rda')
-load('results/.cache/07-single-species-prioritisations.rda')
-load('results/.cache/06-surrogacy-prioritizations.rda')
+session::restore.session('results/.cache/10-multi-species-prioritisations-with-cost.rda')
+load('results/.cache/09-multi-species-prioritisations-no-cost.rda')
+load('results/.cache/08-single-species-prioritisations.rda')
+load('results/.cache/07-surrogacy-prioritizations.rda')
 
 ### set MKL threads
 setMKLthreads(general.params.LST[[MODE]]$threads)
@@ -69,4 +69,4 @@ posthoc.model.GLHT <- summary(
 setMKLthreads(1)
 
 ## save .rda
-save.session('results/.cache/10-statistical-analysis.rda')
+save.session('results/.cache/11-statistical-analysis.rda', compress='xz')

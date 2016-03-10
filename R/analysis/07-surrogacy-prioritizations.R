@@ -1,5 +1,5 @@
 ## load .rda
-session::restore.session('results/.cache/05-format-data-for-prioritisations.rda')
+session::restore.session('results/.cache/06-format-data-for-prioritisations.rda')
 
 ## load parameters
 rapr.params.LST <- parseTOML('parameters/rapr.toml')
@@ -220,5 +220,5 @@ geo.correlation.DF <- ldply(
 correlation.DF <- rbind(env.correlation.DF, geo.correlation.DF)
 
 ## save .rda
-save.session('results/.cache/06-surrogacy-prioritizations.rda')
+save.session('results/.cache/07-surrogacy-prioritizations.rda', compress='xz')
 

@@ -85,4 +85,4 @@ for (i in unique(spp.samples.DF$species))
 
 
 ## save .rda
-save.session('results/.cache/01-load-data.rda')
+save.session('results/.cache/01-load-data.rda', compress='xz')

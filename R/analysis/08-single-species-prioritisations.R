@@ -1,5 +1,5 @@
 ## load .rda
-session::restore.session('results/.cache/05-format-data-for-prioritisations.rda')
+session::restore.session('results/.cache/07-format-data-for-prioritisations.rda')
 
 ## load parameters
 rapr.params.LST <- parseTOML('parameters/rapr.toml')
@@ -114,4 +114,4 @@ single.spp.DF <- ldply(
 
 
 ## save .rda
-save.session('results/.cache/07-single-species-prioritisations.rda')
+save.session('results/.cache/08-single-species-prioritisations.rda', compress='xz')

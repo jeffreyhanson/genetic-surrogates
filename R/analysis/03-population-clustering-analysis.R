@@ -7,7 +7,7 @@ nmds.params.LST <- parseTOML('parameters/nmds.toml')
 
 ### mclust analyses
 ## run analyses
-clust <- makeCluster(ceiling(general.params.LST[[MODE]]$threads*0.75), type='SOCK')
+clust <- makeCluster(general.params.LST[[MODE]]$threads, type='SOCK')
 clusterEvalQ(clust, {library(structurer);library(cluster);library(mclust);library(vegan)})
 clusterExport(clust, c('nmds.params.LST','mclust.params.LST','MODE', 'spp.StructureData.LST', 'spp.samples.DF'))
 registerDoParallel(clust)
@@ -66,4 +66,4 @@ spp.BayeScanData.sample.subset.LST <- llply(
 )
 
 ## load .rda
-save.session('results/.cache/03-population-clustering-analysis.rda')
+save.session('results/.cache/03-population-clustering-analysis.rda', compress='xz')
