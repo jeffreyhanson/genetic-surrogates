@@ -52,7 +52,7 @@ results/results.rda: results/.cache/11-*.rda R/analysis/12-*.R
 	R CMD BATCH --no-restore --no-save R/analysis/12-*.R
 	mv *.Rout results/.cache/
 
-results/.cache/11-*.rda: results/.cache/07-*.rda results/.cache/08-*.rda results/.cache/09-*.rda R/analysis/10-*.rda
+results/.cache/11-*.rda: results/.cache/07-*.rda results/.cache/08-*.rda results/.cache/09-*.rda results/.cache/10-*.rda
 	R CMD BATCH --no-restore --no-save R/analysis/11-*.R
 	mv *.Rout results/.cache/
 
