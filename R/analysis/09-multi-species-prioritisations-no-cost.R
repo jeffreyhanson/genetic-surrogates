@@ -1,5 +1,5 @@
 ## load .rda
-session::restore.session('results/.cache/08-format-data-for-prioritisations.rda')
+session::restore.session('results/.cache/06-format-data-for-prioritisations.rda')
 
 ## load parameters
 rapr.params.LST <- parseTOML('parameters/rapr.toml')
