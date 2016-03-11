@@ -29,7 +29,7 @@ options(error=NULL)
 env.correlation.DF$Surrogate.target <- factor(env.correlation.DF$Surrogate.target)
 env.correlation.DF2 <- env.correlation.DF %>%
 	group_by(Surrogate.target, Method, Type) %>% 
-	summarize(genetic.held=max(genetic.held)+0.1) %>%
+	summarize(genetic.held=max(genetic.held, na.rm=TRUE)+0.1) %>%
 	ungroup() %>% mutate(Combination=as.character(paste0(Surrogate.target,'.',Method,'.',Type))) %>% 
 	left_join(
 		data.frame(
@@ -42,7 +42,7 @@ env.correlation.DF2 <- env.correlation.DF %>%
 geo.correlation.DF$Surrogate.target <- factor(geo.correlation.DF$Surrogate.target)
 geo.correlation.DF2 <- geo.correlation.DF %>%
 	group_by(Surrogate.target, Method, Type) %>% 
-	summarize(genetic.held=max(genetic.held)+0.1) %>%
+	summarize(genetic.held=max(genetic.held, na.rm=TRUE)+0.1) %>%
 	ungroup() %>% mutate(Combination=as.character(paste0(Surrogate.target,'.',Method,'.',Type))) %>% 
 	left_join(
 		data.frame(
