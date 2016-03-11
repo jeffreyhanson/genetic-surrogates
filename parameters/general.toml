@@ -6,4 +6,4 @@ threads = 1
 
 [release]
 n.spp = 27
-threads = 18
+threads = 21

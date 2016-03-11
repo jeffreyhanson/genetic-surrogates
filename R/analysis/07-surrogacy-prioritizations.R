@@ -44,6 +44,7 @@ env.random.prioritisations <- llply(
 		llply(
 			seq_along(rapr.params.LST[[MODE]]$surrogacy.analysis$surrogate.target),
 			function(j) {
+				setMKLthreads(1)
 				# extract number of planning units
 				curr.optim_n <- table(rowSums(env.correlation.prioritisations[[i]][[j]]@results@selections))
 				curr.optim_p <- curr.optim_n / sum(curr.optim_n)
@@ -117,6 +118,7 @@ geo.random.prioritisations <- llply(
 			seq_along(rapr.params.LST[[MODE]]$surrogacy.analysis$surrogate.target),
 			function(j) {
 				# extract number of planning units
+				setMKLthreads(1)
 				curr.optim_n <- table(rowSums(geo.correlation.prioritisations[[i]][[j]]@results@selections))
 				curr.optim_p <- curr.optim_n / sum(curr.optim_n)
 				# identify which planning units are occupied by the species

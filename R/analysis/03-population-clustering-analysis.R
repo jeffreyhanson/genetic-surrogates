@@ -15,6 +15,7 @@ spp.Mclust.LST <- llply(
 	seq_along(spp.StructureData.LST),
 		.fun=function(i) {
 		## generate ordination
+		setMKLthreads(1)
 		curr.nmds <- bayescanr::nmds(
 			bayescanr::BayeScanData(
 				spp.StructureData.LST[[i]]@matrix,

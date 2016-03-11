@@ -15,6 +15,7 @@ spp.nmds.LST <- llply(
 	seq_along(spp.BayeScanData.LST),
 	.fun=function(i) {
 		# subset loci for species
+		setMKLthreads(1)
 		cat('starting species',i,'\n')
 		if (is.null(spp.BayeScan.sample.loci.subset.LST[[i]])) {
 			# all loci are neutral since only 1 population
