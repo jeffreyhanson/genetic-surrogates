@@ -609,7 +609,7 @@ knitr::kable(
 
 ```{r, echo=FALSE}
 knitr::kable(
-	format.table(
+	format.dataframe(
 		filter(
 			ldply(
 				seq_along(unique(spp.samples.DF$species)), 
@@ -649,7 +649,7 @@ knitr::kable(
 
 ```{r, echo=FALSE}
 knitr::kable(
-	format.table(
+	format.dataframe(
 		ldply(
 			seq_along(unique(spp.samples.DF$species)), 
 			function(i) {

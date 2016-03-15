@@ -14,7 +14,7 @@ extractResults <- function(x) {
 	}
 	# extract score
 	score.DF <- data.frame(
-		Solution=rep(seq_along(x@data@species$name), each=length(x@data@species$name)),
+		Solution=rep(seq_along(x@results@summary$Score), each=length(x@data@species$name)),
 		Score=rep(x@results@summary$Score,each=length(x@data@species$name))
 	)
 	# extract amount held

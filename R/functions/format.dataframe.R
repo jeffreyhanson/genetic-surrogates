@@ -5,7 +5,7 @@
 #' @param x \code{data.frame}.
 #' @param omit \code{character} name of columns to omit from processig.
 #' @return \code{data.frame}
-format.table <- function(x, omit=c()) {
+format.dataframe <- function(x, omit=c()) {
 	# replace consecutive duplicate factors with ''
 	for (i in seq_len(ncol(x))) {
 		if (inherits(x[[i]], c('factor', 'character')) & (!names(x)[i] %in% omit)) {

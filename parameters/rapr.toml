@@ -28,7 +28,7 @@ title = "rapr parameters"
 
 	[release."single.species"]
 	amount.target = 0.1
-	amount.replicates = 10000
+	amount.replicates = 100
 	surrogate.target = 0.9
 	surrogate.replicates = 1
 	genetic.target = 0.9
@@ -44,7 +44,7 @@ title = "rapr parameters"
 	
 	[release."surrogacy.analysis"]
 	surrogate.optimal.replicates = 1
-	surrogate.random.replicates = 10000
-	surrogate.target = [0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9]
+	surrogate.random.replicates = 100
+	surrogate.target = [0.5,0.6,0.7,0.8,0.9]
 
 
