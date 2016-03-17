@@ -69,13 +69,13 @@ results.sub.SDF <- results.SDF[rowSums(apply(select(results.SDF, Prioritisation,
 ## main analysis
 # fit models
 full.scenario.GLMM <- glmer(value ~ Prioritisation*Metric*Context + (1 | Species), family='binomial', data=results.sub.SDF, nAGQ=10, control=glmerControl(optimizer=c('bobyqa'), optCtrl=list(maxfun=1e5)))
-sub.scenario.1.GLMM <- update(full.model.GLMM, .~. -Prioritisation:Metric:Context)
-sub.scenario.2.GLMM <- update(full.model.GLMM, .~. -Metric:Context)
-sub.scenario.3.GLMM <- update(full.model.GLMM, .~. -Prioritisation:Context)
-sub.scenario.4.GLMM <- update(full.model.GLMM, .~. -Prioritisation:Metric)
-sub.scenario.5.GLMM <- update(full.model.GLMM, .~. -Context)
-sub.scenario.6.GLMM <- update(full.model.GLMM, .~. -Metric)
-null.scenario.GLMM <- update(full.model.GLMM, .~. -Prioritisation)
+sub.scenario.1.GLMM <- update(full.scenario.GLMM, .~. -Prioritisation:Metric:Context)
+sub.scenario.2.GLMM <- update(sub.scenario.1.GLMM, .~. -Metric:Context)
+sub.scenario.3.GLMM <- update(sub.scenario.2.GLMM, .~. -Prioritisation:Context)
+sub.scenario.4.GLMM <- update(sub.scenario.3.GLMM, .~. -Prioritisation:Metric)
+sub.scenario.5.GLMM <- update(sub.scenario.4.GLMM, .~. -Context)
+sub.scenario.6.GLMM <- update(sub.scenario.5.GLMM, .~. -Metric)
+null.scenario.GLMM <- update(sub.scenario.6.GLMM, .~. -Prioritisation)
 
 # compare models
 sub.scenario.1.ANOVA <- anova(full.scenario.GLMM, sub.scenario.1.GLMM, test='Chisq')
@@ -87,9 +87,9 @@ sub.scenario.6.ANOVA <- anova(sub.scenario.5.GLMM, sub.scenario.6.GLMM, test='Ch
 sub.scenario.7.ANOVA <- anova(sub.scenario.6.GLMM, null.scenario.GLMM, test='Chisq')
 
 # post-hoc
-posthoc.model.GLMM <- glmer(value ~ Prioritisation.Metric.Context + (1 | Species), family='binomial', data=results.sub.SDF, nAGQ=10, control=glmerControl(optimizer=c('bobyqa'), optCtrl=list(maxfun=1e5)))
-posthoc.model.GLHT <- summary(
-	glht(posthoc.model.GLMM,
+posthoc.scenario.GLMM <- glmer(value ~ Prioritisation.Metric.Context + (1 | Species), family='binomial', data=results.sub.SDF, nAGQ=10, control=glmerControl(optimizer=c('bobyqa'), optCtrl=list(maxfun=1e5)))
+posthoc.scenario.GLHT <- summary(
+	glht(posthoc.scenario.GLMM,
 		linfct=mcp(Prioritisation.Metric.Context='Tukey')),
 	adjusted('bonferroni'))
 
