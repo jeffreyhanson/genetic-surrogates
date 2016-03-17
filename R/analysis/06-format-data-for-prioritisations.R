@@ -7,7 +7,8 @@ surrogate.ASL <- llply(
 	.fun=function(x) {
 		make.multi.species.AttributeSpace(
 			site.data=grid.DF[,x,drop=FALSE],
-			species.data=grid.DF[,unique(spp.samples.DF$species),drop=FALSE]
+			species.data=grid.DF[,unique(spp.samples.DF$species),drop=FALSE],
+			distance.metric='minkowski'
 		)
 	}
 )
@@ -24,7 +25,8 @@ adaptive.ASL <- llply(
 			site.data=select(grid.DF, contains(paste0(unique(spp.samples.DF$species)[i], '_adaptive'))),
 			species.data=na.omit(select(grid.DF, contains(paste0(unique(spp.samples.DF$species)[i], '_adaptive')))),
 			spp.pos=i,
-			n.species=n_distinct(spp.samples.DF$species)
+			n.species=n_distinct(spp.samples.DF$species),
+			distance.metric='minkowski'
 		)
 	}
 )
@@ -41,7 +43,8 @@ neutral.ASL <- llply(
 			site.data=select(grid.DF, contains(paste0(unique(spp.samples.DF$species)[i], '_neutral'))),
 			species.data=na.omit(select(grid.DF, contains(paste0(unique(spp.samples.DF$species)[i], '_neutral')))),
 			spp.pos=i,
-			n.species=n_distinct(spp.samples.DF$species)
+			n.species=n_distinct(spp.samples.DF$species),
+			distance.metric='minkowski'
 		)
 	}
 )

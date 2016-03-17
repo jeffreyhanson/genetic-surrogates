@@ -8,10 +8,11 @@
 #' @param species.data \code{data.frame} with coordinates of demand points for the species.
 #' @param n.species \code{numeric} number of species to output.
 #' @param spp.pos \code{numeric} index of this species.
+#' @param distance.metric \code{character} name of distance metric to use for attribute space.
 #' @return \code{AttributeSpace}.
 #' @seealso \code{\link[rapr]{AttributeSpace}}, \code{\link[rapr]{AttributeSpace}}.
 #' @export
-make.single.species.AttributeSpace <- function(site.data,species.data,n.species,spp.pos) {
+make.single.species.AttributeSpace <- function(site.data,species.data,n.species,spp.pos, distance.metric='euclidean') {
 	# replace NA values in site.data with -9999
 	site.data <- apply(site.data, 2, function(x) {
 		replace(x, which(is.na(x)), -9999)
@@ -32,7 +33,8 @@ make.single.species.AttributeSpace <- function(site.data,species.data,n.species,
 					points=SimplePoints(coords=as.matrix(species.data)),
 					weights=rep(1, nrow(species.data))
 				)
-			)
+			),
+			distance.metric=distance.metric
 		)
 	)
 }
