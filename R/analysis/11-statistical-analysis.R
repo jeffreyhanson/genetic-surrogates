@@ -14,12 +14,12 @@ correlation.sub.DF <- correlation.DF[rowSums(apply(select(correlation.DF, Surrog
 # fit models
 full.correlation.GLMM <- glmer(genetic.held ~ Surrogate.target*Method*Type + (1|Species), data=correlation.sub.DF, family='binomial', nAGQ=10, control=glmerControl(optimizer=c('bobyqa'),optCtrl=list(maxfun=1e5)))
 sub.correlation.1.GLMM <- update(full.correlation.GLMM, .~. -Surrogate.target:Method:Type)
-sub.correlation.2.GLMM <- update(full.correlation.GLMM, .~. -Method:Type)
-sub.correlation.3.GLMM <- update(full.correlation.GLMM, .~. -Surrogate.target:Type)
-sub.correlation.4.GLMM <- update(full.correlation.GLMM, .~. -Surrogate.target:Method)
-sub.correlation.5.GLMM <- update(full.correlation.GLMM, .~. -Type)
-sub.correlation.6.GLMM <- update(full.correlation.GLMM, .~. -Method)
-null.correlation.GLMM <- update(full.correlation.GLMM, .~. -Surrogate.target)
+sub.correlation.2.GLMM <- update(sub.correlation.1.GLMM, .~. -Method:Type)
+sub.correlation.3.GLMM <- update(sub.correlation.2.GLMM, .~. -Surrogate.target:Type)
+sub.correlation.4.GLMM <- update(sub.correlation.3.GLMM, .~. -Surrogate.target:Method)
+sub.correlation.5.GLMM <- update(sub.correlation.4.GLMM, .~. -Type)
+sub.correlation.6.GLMM <- update(sub.correlation.5.GLMM, .~. -Method)
+null.correlation.GLMM <- update(sub.correlation.6.GLMM, .~. -Surrogate.target)
 
 # compare models
 sub.correlation.1.ANOVA <- anova(full.correlation.GLMM, sub.correlation.1.GLMM, test='Chisq')
