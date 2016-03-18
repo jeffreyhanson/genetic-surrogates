@@ -20,6 +20,7 @@ try(session::restore.session('results/results.rda'))
 
 # set options
 options(error=NULL)
+
 ```
 
 ## Figures
