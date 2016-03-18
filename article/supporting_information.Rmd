@@ -653,15 +653,17 @@ knitr::kable(
 		ldply(
 			seq_along(unique(spp.samples.DF$species)), 
 			function(i) {
-				data.frame(
-					Species=paste0('\\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[i]),'}'),
-					Primer=spp.BayeScan.sample.loci.subset.LST[[i]]@data@primers,
-					Probability=spp.BayeScan.sample.loci.subset.LST[[i]]@results@summary[[2]],
-					qval=spp.BayeScan.sample.loci.subset.LST[[i]]@results@summary[[4]],
-					alpha=spp.BayeScan.sample.loci.subset.LST[[i]]@results@summary[[5]],
-					fst=spp.BayeScan.sample.loci.subset.LST[[i]]@results@summary[[6]],
-					Type=spp.BayeScan.sample.loci.subset.LST[[i]]@results@summary[[7]]
-				)
+				if (!is.null(spp.BayeScan.sample.loci.subset.LST[[i]])) {
+					data.frame(
+						Species=paste0('\\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[i]),'}'),
+						Primer=spp.BayeScan.sample.loci.subset.LST[[i]]@data@primers,
+						Probability=spp.BayeScan.sample.loci.subset.LST[[i]]@results@summary[[2]],
+						qval=spp.BayeScan.sample.loci.subset.LST[[i]]@results@summary[[4]],
+						alpha=spp.BayeScan.sample.loci.subset.LST[[i]]@results@summary[[5]],
+						fst=spp.BayeScan.sample.loci.subset.LST[[i]]@results@summary[[6]],
+						Type=spp.BayeScan.sample.loci.subset.LST[[i]]@results@summary[[7]]
+					)
+				}
 			}
 		),
 		omit='Type'
@@ -669,6 +671,6 @@ knitr::kable(
 	digits=2,
 	col.names=c('Species', 'Primer', 'Probability', 'q-value', '$\\alpha$', '$F_{ST}$', 'Type'),
 	align=c('l', 'c', 'c', 'c', 'c', 'c', 'c'),
-	caption='Loci classifications for each species. Each row denotes a sampled loci for a given species, and the evidence for it being under selection based on outputs from the program \\texttt{Bayescan}.'
+	caption='Loci classifications for each species. Each row denotes a sampled loci for a given species, and the evidence for it being under selection based on outputs from the program \\texttt{Bayescan}. Note that loci in species with a single population were assumed to be neutral. Loci for these species do not appear in this table.'
 )
 ```
