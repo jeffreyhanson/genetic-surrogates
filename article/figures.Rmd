@@ -176,8 +176,8 @@ results.PDF <- results.SDF %>% group_by(
 		panel.letter=c(as.character(panel.letter[1]), rep(NA_character_, length(Context)-1))
 	) %>% data.frame() %>% left_join(
 		data.frame(
-			letter=unname(toupper(cld(posthoc.model.GLHT)$mcletters$Letters)),
-			Combination=as.character(names(toupper(cld(posthoc.model.GLHT)$mcletters$Letters)))
+			letter=unname(toupper(cld(posthoc.scenario.GLHT)$mcletters$Letters)),
+			Combination=as.character(names(toupper(cld(posthoc.scenario.GLHT)$mcletters$Letters)))
 		) %>% mutate(Combination=as.character(Combination)),
 		by='Combination'
 	) %>% data.frame()
