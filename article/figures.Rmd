@@ -25,7 +25,7 @@ options(error=NULL)
 
 ## Figures
 
-```{r, echo=FALSE, fig.width=6, fig.height=4.5, fig.cap='The relationship between surrogates and genetic variation secured in prioritizations. Panel (a) shows the relationship between environmental surrogate targets used to generate a prioritization and the proportion of adaptive genetic variation it secures. Similarly, panel (b) shows that for geographic surrogate targets and neutral genetic variation. Box-plots show inter-specific variation in the proportion of genetic variation secured using different surrogate-based targets. Letters indicate significant differences ($P < 0.05$).'}
+```{r, echo=FALSE, message=FALSE, fig.width=6, fig.height=4.5, fig.cap='The relationship between surrogates and genetic variation secured in prioritizations. Panel (a) shows the relationship between environmental surrogate targets used to generate a prioritization and the proportion of adaptive genetic variation it secures. Similarly, panel (b) shows that for geographic surrogate targets and neutral genetic variation. Box-plots show inter-specific variation in the proportion of genetic variation secured using different surrogate-based targets. Letters indicate significant differences ($P < 0.05$).'}
 # prepare data
 env.correlation.DF$Surrogate.target <- factor(env.correlation.DF$Surrogate.target)
 env.correlation.DF2 <- env.correlation.DF %>%
@@ -40,6 +40,7 @@ env.correlation.DF2 <- env.correlation.DF %>%
 		),
 		by='Combination'
 	) %>% data.frame()
+
 geo.correlation.DF$Surrogate.target <- factor(geo.correlation.DF$Surrogate.target)
 geo.correlation.DF2 <- geo.correlation.DF %>%
 	group_by(Surrogate.target, Method, Type) %>% 
@@ -53,16 +54,16 @@ geo.correlation.DF2 <- geo.correlation.DF %>%
 		),
 		by='Combination'
 	) %>% data.frame()
-
+	
 # make figure
 p1 <- ggplot(aes(x=Surrogate.target,y=genetic.held, color=Method),
 		data=env.correlation.DF) +
 	geom_boxplot(position=position_dodge(0.9)) +
 	xlab('Environmental surrogate target (%)') + 
 	ylab('Adaptive genetic\nvariation secured (%)') +
-	geom_text(aes(x=0.75, y=1, label='(a)'), color='black', size=5) +
+	geom_text(aes(x=0.55, y=1.125, label='(a)'), color='black', size=5) +
 	theme_classic() +
-	theme(legend.position=c(0.225,0.8)) +
+	theme(legend.position=c(0.9,0.4)) +
 	scale_color_manual(name='Prioritization', values=c('Optimal'='black', 'Random'='grey50')) +
 	geom_text(aes(x=Surrogate.target, y=genetic.held, color=Method, label=letter),
 		data=env.correlation.DF2, position=position_dodge(0.9))
@@ -72,7 +73,7 @@ p2 <- ggplot(aes(x=Surrogate.target,y=genetic.held, color=Method),
 	geom_boxplot(position=position_dodge(0.9)) +
 	xlab('Geographic surrogate target (%)') + 
 	ylab('Neutral genetic\nvariation secured (%)') +
-	geom_text(aes(x=0.75, y=1, label='(b)'), color='black', size=5) +
+	geom_text(aes(x=0.55, y=1.125, label='(b)'), color='black', size=5) +
 	theme_classic() +
 	theme(legend.position='none') +
 	scale_color_manual(name='Prioritization', values=c('Optimal'='black', 'Random'='grey50')) +
@@ -97,8 +98,8 @@ countries.FPLY <- countriesHigh[
 ,] %>% spFortify
 # prepare data for plotting
 grid.FPLY <- grid.PLY
-for (i in seq_along(single.spp.prioritisations))
-	grid.FPLY@data[[paste0('Single-species (equal costs).', c('Amount', 'Surrogate', 'Genetic')[i])]] <- rowMeans(sapply(single.spp.prioritisations[[i]], function(x){colMeans(x@results@selections)}))
+for (i in seq_along(single.spp.prioritisations[[1]]))
+	grid.FPLY@data[[paste0('Single-species (equal costs).', c('Amount', 'Surrogate', 'Genetic')[i])]] <- rowMeans(sapply(single.spp.prioritisations, function(x){colMeans(x[[i]]@results@selections)}))
 for (i in seq_along(multi.spp.prioritisations))
 	grid.FPLY@data[[paste0('Multi-species (equal costs).', c('Amount', 'Surrogate', 'Genetic')[i])]] <- colMeans(multi.spp.prioritisations[[i]]@results@selections)
 for (i in seq_along(multi.spp.prioritisations.with.cost))
@@ -205,7 +206,7 @@ suppressWarnings({
 		geom_boxplot(position=position_dodge(0.9)) +
 		geom_text(aes(x=Prioritisation, y=letter.height, label=letter),
 			data=results.PDF, position=position_dodge(0.9)) +
-		geom_text(aes(x=0.7, y=1, label=panel.letter),
+		geom_text(aes(x=0.7, y=1.05, label=panel.letter),
 			data=results.PDF) +
 		scale_fill_manual(name='Prioritisation',
 			values=c('grey80','grey50','grey20')) +
