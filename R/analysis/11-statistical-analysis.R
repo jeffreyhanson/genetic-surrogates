@@ -8,33 +8,25 @@ load('results/.cache/07-surrogacy-prioritizations.rda')
 ### surrogacy analyses
 # prepare data
 correlation.DF$Surrogate.target <- as.factor(correlation.DF$Surrogate.target)
-correlation.DF$Surrogate.target.Method.Type <- with(correlation.DF, interaction(Surrogate.target, Method, Type))
-correlation.sub.DF <- correlation.DF[rowSums(apply(select(correlation.DF, Surrogate.target, Method, Type), 2, is.na))==0,]
+correlation.DF$Surrogate.target.Type <- with(correlation.DF, interaction(Surrogate.target, Type))
+correlation.sub.DF <- correlation.DF[rowSums(apply(select(correlation.DF, Surrogate.target, Type), 2, is.na))==0,]
 
 # fit models
-full.correlation.GLMM <- glmer(genetic.held ~ Surrogate.target*Method*Type + (1|Species), data=correlation.sub.DF, family='binomial', nAGQ=10, control=glmerControl(optimizer=c('bobyqa'),optCtrl=list(maxfun=1e5)))
-sub.correlation.1.GLMM <- update(full.correlation.GLMM, .~. -Surrogate.target:Method:Type)
-sub.correlation.2.GLMM <- update(sub.correlation.1.GLMM, .~. -Method:Type)
-sub.correlation.3.GLMM <- update(sub.correlation.2.GLMM, .~. -Surrogate.target:Type)
-sub.correlation.4.GLMM <- update(sub.correlation.3.GLMM, .~. -Surrogate.target:Method)
-sub.correlation.5.GLMM <- update(sub.correlation.4.GLMM, .~. -Type)
-sub.correlation.6.GLMM <- update(sub.correlation.5.GLMM, .~. -Method)
-null.correlation.GLMM <- update(sub.correlation.6.GLMM, .~. -Surrogate.target)
+full.correlation.GLMM <- glmer(genetic.held ~ Surrogate.target*Type + (1|Species), data=correlation.sub.DF, family='binomial', nAGQ=10, control=glmerControl(optimizer=c('bobyqa'),optCtrl=list(maxfun=1e5)))
+sub.correlation.1.GLMM <- update(full.correlation.GLMM, .~. -Surrogate.target:Type)
+sub.correlation.2.GLMM <- update(sub.correlation.1.GLMM, .~. -Type)
+null.correlation.GLMM <- update(sub.correlation.2.GLMM, .~. -Surrogate.target)
 
 # compare models
 sub.correlation.1.ANOVA <- anova(full.correlation.GLMM, sub.correlation.1.GLMM, test='Chisq')
 sub.correlation.2.ANOVA <- anova(sub.correlation.1.GLMM, sub.correlation.2.GLMM, test='Chisq')
-sub.correlation.3.ANOVA <- anova(sub.correlation.2.GLMM, sub.correlation.3.GLMM, test='Chisq')
-sub.correlation.4.ANOVA <- anova(sub.correlation.3.GLMM, sub.correlation.4.GLMM, test='Chisq')
-sub.correlation.5.ANOVA <- anova(sub.correlation.4.GLMM, sub.correlation.5.GLMM, test='Chisq')
-sub.correlation.6.ANOVA <- anova(sub.correlation.5.GLMM, sub.correlation.6.GLMM, test='Chisq')
-sub.correlation.7.ANOVA <- anova(sub.correlation.6.GLMM, null.correlation.GLMM, test='Chisq')
+sub.correlation.3.ANOVA <- anova(sub.correlation.2.GLMM, null.correlation.GLMM, test='Chisq')
 
 # posthoc analysis
-posthoc.correlation.GLMM <- glmer(genetic.held ~ Surrogate.target.Method.Type + (1|Species), data=correlation.sub.DF, family='binomial', nAGQ=10, control=glmerControl(optimizer=c('bobyqa'),optCtrl=list(maxfun=1e5)))
+posthoc.correlation.GLMM <- glmer(genetic.held ~ Surrogate.target.Type + (1|Species), data=correlation.sub.DF, family='binomial', nAGQ=10, control=glmerControl(optimizer=c('bobyqa'),optCtrl=list(maxfun=1e5)))
 posthoc.correlation.GLHT <- summary(
 	glht(posthoc.correlation.GLMM,
-		linfct=mcp(Surrogate.target.Method.Type='Tukey')),
+		linfct=mcp(Surrogate.target.Type='Tukey')),
 	adjusted('bonferroni'))
 
 ### scenario analyses
