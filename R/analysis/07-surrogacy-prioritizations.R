@@ -67,7 +67,8 @@ env.correlation.DF <- ldply(
 				rapr.params.LST[[MODE]]$surrogacy.analysis$surrogate.target,
 				each=rapr.params.LST[[MODE]]$surrogacy.analysis$surrogate.optimal.replicates
 			),
-			genetic.held=adaptive.held
+			genetic.held=adaptive.held,
+			Type='Environmental'
 		)
 	}
 ) %>% mutate(
@@ -85,7 +86,8 @@ geo.correlation.DF <- ldply(
 				rapr.params.LST[[MODE]]$surrogacy.analysis$surrogate.target,
 				each=rapr.params.LST[[MODE]]$surrogacy.analysis$surrogate.optimal.replicates
 			),
-			genetic.held=neutral.held
+			genetic.held=neutral.held,
+			Type='Geographic'
 		)
 	}
 ) %>% mutate(
