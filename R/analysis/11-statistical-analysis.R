@@ -51,14 +51,14 @@ scenario.DF <- rbind.fill(list(single.spp.SDF, multi.spp.SDF, multi.spp.with.cos
 		'multi-species (equal costs)'='Multi-species\n(equal costs)',
 		'multi-species (opportunity costs)'='Multi-species\n(opportunity costs)'))) %>%
 	mutate(Prioritisation=revalue(Prioritisation, c(
-		'Amount'='Amount\ntargets',
+		'Amount'='Amount targets',
 		'Surrogate'='Amount & surrogate\ntargets',
 		'Genetic'='Amount & genetic\ntargets'
 	))) %>%
 	mutate(
 		Metric=factor(as.character(Metric), levels=c('Adaptive variation','Neutral variation')),
 		Context=factor(as.character(Context), levels=c('Single-species\n(equal costs)','Multi-species\n(equal costs)','Multi-species\n(opportunity costs)')),
-		Prioritisation=factor(as.character(Prioritisation), levels=c('Amount\ntargets','Amount & surrogate\ntargets','Amount & genetic\ntargets'))
+		Prioritisation=factor(as.character(Prioritisation), levels=c('Amount targets','Amount & surrogate\ntargets','Amount & genetic\ntargets'))
 	) %>%
 	mutate(Prioritisation.Metric.Context=interaction(Prioritisation,Metric,Context))
 	

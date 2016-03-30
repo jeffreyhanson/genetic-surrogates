@@ -108,8 +108,8 @@ grid.FPLY <- grid.FPLY %>% gather(
 		Context=sapply(strsplit(as.character(Combination), '.', fixed=TRUE), `[[`, 1),
 		Prioritization=sapply(strsplit(as.character(Combination), '.', fixed=TRUE), `[[`, 2)
 	) %>% mutate(
-		Prioritization=revalue(Prioritization, c('Amount'='Amount\ntargets', 'Surrogate'='Amount & surrogate\ntargets', 'Genetic'='Amount & genetic\ntargets')),
-		Prioritization=factor(as.character(Prioritization), levels=c('Amount\ntargets', 'Amount & surrogate\ntargets', 'Amount & genetic\ntargets')),
+		Prioritization=revalue(Prioritization, c('Amount'='Amount targets', 'Surrogate'='Amount & surrogate\ntargets', 'Genetic'='Amount & genetic\ntargets')),
+		Prioritization=factor(as.character(Prioritization), levels=c('Amount targets', 'Amount & surrogate\ntargets', 'Amount & genetic\ntargets')),
 		Context=factor(
 			gsub(' (', '\n(', Context, fixed=TRUE),
 			levels=c("Single-species\n(equal costs)", "Multi-species\n(equal costs)", 
@@ -188,7 +188,7 @@ suppressWarnings({
 			slope=0, color='red',linetype='dashed') +
 		geom_text(aes(x=Prioritisation, y=letter.height, label=letter),
 			data=scenario.PDF, position=position_dodge(0.9)) +
-		geom_text(aes(x=0.5, y=1.075, label=panel.letter),
+		geom_text(aes(x=0.6, y=1.09, label=panel.letter),
 			data=scenario.PDF) +
 		scale_fill_manual(name='Prioritisation',
 			values=c('grey80','grey50','grey20')) +

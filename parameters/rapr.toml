@@ -2,16 +2,16 @@ title = "rapr parameters"
 
 [debug]
 
-	[release."surrogacy.analysis"]
-	surrogate.threshold = 0.8
+	[debug."surrogacy.analysis"]
+	genetic.target = 0.8
 	surrogate.optimal.replicates = 1
-	surrogate.target = [0.8 ,0.9, 0.95, 0.99]
+	surrogate.target = [0.75, 0.9, 0.95, 0.99]
 
-	[release."scenario.analysis"]
+	[debug."scenario.analysis"]
 	amount.target = 0.1
 	surrogate.target = 0.9
 	genetic.target = 0.8
-	single.species.amount.replicates = 100
+	single.species.amount.replicates = 10
 	other.replicates = 1
 
 [release]
