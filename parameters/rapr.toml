@@ -2,49 +2,29 @@ title = "rapr parameters"
 
 [debug]
 
-	[debug."single.species"]
-	amount.target = 0.1
-	amount.replicates = 10
-	surrogate.target = 0.9
-	surrogate.replicates = 1
-	genetic.target = 0.5
-	genetic.replicates = 1
-
-	[debug."multi.species"]
-	amount.target = 0.1
-	amount.replicates = 1
-	surrogate.target = 0.9
-	surrogate.replicates = 1
-	genetic.target = 0.5
-	genetic.replicates = 1
-	
-	[debug."surrogacy.analysis"]
+	[release."surrogacy.analysis"]
+	surrogate.threshold = 0.8
 	surrogate.optimal.replicates = 1
-	surrogate.random.replicates = 10
-	surrogate.target = [0.1, 0.2, 0.3, 0.4, 0.5]
+	surrogate.target = [0.8 ,0.9, 0.95, 0.99]
 
+	[release."scenario.analysis"]
+	amount.target = 0.1
+	surrogate.target = 0.9
+	genetic.target = 0.8
+	single.species.amount.replicates = 100
+	other.replicates = 1
 
 [release]
 
-	[release."single.species"]
-	amount.target = 0.1
-	amount.replicates = 100
-	surrogate.target = 0.95
-	surrogate.replicates = 1
-	genetic.target = 0.9
-	genetic.replicates = 1
-
-	[release."multi.species"]
-	amount.target = 0.1
-	amount.replicates = 1
-	surrogate.target = 0.95
-	surrogate.replicates = 1
-	genetic.target = 0.9
-	genetic.replicates = 1
-	
 	[release."surrogacy.analysis"]
+	genetic.target = 0.8
 	surrogate.optimal.replicates = 1
-	surrogate.random.replicates = 100
-	surrogate.target = [0.7 ,0.8 ,0.9, 0.95, 0.99]
+	surrogate.target = [0.1, 0.25, 0.5, 0.75, 0.9, 0.95, 0.99]
 
+	[release."scenario.analysis"]
+	amount.target = 0.1
+	surrogate.target = 0.9
+	genetic.target = 0.8
+	single.species.amount.replicates = 100
+	other.replicates = 1
 

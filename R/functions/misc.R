@@ -57,3 +57,59 @@ pretty.pval <- function(x) {
 	if (x < 0.05)
 		return('< 0.05')
 }
+
+#' pretty.tval
+#' 
+#' This function returns a floored version of a test statistic for use in text along with the correct arithmatic operator.
+#' @param x \code{numeric} test statistic or multiple test statistics.
+#' @return \code{character} object.
+#' @example
+#' pretty.tval(0.04)
+#' pretty.tval(c(0.01, 3, 0.5))
+#' @export
+pretty.tval <- function(x, digits=1) {
+	x <- x*(10^digits)
+	x <- floor(x)
+	x <- x/(10^digits)
+	return(x)
+}
+
+
+#' extract.GLHT
+#'
+#' Extract maximum p-value from multiple comparisons object given a filter.
+#' @param x \code{glht} object.
+#' @param filter1 \code{character} first filter expression 
+#' @param filter2 \code{character} second filter expression 
+#' @export
+extract.GLHT <- function(x, filter1, filter2) {
+	rownames <- names(x$test$tstat)
+	first.pos <- grep(filter1, rownames)
+	second.pos <- grep(filter2, rownames)
+	return(
+		list(
+			t=pretty.tval(max(unname(x$test$tstat))),
+			p=pretty.pval(max(unname(x$test$pvalues)))
+		)
+	)
+}
+
+#' Convert lower triangle matrix of p-values to full matrix (V 1.02, 2015 04 23)
+#' @author Sal Mangiafico, Rutgers Cooperative Extension (http://rcompanion.org/)
+#' @seealso \url{http://rcompanion.org/rcompanion/d_06.html}
+#' @example
+#' PT = full.p.table(pairwise.wilcox.test(x, g, p.adjust.method=\"none\")$p.value)
+full.p.table = function(PT) {
+	PTa <- rep(c(NA_real_),length(PT[,1]))         # Add a row
+	PT1 <- rbind(PTa, PT)
+	rownames(PT1)[1] <- colnames(PT1)[1]
+	PTb <- rep(c(NA_real_),length(PT1[,1]))        # Add a column
+	PT1 <- cbind(PT1, PTb)
+	n <- length(PT1[,1])
+	colnames(PT1)[n] <- rownames(PT1)[n]
+	PT2 = t(PT1)                                   # Create new transposed
+	PT2[lower.tri(PT2)] = PT1[lower.tri(PT1)]
+	diag(PT2) = signif(1.00, digits = 4)           # Set the diagonal
+	return(PT2)
+}
+

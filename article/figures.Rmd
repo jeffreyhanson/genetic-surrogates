@@ -27,39 +27,20 @@ options(error=NULL)
 
 ```{r, echo=FALSE, message=FALSE, fig.width=6, fig.height=4.5, fig.cap='The relationship between surrogates and genetic variation secured in prioritizations. Panel (a) shows the relationship between environmental surrogate targets used to generate a prioritization and the proportion of adaptive genetic variation it secures. Similarly, panel (b) shows that for geographic surrogate targets and neutral genetic variation. Box-plots show inter-specific variation in the proportion of genetic variation secured using different surrogate-based targets. Letters indicate significant differences ($P < 0.05$).'}
 # prepare data
-env.correlation.DF$Surrogate.target <- factor(env.correlation.DF$Surrogate.target)
-env.correlation.DF <- env.correlation.DF %>%
+correlation.PDF <- correlation.sub.DF %>%
 	group_by(Surrogate.target, Type, Species) %>% 
 	summarize(genetic.held=mean(genetic.held, na.rm=TRUE)) %>%
 	data.frame()
 
-env.correlation.DF2 <- env.correlation.DF %>%
-	group_by(Surrogate.target, Type) %>% 
+correlation.PDF2 <- correlation.PDF %>%
+	group_by(Type, Surrogate.target, Type) %>% 
 	summarize(genetic.held=max(genetic.held, na.rm=TRUE)+0.1) %>%
-	ungroup() %>% mutate(Combination=as.character(paste0(Surrogate.target,'.',Type))) %>% 
+	ungroup() %>%
+	mutate(Combination=as.character(paste0(Surrogate.target,'.',Type))) %>% 
 	left_join(
 		data.frame(
-			letter=unname(toupper(cld(posthoc.correlation.GLHT)$mcletters$Letters)),
-			Combination=as.character(names(toupper(cld(posthoc.correlation.GLHT)$mcletters$Letters))),
-			stringsAsFactors=FALSE
-		),
-		by='Combination'
-	) %>% data.frame()
-
-geo.correlation.DF$Surrogate.target <- factor(geo.correlation.DF$Surrogate.target)
-geo.correlation.DF <- geo.correlation.DF %>%
-	group_by(Surrogate.target, Type, Species) %>% 
-	summarize(genetic.held=mean(genetic.held, na.rm=TRUE)) %>%
-	data.frame()
-
-geo.correlation.DF2 <- geo.correlation.DF %>%
-	group_by(Surrogate.target, Type) %>% 
-	summarize(genetic.held=max(genetic.held, na.rm=TRUE)+0.1) %>%
-	ungroup() %>% mutate(Combination=as.character(paste0(Surrogate.target,'.',Type))) %>% 
-	left_join(
-		data.frame(
-			letter=unname(toupper(cld(posthoc.correlation.GLHT)$mcletters$Letters)),
-			Combination=as.character(names(toupper(cld(posthoc.correlation.GLHT)$mcletters$Letters))),
+			letter=unname(correlation.fisher.cld$Letters),
+			Combination=names(correlation.fisher.cld$Letters),
 			stringsAsFactors=FALSE
 		),
 		by='Combination'
@@ -67,26 +48,32 @@ geo.correlation.DF2 <- geo.correlation.DF %>%
 	
 # make figure
 p1 <- ggplot(aes(x=Surrogate.target,y=genetic.held),
-		data=env.correlation.DF) +
+		data=filter(correlation.PDF, Type=='Environmental')) +
 	geom_boxplot(position=position_dodge(0.9)) +
 	xlab('Environmental surrogate target (%)') + 
 	ylab('Adaptive genetic\nvariation secured (%)') +
-	geom_text(aes(x=0.55, y=1.125, label='(a)'), color='black', size=5) +
+	geom_abline(intercept=rapr.params.LST[[MODE]]$surrogacy.analysis$genetic.target,
+		slope=0, color='red', linetype='dashed') +
+	geom_text(aes(x=0.55, y=1.115, label='(a)'), color='black', size=5) +
 	theme_classic() +
 	theme(legend.position='none') +
 	geom_text(aes(x=Surrogate.target, y=genetic.held, label=letter),
-		data=env.correlation.DF2, position=position_dodge(0.9))
+		data=filter(correlation.PDF2, Type=='Environmental'),
+		position=position_dodge(0.9))
 
 p2 <- ggplot(aes(x=Surrogate.target,y=genetic.held),
-			data=geo.correlation.DF) +
+			data=filter(correlation.PDF, Type=='Geographic')) +
 	geom_boxplot(position=position_dodge(0.9)) +
 	xlab('Geographic surrogate target (%)') + 
 	ylab('Neutral genetic\nvariation secured (%)') +
-	geom_text(aes(x=0.55, y=1.125, label='(b)'), color='black', size=5) +
+	geom_abline(intercept=rapr.params.LST[[MODE]]$surrogacy.analysis$genetic.target, 
+		slope=0, color='red', linetype='dashed') +
+	geom_text(aes(x=0.55, y=1.115, label='(b)'), color='black', size=5) +
 	theme_classic() +
 	theme(legend.position='none') +
 	geom_text(aes(x=Surrogate.target, y=genetic.held, label=letter),
-		data=geo.correlation.DF2, position=position_dodge(0.9))
+		data=filter(correlation.PDF2, Type=='Geographic'),
+		position=position_dodge(0.9))
 
 # render figure
 grid.arrange(p1,p2,nrow=2)
@@ -121,7 +108,8 @@ grid.FPLY <- grid.FPLY %>% gather(
 		Context=sapply(strsplit(as.character(Combination), '.', fixed=TRUE), `[[`, 1),
 		Prioritization=sapply(strsplit(as.character(Combination), '.', fixed=TRUE), `[[`, 2)
 	) %>% mutate(
-		Prioritization=factor(Prioritization, levels=c('Amount', 'Surrogate', 'Genetic')),
+		Prioritization=revalue(Prioritization, c('Amount'='Amount\ntargets', 'Surrogate'='Amount & surrogate\ntargets', 'Genetic'='Amount & genetic\ntargets')),
+		Prioritization=factor(as.character(Prioritization), levels=c('Amount\ntargets', 'Amount & surrogate\ntargets', 'Amount & genetic\ntargets')),
 		Context=factor(
 			gsub(' (', '\n(', Context, fixed=TRUE),
 			levels=c("Single-species\n(equal costs)", "Multi-species\n(equal costs)", 
@@ -168,54 +156,40 @@ ggplot() +
 
 ```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.width=5, fig.height=5, fig.cap='The effectiveness of prioritizations at securing genetic variation. The top row of panels (a--b) show the performance of single-species prioritizations generated assuming equal costs among planning costs. The middle row of panels (c--d) show the performance of multi-species prioritizations generated assuming equal costs among planning units. The bottom row of panels (e--f) show the performance of multi-species prioritizations generated using opportunity costs. The left column of panels (a, c, d) and the right column of panels (b, d, f) show the proportion of adaptive and neutral genetic variation secured (respectively). Box plots show the effectiveness of prioritizations generated using amount-based targets, amount-based and surrogate-based targets, and amount-based and genetic-based targets for each species. Letters denote significant differences ($P < 0.05$).'}
 # prepare data for plotting
-results.SDF <- results.SDF %>% mutate(
-		Prioritisation=factor(as.character(Prioritisation), levels=c('Amount','Surrogate','Genetic')),
-		Context=factor(as.character(Context), levels=c("single-species (equal costs)", "multi-species (equal costs)", "multi-species (opportunity costs)")),
-		Metric=factor(as.character(Metric), c("Adaptive variation", "Neutral variation"))
-	)
-results.PDF <- results.SDF %>% group_by(
-		Prioritisation, Context, Metric
-	) %>% mutate(
+scenario.PDF <- scenario.DF %>% group_by(Prioritisation, Context, Metric) %>% 
+	mutate(
 		letter.height=max(value, na.rm=TRUE)+0.1,
-		Combination=paste0(Prioritisation,'.',Metric,'.',Context)
-	) %>% filter(
-		c(TRUE, rep(FALSE, length(Context)-1))
-	) %>% data.frame() %>% group_by(Context, Metric) %>% mutate(
-		panel.letter=paste0('(',letters[as.integer(Context) + (as.integer(Metric)-1)],')'),
+		Combination=paste0(Prioritisation,'.',Metric,'.',Context)) %>%
+	filter(c(TRUE, rep(FALSE, length(Context)-1))) %>% 
+	ungroup() %>%
+	group_by(Context, Metric) %>% 
+	mutate(
+		panel.letter=paste0(
+			'(',letters[(as.integer(Context)*2)-1 + (as.integer(Metric)-1)],')'
+		),
 		panel.letter=c(as.character(panel.letter[1]), rep(NA_character_, length(Context)-1))
-	) %>% data.frame() %>% left_join(
+	) %>% 
+	ungroup() %>% 
+	left_join(
 		data.frame(
-			letter=unname(toupper(cld(posthoc.scenario.GLHT)$mcletters$Letters)),
-			Combination=as.character(names(toupper(cld(posthoc.scenario.GLHT)$mcletters$Letters)))
+			letter=unname(scenario.fisher.cld$Letters),
+			Combination=names(scenario.fisher.cld$Letters)
 		) %>% mutate(Combination=as.character(Combination)),
 		by='Combination'
 	) %>% data.frame()
-results.SDF <- results.SDF %>% mutate(
-	Context=sapply(as.character(Context), function(x) {paste0(toupper(substr(x, 1, 1)), substr(x, 2, nchar(x)))}),
-	Context=factor(
-		gsub(' (', '\n(', Context, fixed=TRUE),
-		levels=c("Single-species\n(equal costs)",
-		"Multi-species\n(equal costs)", 
-		"Multi-species\n(opportunity costs)"))
-	)
-results.PDF <- results.PDF %>% mutate(
-	Context=sapply(as.character(Context), function(x) {paste0(toupper(substr(x, 1, 1)), substr(x, 2, nchar(x)))}),
-	Context=factor(
-		gsub(' (', '\n(', Context, fixed=TRUE),
-		levels=c("Single-species\n(equal costs)",
-		"Multi-species\n(equal costs)", 
-		"Multi-species\n(opportunity costs)"))
-	)
 
 # make plot
 suppressWarnings({
 	ggplot(aes(x=Prioritisation,y=value),
-		data=results.SDF) +
+		data=scenario.DF) +
 		geom_boxplot(position=position_dodge(0.9)) +
+		geom_abline(
+			intercept=rapr.params.LST[[MODE]]$scenario.analysis$genetic.target,
+			slope=0, color='red',linetype='dashed') +
 		geom_text(aes(x=Prioritisation, y=letter.height, label=letter),
-			data=results.PDF, position=position_dodge(0.9)) +
-		geom_text(aes(x=0.7, y=1.05, label=panel.letter),
-			data=results.PDF) +
+			data=scenario.PDF, position=position_dodge(0.9)) +
+		geom_text(aes(x=0.5, y=1.075, label=panel.letter),
+			data=scenario.PDF) +
 		scale_fill_manual(name='Prioritisation',
 			values=c('grey80','grey50','grey20')) +
 		ylab('Genetic variation secured (%)') +
