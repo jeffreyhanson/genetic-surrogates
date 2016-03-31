@@ -441,6 +441,7 @@ plot.spp.nmds <- function(i) {
 	curr.FPLY <- grid.FPLY[,
 		c(adapt.col, neutral.col,
 		'long','lat','group'),drop=FALSE]
+	curr.FPLY <- curr.FPLY[which(!is.na(curr.FPLY[[1]])),]
 	curr.FPLY <- curr.FPLY %>% gather(d, value, contains('adaptive'), contains('neutral')) %>% mutate(
 		d=gsub(paste0(unique(spp.samples.DF$species)[i], '_'), '', d, fixed=TRUE),
 		d=gsub('_', ' ', d, fixed=TRUE)

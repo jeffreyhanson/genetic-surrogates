@@ -39,7 +39,7 @@ correlation.PDF2 <- correlation.PDF %>%
 	mutate(Combination=as.character(paste0(Type,'.',Surrogate.target,'.',Method))) %>% 
 	left_join(
 		data.frame(
-			letter=unname(toupper(cld(correlation.GLHT)$mcletters$Letters),
+			letter=unname(toupper(cld(correlation.GLHT)$mcletters$Letters)),
 			Combination=as.character(names(toupper(cld(correlation.GLHT)$mcletters$Letters))),
 			stringsAsFactors=FALSE
 		),
@@ -47,31 +47,29 @@ correlation.PDF2 <- correlation.PDF %>%
 	) %>% data.frame()
 	
 # make figure
-p1 <- ggplot(aes(x=Surrogate.target,y=genetic.held),
+p1 <- ggplot(aes(x=Surrogate.target,y=genetic.held, fill=Method),
 		data=filter(correlation.PDF, Type=='Environmental')) +
 	geom_boxplot(position=position_dodge(0.9)) +
 	xlab('Environmental surrogate target (%)') + 
 	ylab('Adaptive genetic\nvariation secured (%)') +
-	geom_abline(intercept=rapr.params.LST[[MODE]]$surrogacy.analysis$genetic.target,
-		slope=0, color='red', linetype='dashed') +
 	geom_text(aes(x=0.55, y=1.115, label='(a)'), color='black', size=5) +
 	theme_classic() +
-	theme(legend.position='none') +
-	geom_text(aes(x=Surrogate.target, y=genetic.held, label=letter),
+	theme(legend.position=c(0.9,0.4)) +
+	scale_fill_manual(name='Prioritization', values=c('Optimal'='white', 'Random'='grey50')) +
+	geom_text(aes(x=Surrogate.target, y=genetic.held, fill=Method, label=letter),
 		data=filter(correlation.PDF2, Type=='Environmental'),
 		position=position_dodge(0.9))
 
-p2 <- ggplot(aes(x=Surrogate.target,y=genetic.held),
+p2 <- ggplot(aes(x=Surrogate.target,y=genetic.held, fill=Method),
 			data=filter(correlation.PDF, Type=='Geographic')) +
 	geom_boxplot(position=position_dodge(0.9)) +
 	xlab('Geographic surrogate target (%)') + 
 	ylab('Neutral genetic\nvariation secured (%)') +
-	geom_abline(intercept=rapr.params.LST[[MODE]]$surrogacy.analysis$genetic.target, 
-		slope=0, color='red', linetype='dashed') +
 	geom_text(aes(x=0.55, y=1.115, label='(b)'), color='black', size=5) +
 	theme_classic() +
 	theme(legend.position='none') +
-	geom_text(aes(x=Surrogate.target, y=genetic.held, label=letter),
+	scale_fill_manual(name='Prioritization', values=c('Optimal'='white', 'Random'='grey50')) +
+	geom_text(aes(x=Surrogate.target, y=genetic.held, fill=Method, label=letter),
 		data=filter(correlation.PDF2, Type=='Geographic'),
 		position=position_dodge(0.9))
 
@@ -158,7 +156,7 @@ ggplot() +
 # prepare data for plotting
 scenario.PDF <- scenario.DF %>% group_by(Prioritisation, Context, Metric) %>% 
 	mutate(
-		letter.height=max(value, na.rm=TRUE)+0.1,
+		letter.height=max(genetic.held, na.rm=TRUE)+0.1,
 		Combination=paste0(Prioritisation,'.',Metric,'.',Context)) %>%
 	filter(c(TRUE, rep(FALSE, length(Context)-1))) %>% 
 	ungroup() %>%
@@ -180,12 +178,9 @@ scenario.PDF <- scenario.DF %>% group_by(Prioritisation, Context, Metric) %>%
 
 # make plot
 suppressWarnings({
-	ggplot(aes(x=Prioritisation,y=value),
+	ggplot(aes(x=Prioritisation,y=genetic.held),
 		data=scenario.DF) +
 		geom_boxplot(position=position_dodge(0.9)) +
-		geom_abline(
-			intercept=rapr.params.LST[[MODE]]$scenario.analysis$genetic.target,
-			slope=0, color='red',linetype='dashed') +
 		geom_text(aes(x=Prioritisation, y=letter.height, label=letter),
 			data=scenario.PDF, position=position_dodge(0.9)) +
 		geom_text(aes(x=0.6, y=1.09, label=panel.letter),
