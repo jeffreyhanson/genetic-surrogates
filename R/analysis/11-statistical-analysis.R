@@ -8,38 +8,39 @@ load('results/.cache/07-surrogacy-prioritizations.rda')
 ### surrogacy analyses
 # prepare data
 correlation.DF$Surrogate.target <- as.factor(correlation.DF$Surrogate.target)
-correlation.DF$Surrogate.target.Type <- with(correlation.DF, interaction(Surrogate.target, Type))
-correlation.sub.DF <- correlation.DF[rowSums(apply(select(correlation.DF, Surrogate.target, Type), 2, is.na))==0,]
+correlation.DF$Type.Surrogate.target.Method <- with(correlation.DF, interaction(Type, Surrogate.target, Method))
+correlation.sub.DF <- correlation.DF[rowSums(apply(select(correlation.DF, Type, Surrogate.target, Method), 2, is.na))==0,]
 
-# prepare matrix with success vs. failures
-correlation.contingency.DF <- correlation.sub.DF %>% group_by(Surrogate.target,Type) %>% filter(!is.na(genetic.held)) %>% summarize(count=sum(genetic.held>=0.8), total=length(genetic.held)) %>% ungroup %>% mutate(prop=count/total, Surrogate.target2=as.numeric(as.character(Surrogate.target))) %>% mutate(secured=count, not.secured=total-count, name=paste0(Surrogate.target, '.', Type)) %>% select(secured, not.secured, name) %>% data.frame
-correlation.MTX <- as.matrix(select(correlation.contingency.DF, secured, not.secured))
-rownames(correlation.MTX) <- correlation.contingency.DF$name
+# run models
+full.correlation.GLMM <- glmer(genetic.held~Type.Surrogate.target.Method + (1|Species), data=correlation.sub.DF, family='binomial', nAGQ=10, control=glmerControl(optimizer=c('bobyqa'),optCtrl=list(maxfun=1e5)))
+null.correlation.GLMM <- glmer(genetic.held~ 1 + (1|Species), data=correlation.sub.DF, family='binomial', nAGQ=10, control=glmerControl(optimizer=c('bobyqa'),optCtrl=list(maxfun=1e5)))
 
-# run fisher test
-correlation.fisher.test <- fisher.test(correlation.MTX, workspace=1e8)
+# compare models
+correlation.ANOVA <- anova(full.correlation.GLMM, null.correlation.GLMM, test='Chisq')
 
-# run post-hoc fisher test
-correlation.fisher.multcomp <- fisher.multcomp(correlation.MTX, 'bonferroni')
-correlation.fisher.cld <- cld.RV.multcomp(correlation.fisher.multcomp)
+# posthoc analysis
+correlation.GLHT <- summary(
+	glht(full.correlation.GLMM, linfct=mcp(Type.Surrogate.target.Method='Tukey')),
+	adjusted('bonferroni')
+)
 
 ### scenario analyses
 ## prepare data
 # single species prioritisations
 single.spp.SDF <- single.spp.DF %>%
-	gather(Metric, value, amount.held:neutral.held) %>%
+	gather(Metric, genetic.held, amount.held:neutral.held) %>%
 	filter(Metric %in% c('adaptive.held', 'neutral.held')) %>%
 	mutate(Context='single-species (equal costs)')
 	
 # multi-species prioritisations without cost
 multi.spp.SDF <- multi.spp.DF %>%
-	gather(Metric, value, amount.held:neutral.held) %>%
+	gather(Metric, genetic.held, amount.held:neutral.held) %>%
 	filter(Metric %in% c('adaptive.held', 'neutral.held')) %>%
 	mutate(Context='multi-species (equal costs)') 
 
 # multi-species prioritisations with cost
 multi.spp.with.cost.SDF <- multi.spp.with.cost.DF %>%
-	gather(Metric, value, amount.held:neutral.held) %>%
+	gather(Metric, genetic.held, amount.held:neutral.held) %>%
 	filter(Metric %in% c('adaptive.held', 'neutral.held')) %>%
 	mutate(Context='multi-species (opportunity costs)') 
 
@@ -65,27 +66,18 @@ scenario.DF <- rbind.fill(list(single.spp.SDF, multi.spp.SDF, multi.spp.with.cos
 # remove NA values
 scenario.sub.DF <- scenario.DF[rowSums(apply(select(scenario.DF, Prioritisation, Metric, Context), 2, is.na))==0,]
 
-# prepare matrix with success vs. failures
-scenario.contingency.DF <- scenario.sub.DF %>% 
-	group_by(Prioritisation.Metric.Context) %>% 
-	filter(!is.na(value)) %>% 
-	summarize(count=sum(value>=0.8), total=length(value)) %>% 
-	ungroup %>% 
-	mutate(prop=count/total, secured=count, not.secured=total-count) %>%
-	select(secured, not.secured, Prioritisation.Metric.Context) %>%
-	data.frame()
+# run models
+full.scenario.GLMM <- glmer(genetic.held~Prioritisation.Metric.Context + (1|Species), data=scenario.sub.DF, family='binomial', nAGQ=10, control=glmerControl(optimizer=c('bobyqa'),optCtrl=list(maxfun=1e5)))
+null.scenario.GLMM <- glmer(genetic.held~ 1 + (1|Species), data=scenario.sub.DF, family='binomial', nAGQ=10, control=glmerControl(optimizer=c('bobyqa'),optCtrl=list(maxfun=1e5)))
 
-scenario.MTX <- as.matrix(select(scenario.contingency.DF, secured, not.secured))
-rownames(scenario.MTX) <- scenario.contingency.DF$Prioritisation.Metric.Context
+# compare models
+scenario.ANOVA <- anova(full.scenario.GLMM, null.scenario.GLMM, test='Chisq')
 
-## main analysis
-# fisher test
-scenario.fisher.test <- fisher.test(scenario.MTX, workspace=1e9)
-
-# post-hoc posthoc fisher tests
-scenario.fisher.multcomp <- fisher.multcomp(scenario.MTX, 'bonferroni')
-
-scenario.fisher.cld <- cld.RV.multcomp(scenario.fisher.multcomp)
+# posthoc analysis
+scenario.GLHT <- summary(
+	glht(full.scenario.GLMM, linfct=mcp(Prioritisation.Metric.Context ='Tukey')),
+	adjusted('bonferroni')
+)
 
 ## save .rda
 save.session('results/.cache/11-statistical-analysis.rda', compress='xz')

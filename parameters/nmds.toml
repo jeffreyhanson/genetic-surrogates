@@ -3,11 +3,11 @@ title = "mds parameters"
 [debug]
 min.k = 2
 max.k = 5
-max.stress = 0.1
+max.stress = 0.25
 trymax = 10
 
 [release]
 min.k = 2
 max.k = 100000
-max.stress = 0.1
+max.stress = 0.25
 trymax = 100

@@ -25,22 +25,22 @@ options(error=NULL)
 
 ## Figures
 
-```{r, echo=FALSE, message=FALSE, fig.width=6, fig.height=4.5, fig.cap='The relationship between surrogates and genetic variation secured in prioritizations. Panel (a) shows the relationship between environmental surrogate targets used to generate a prioritization and the proportion of adaptive genetic variation it secures. Similarly, panel (b) shows that for geographic surrogate targets and neutral genetic variation. Box-plots show inter-specific variation in the proportion of genetic variation secured using different surrogate-based targets. Letters indicate significant differences ($P < 0.05$).'}
+```{r, echo=FALSE, message=FALSE, fig.width=6, fig.height=4.5, fig.cap='The relationship between surrogates and genetic variation secured in prioritizations. White boxplots show the proportion of genetic variation secured by prioritizations generated using surrogate-based targets. Grey boxplots show the proportion of genetic variation secured by randomly generated prioritizations with the same number of planning units as the surrogate-based prioritizations. Panel (a) shows the relationship between environmental surrogate targets used to generate a prioritization and the proportion of adaptive genetic variation it secures. Similarly, panel (b) shows that for geographic surrogate targets and neutral genetic variation. Box-plots show inter-specific variation in the proportion of genetic variation secured using different surrogate-based targets. Letters indicate significant differences ($P < 0.05$).'}
 # prepare data
 correlation.PDF <- correlation.sub.DF %>%
-	group_by(Surrogate.target, Type, Species) %>% 
+	group_by(Type, Surrogate.target, Method, Species) %>% 
 	summarize(genetic.held=mean(genetic.held, na.rm=TRUE)) %>%
 	data.frame()
 
 correlation.PDF2 <- correlation.PDF %>%
-	group_by(Type, Surrogate.target, Type) %>% 
+	group_by(Type, Surrogate.target, Method) %>% 
 	summarize(genetic.held=max(genetic.held, na.rm=TRUE)+0.1) %>%
 	ungroup() %>%
-	mutate(Combination=as.character(paste0(Surrogate.target,'.',Type))) %>% 
+	mutate(Combination=as.character(paste0(Type,'.',Surrogate.target,'.',Method))) %>% 
 	left_join(
 		data.frame(
-			letter=unname(correlation.fisher.cld$Letters),
-			Combination=names(correlation.fisher.cld$Letters),
+			letter=unname(toupper(cld(correlation.GLHT)$mcletters$Letters),
+			Combination=as.character(names(toupper(cld(correlation.GLHT)$mcletters$Letters))),
 			stringsAsFactors=FALSE
 		),
 		by='Combination'
@@ -172,8 +172,8 @@ scenario.PDF <- scenario.DF %>% group_by(Prioritisation, Context, Metric) %>%
 	ungroup() %>% 
 	left_join(
 		data.frame(
-			letter=unname(scenario.fisher.cld$Letters),
-			Combination=names(scenario.fisher.cld$Letters)
+			letter=unname(toupper(cld(scenario.GLHT)$mcletters$Letters)),
+			Combination=as.character(names(toupper(cld(scenario.GLHT)$mcletters$Letters)))
 		) %>% mutate(Combination=as.character(Combination)),
 		by='Combination'
 	) %>% data.frame()
