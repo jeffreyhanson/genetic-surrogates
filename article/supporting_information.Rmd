@@ -450,28 +450,31 @@ plot.spp.nmds <- function(i) {
 		curr.FPLY[['d']] <- gsub(as.character(j), paste0('(', j, ')'), curr.FPLY[['d']], fixed=TRUE)
 	curr.FPLY <- curr.FPLY %>% mutate(d=factor(gsub(' d(', ' (', d, fixed=TRUE)))
 	# make plot
-	ggplot() +
-		geom_polygon(data=countries.FPLY, aes(x=long, y=lat, group=group),
-			fill='grey85', color='grey70') +
-		geom_polygon(data=curr.FPLY, aes_string(x='long', y='lat', 
-			group='group', fill='value'), color='grey10') +
-		theme_classic() +
-		theme(
-			axis.ticks=element_blank(), axis.text=element_blank(), axis.line=element_blank(), plot.margin = unit(c(0, 0, 0, 0), "lines"), axis.title=element_blank(),
-			panel.border=element_rect(color='black', fill=NA, size=1),
-			strip.background = element_rect(fill='grey20'),
-			strip.text = element_text(color='white', size=20)
-		) +
-		coord_cartesian(
-			xlim=buffered.range(grid.FPLY$long, 0),
-			ylim=buffered.range(grid.FPLY$lat, 0)
-		) +
-		scale_fill_gradientn(name='',
-			colors=brewer.pal(9, 'RdYlBu'),
-			guide=guide_colorbar(ticks=element_line(color='black'),
-				border=element_line(color='black'), barheight=unit(7, 'cm'))
-		) +
-		facet_wrap(~ d, ncol=4)
+	curr.GROBS <- llply(unique(curr.FPLY$d), function(x) {
+		ggplot() +
+			geom_polygon(data=countries.FPLY, aes(x=long, y=lat, group=group),
+				fill='grey85', color='grey70') +
+			geom_polygon(data=filter(curr.FPLY, d==x), aes_string(x='long', y='lat', 
+				group='group', fill='value'), color='grey10') +
+			theme_classic() +
+			theme(
+				axis.ticks=element_blank(), axis.text=element_blank(), axis.line=element_blank(), plot.margin = unit(c(0, 0, 0, 0), "lines"), axis.title=element_blank(),
+				panel.border=element_rect(color='black', fill=NA, size=1),
+				strip.background = element_rect(fill='grey20'),
+				strip.text = element_text(color='white', size=20)
+			) +
+			coord_cartesian(
+				xlim=buffered.range(grid.FPLY$long, 0),
+				ylim=buffered.range(grid.FPLY$lat, 0)
+			) +
+			scale_fill_gradientn(name='',
+				colors=brewer.pal(9, 'RdYlBu'),
+				guide=guide_colorbar(ticks=element_line(color='black'),
+					border=element_line(color='black'), barheight=unit(7, 'cm'))
+			)
+	})
+	do.call(grid.arrange, append(curr.GROBS, list(ncol=4)))
+	invisible()
 }
 
 calc.fig.height <- function(i) {
