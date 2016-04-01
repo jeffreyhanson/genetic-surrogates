@@ -54,6 +54,7 @@ To rerun all computational analyses, run `make all`
 	+ RcppTOML
 	+ rgeos
 	+ stats
+	+ taxize
 	+ testthat
 	+ tidyr
 	+ rworldxtra

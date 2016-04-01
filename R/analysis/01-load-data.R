@@ -83,6 +83,16 @@ for (i in unique(spp.samples.DF$species))
 		1
 	)
 
+## compile phylogeentic data
+spp.phylo.LST <- classification(unique(spp.samples.DF$species), db='ncbi')
+spp.phylo.DF <- ldply(spp.phylo.LST, function(x) {
+	curr.row <- which(x$rank=='family')
+	if (length(curr.row)==0)
+		return(data.frame(Family=NA_character_))
+	data.frame(Family=x$name[curr.row])
+}) %>% 
+	mutate(Species=unique(spp.samples.DF$species)) %>% 
+	select(Species, Family)
 
 ## save .rda
 save.session('results/.cache/01-load-data.rda', compress='xz')
