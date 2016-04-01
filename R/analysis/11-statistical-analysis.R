@@ -7,14 +7,13 @@ load('results/.cache/07-surrogacy-prioritizations.rda')
 #### Statistical analyses
 ### surrogacy analyses
 # prepare data
-correlation.DF <- left_join(correlation.DF, spp.phylo.DF, by='Species')
 correlation.DF$Surrogate.target <- as.factor(correlation.DF$Surrogate.target)
 correlation.DF$Type.Surrogate.target.Method <- with(correlation.DF, interaction(Type, Surrogate.target, Method))
 correlation.sub.DF <- correlation.DF[rowSums(apply(select(correlation.DF, Type, Surrogate.target, Method), 2, is.na))==0,]
 
 # run models
-full.correlation.GLMM <- glmer(genetic.held~Type.Surrogate.target.Method + (1|Species) + (1|Family), data=correlation.sub.DF, family='binomial', nAGQ=1, control=glmerControl(optimizer=c('bobyqa'),optCtrl=list(maxfun=1e5)))
-null.correlation.GLMM <- glmer(genetic.held~ 1 + (1|Species) + (1|Family), data=correlation.sub.DF, family='binomial', nAGQ=1, control=glmerControl(optimizer=c('bobyqa'),optCtrl=list(maxfun=1e5)))
+full.correlation.GLMM <- glmer(genetic.held~Type.Surrogate.target.Method + (1|Species), data=correlation.sub.DF, family='binomial', nAGQ=10, control=glmerControl(optimizer=c('bobyqa'),optCtrl=list(maxfun=1e5)))
+null.correlation.GLMM <- glmer(genetic.held~ 1 + (1|Species), data=correlation.sub.DF, family='binomial', nAGQ=10, control=glmerControl(optimizer=c('bobyqa'),optCtrl=list(maxfun=1e5)))
 
 # compare models
 correlation.ANOVA <- anova(full.correlation.GLMM, null.correlation.GLMM, test='Chisq')
@@ -47,7 +46,6 @@ multi.spp.with.cost.SDF <- multi.spp.with.cost.DF %>%
 
 # compile data.frames
 scenario.DF <- rbind.fill(list(single.spp.SDF, multi.spp.SDF, multi.spp.with.cost.SDF)) %>%
-	left_join(spp.phylo.DF, by='Species')
 	mutate(Metric=revalue(Metric, c('adaptive.held'='Adaptive variation', 'neutral.held'='Neutral variation'))) %>%
 	mutate(Context=revalue(Context, c(
 		'single-species (equal costs)'='Single-species\n(equal costs)',
@@ -69,8 +67,8 @@ scenario.DF <- rbind.fill(list(single.spp.SDF, multi.spp.SDF, multi.spp.with.cos
 scenario.sub.DF <- scenario.DF[rowSums(apply(select(scenario.DF, Prioritisation, Metric, Context), 2, is.na))==0,]
 
 # run models
-full.scenario.GLMM <- glmer(genetic.held~Prioritisation.Metric.Context + (1|Species)  + (1|Family), data=scenario.sub.DF, family='binomial', nAGQ=1, control=glmerControl(optimizer=c('bobyqa'),optCtrl=list(maxfun=1e5)))
-null.scenario.GLMM <- glmer(genetic.held~ 1 + (1|Species), data=scenario.sub.DF, family='binomial', nAGQ=1, control=glmerControl(optimizer=c('bobyqa'),optCtrl=list(maxfun=1e5)))
+full.scenario.GLMM <- glmer(genetic.held~Prioritisation.Metric.Context + (1|Species), data=scenario.sub.DF, family='binomial', nAGQ=10, control=glmerControl(optimizer=c('bobyqa'),optCtrl=list(maxfun=1e5)))
+null.scenario.GLMM <- glmer(genetic.held~ 1 + (1|Species), data=scenario.sub.DF, family='binomial', nAGQ=10, control=glmerControl(optimizer=c('bobyqa'),optCtrl=list(maxfun=1e5)))
 
 # compare models
 scenario.ANOVA <- anova(full.scenario.GLMM, null.scenario.GLMM, test='Chisq')
@@ -82,4 +80,4 @@ scenario.GLHT <- summary(
 )
 
 ## save .rda
-save.session('results/.cache/12-statistical-analysis.rda', compress='xz')
+save.session('results/.cache/11-statistical-analysis.rda', compress='xz')

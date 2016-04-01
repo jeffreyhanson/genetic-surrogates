@@ -42,7 +42,7 @@ suppressMessages(library(mclust))
 suppressMessages(library(cluster))
 suppressMessages(library(multcomp))
 suppressMessages(library(lme4))
-suppressMessages(library(taxize))
+
 
 ## load github packages
 # devtools::install_github('paleo13/raspr')
