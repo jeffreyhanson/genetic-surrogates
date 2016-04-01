@@ -471,7 +471,7 @@ plot.spp.nmds <- function(i) {
 				colors=brewer.pal(9, 'RdYlBu'),
 				guide=guide_colorbar(ticks=element_line(color='black'),
 					border=element_line(color='black'), barheight=unit(7, 'cm'))
-			)
+			) + facet_wrap(~d)
 	})
 	do.call(grid.arrange, append(curr.GROBS, list(ncol=4)))
 	invisible()
