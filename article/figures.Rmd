@@ -25,27 +25,14 @@ options(error=NULL)
 
 ## Figures
 
-```{r, echo=FALSE, message=FALSE, fig.width=6, fig.height=4.5, fig.cap='The relationship between surrogates and genetic variation secured in prioritizations. White boxplots show the proportion of genetic variation secured by prioritizations generated using surrogate-based targets. Grey boxplots show the proportion of genetic variation secured by randomly generated prioritizations with the same number of planning units as the surrogate-based prioritizations. Panel (a) shows the relationship between environmental surrogate targets used to generate a prioritization and the proportion of adaptive genetic variation it secures. Similarly, panel (b) shows that for geographic surrogate targets and neutral genetic variation. Box-plots show inter-specific variation in the proportion of genetic variation secured using different surrogate-based targets. Letters indicate significant differences ($P < 0.05$).'}
+```{r, echo=FALSE, message=FALSE, fig.width=6, fig.height=4.5, fig.cap='The relationship between surrogates and genetic variation secured in prioritizations. White boxplots show the proportion of genetic variation secured by prioritizations generated using surrogate-based targets. Grey boxplots show the proportion of genetic variation secured by randomly generated prioritizations with the same number of planning units as the surrogate-based prioritizations. Panel (a) shows the relationship between environmental surrogate targets used to generate a prioritization and the proportion of adaptive genetic variation it secures. Similarly, panel (b) shows that for geographic surrogate targets and neutral genetic variation. Box-plots show inter-specific variation in the proportion of genetic variation secured using different surrogate-based targets.'}
 # prepare data
 correlation.PDF <- correlation.sub.DF %>%
 	group_by(Type, Surrogate.target, Method, Species) %>% 
 	summarize(genetic.held=mean(genetic.held, na.rm=TRUE)) %>%
 	data.frame()
 
-correlation.PDF2 <- correlation.PDF %>%
-	group_by(Type, Surrogate.target, Method) %>% 
-	summarize(genetic.held=max(genetic.held, na.rm=TRUE)+0.1) %>%
-	ungroup() %>%
-	mutate(Combination=as.character(paste0(Type,'.',Surrogate.target,'.',Method))) %>% 
-	left_join(
-		data.frame(
-			letter=unname(toupper(cld(correlation.GLHT)$mcletters$Letters)),
-			Combination=as.character(names(toupper(cld(correlation.GLHT)$mcletters$Letters))),
-			stringsAsFactors=FALSE
-		),
-		by='Combination'
-	) %>% data.frame()
-	
+
 # make figure
 p1 <- ggplot(aes(x=Surrogate.target,y=genetic.held, fill=Method),
 		data=filter(correlation.PDF, Type=='Environmental')) +
@@ -55,10 +42,7 @@ p1 <- ggplot(aes(x=Surrogate.target,y=genetic.held, fill=Method),
 	geom_text(aes(x=0.55, y=1.115, label='(a)'), color='black', size=5) +
 	theme_classic() +
 	theme(legend.position=c(0.9,0.4)) +
-	scale_fill_manual(name='Prioritization', values=c('Optimal'='white', 'Random'='grey50')) +
-	geom_text(aes(x=Surrogate.target, y=genetic.held, fill=Method, label=letter),
-		data=filter(correlation.PDF2, Type=='Environmental'),
-		position=position_dodge(0.9))
+	scale_fill_manual(name='Prioritization', values=c('Optimal'='white', 'Random'='grey50'))
 
 p2 <- ggplot(aes(x=Surrogate.target,y=genetic.held, fill=Method),
 			data=filter(correlation.PDF, Type=='Geographic')) +
@@ -69,9 +53,6 @@ p2 <- ggplot(aes(x=Surrogate.target,y=genetic.held, fill=Method),
 	theme_classic() +
 	theme(legend.position='none') +
 	scale_fill_manual(name='Prioritization', values=c('Optimal'='white', 'Random'='grey50')) +
-	geom_text(aes(x=Surrogate.target, y=genetic.held, fill=Method, label=letter),
-		data=filter(correlation.PDF2, Type=='Geographic'),
-		position=position_dodge(0.9))
 
 # render figure
 grid.arrange(p1,p2,nrow=2)
@@ -90,15 +71,15 @@ countries.FPLY <- countriesHigh[
 	)
 ,] %>% spFortify
 # prepare data for plotting
-grid.FPLY <- grid.PLY
+grid.sub.FPLY <- grid.sub.PLY
 for (i in seq_along(single.spp.prioritisations[[1]]))
-	grid.FPLY@data[[paste0('Single-species (equal costs).', c('Amount', 'Surrogate', 'Genetic')[i])]] <- rowMeans(sapply(single.spp.prioritisations, function(x){colMeans(x[[i]]@results@selections)}))
+	grid.sub.FPLY@data[[paste0('Single-species (equal costs).', c('Amount', 'Surrogate', 'Genetic')[i])]] <- rowMeans(sapply(single.spp.prioritisations, function(x){colMeans(x[[i]]@results@selections)}))
 for (i in seq_along(multi.spp.prioritisations))
-	grid.FPLY@data[[paste0('Multi-species (equal costs).', c('Amount', 'Surrogate', 'Genetic')[i])]] <- colMeans(multi.spp.prioritisations[[i]]@results@selections)
+	grid.sub.FPLY@data[[paste0('Multi-species (equal costs).', c('Amount', 'Surrogate', 'Genetic')[i])]] <- colMeans(multi.spp.prioritisations[[i]]@results@selections)
 for (i in seq_along(multi.spp.prioritisations.with.cost))
-	grid.FPLY@data[[paste0('Multi-species (opportunity costs).', c('Amount', 'Surrogate', 'Genetic')[i])]] <- colMeans(multi.spp.prioritisations.with.cost[[i]]@results@selections)
-grid.FPLY <- spFortify(grid.FPLY)
-grid.FPLY <- grid.FPLY %>% gather(
+	grid.sub.FPLY@data[[paste0('Multi-species (opportunity costs).', c('Amount', 'Surrogate', 'Genetic')[i])]] <- colMeans(multi.spp.prioritisations.with.cost[[i]]@results@selections)
+grid.sub.FPLY <- spFortify(grid.sub.FPLY)
+grid.sub.FPLY <- grid.sub.FPLY %>% gather(
 		Combination,
 		`Selection.Frequency`,
 		`Single-species (equal costs).Amount`:`Multi-species (opportunity costs).Genetic`
@@ -113,7 +94,7 @@ grid.FPLY <- grid.FPLY %>% gather(
 			levels=c("Single-species\n(equal costs)", "Multi-species\n(equal costs)", 
 			"Multi-species\n(opportunity costs)"))
 	)
-panel.DF <- grid.FPLY %>% select(Context, Prioritization, long, lat) %>% 
+panel.DF <- grid.sub.FPLY %>% select(Context, Prioritization, long, lat) %>% 
 	mutate(
 		lat=min(lat)+(diff(range(lat))*0.98),
 		long=min(long)+(diff(range(long))*0.02)
@@ -127,7 +108,7 @@ panel.DF <- grid.FPLY %>% select(Context, Prioritization, long, lat) %>%
 ggplot() +
 	geom_polygon(data=countries.FPLY, aes(x=long, y=lat, group=group),
 		fill='grey85', color='grey70') +
-	geom_polygon(data=grid.FPLY, aes_string(x='long', y='lat', 
+	geom_polygon(data=grid.sub.FPLY, aes_string(x='long', y='lat', 
 		group='group', fill='Selection.Frequency'),
 		alpha=0.8, color='grey10') +
 	geom_text(aes_string(x='long',y='lat', label='panel.letter'), data=panel.DF) +
@@ -141,8 +122,8 @@ ggplot() +
 		legend.margin=unit(c(0.1), 'cm'),
 		axis.title=element_blank()) +
 	coord_cartesian(
-		xlim=buffered.range(grid.FPLY$long, 0),
-		ylim=buffered.range(grid.FPLY$lat, 0)
+		xlim=buffered.range(grid.sub.FPLY$long, 0),
+		ylim=buffered.range(grid.sub.FPLY$lat, 0)
 	) +
 	facet_grid(Context ~ Prioritization) +
 	scale_fill_gradientn(name='Selection Frequency (%)',

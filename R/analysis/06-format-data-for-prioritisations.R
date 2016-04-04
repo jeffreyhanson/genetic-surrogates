@@ -1,13 +1,27 @@
 ## load .rda
 session::restore.session('results/.cache/05-genetic-nmds.rda')
 
+# subset data.frames for species with identifiable adaptive and/or neutral genetic variation
+missing.species <- unique(spp.samples.DF$species)[laply(spp.BayeScanData.sample.subset.LST, function(x) {!is.null(x)})]
+if (length(missing.species)>0) { 
+	grid.sub.DF <- grid.DF
+	for (i in missing.species)
+		grid.sub.DF <- grid.sub.DF[, names(grid.sub.DF)[(-1 * grep(paste0('^.*',i,'.*$'), names(grid.sub.DF)))]]
+	spp.samples.sub.DF <- filter(spp.samples.DF, !species %in% missing.species)
+	grid.sub.PLY <- grid.PLY[!grid.PLY$species %in% missing.species,]
+} else {
+	grid.sub.DF <- grid.DF
+	grid.sub.PLY <- grid.PLY
+	spp.samples.sub.DF <- spp.samples.DF
+}
+
 # generate attribute spaces for geographic and environmental data
 surrogate.ASL <- llply(
-	list(grep('^env.*$', names(grid.DF)),grep('^geo.*$', names(grid.DF))),
+	list(grep('^env.*$', names(grid.sub.DF)),grep('^geo.*$', names(grid.sub.DF))),
 	.fun=function(x) {
 		make.multi.species.AttributeSpace(
-			site.data=grid.DF[,x,drop=FALSE],
-			species.data=grid.DF[,unique(spp.samples.DF$species),drop=FALSE],
+			site.data=grid.sub.DF[,x,drop=FALSE],
+			species.data=grid.sub.DF[,unique(spp.samples.sub.DF$species),drop=FALSE],
 			distance.metric='euclidean'
 		)
 	}
@@ -15,17 +29,17 @@ surrogate.ASL <- llply(
 
 # generate attribute spaces for genetic data
 adaptive.ASL <- llply(
-	seq_along(unique(spp.samples.DF$species)),
+	seq_along(unique(spp.samples.sub.DF$species)),
 	function(i) {
 		# if no adaptive space for this species then return null
-		if (ncol(select(grid.DF, contains(paste0(unique(spp.samples.DF$species)[i], '_adaptive'))))==0)
+		if (ncol(select(grid.sub.DF, contains(paste0(unique(spp.samples.sub.DF$species)[i], '_adaptive'))))==0)
 			return(NULL)
 		# else return attribute space
 		make.single.species.AttributeSpace(
-			site.data=select(grid.DF, contains(paste0(unique(spp.samples.DF$species)[i], '_adaptive'))),
-			species.data=na.omit(select(grid.DF, contains(paste0(unique(spp.samples.DF$species)[i], '_adaptive')))),
+			site.data=select(grid.sub.DF, contains(paste0(unique(spp.samples.sub.DF$species)[i], '_adaptive'))),
+			species.data=na.omit(select(grid.sub.DF, contains(paste0(unique(spp.samples.sub.DF$species)[i], '_adaptive')))),
 			spp.pos=i,
-			n.species=n_distinct(spp.samples.DF$species),
+			n.species=n_distinct(spp.samples.sub.DF$species),
 			distance.metric='euclidean'
 		)
 	}
@@ -33,17 +47,17 @@ adaptive.ASL <- llply(
 adaptive.ASL <- adaptive.ASL[!sapply(adaptive.ASL, is.null)]
 
 neutral.ASL <- llply(
-	seq_along(unique(spp.samples.DF$species)),
+	seq_along(unique(spp.samples.sub.DF$species)),
 	function(i) {
-		# if no adaptive space for this species then return null
-		if (ncol(select(grid.DF, contains(paste0(unique(spp.samples.DF$species)[i], '_neutral'))))==0)
+		# if no neutral space for this species then return null
+		if (ncol(select(grid.sub.DF, contains(paste0(unique(spp.samples.sub.DF$species)[i], '_neutral'))))==0)
 			return(NULL)
 		# else return attribute space
 		make.single.species.AttributeSpace(
-			site.data=select(grid.DF, contains(paste0(unique(spp.samples.DF$species)[i], '_neutral'))),
-			species.data=na.omit(select(grid.DF, contains(paste0(unique(spp.samples.DF$species)[i], '_neutral')))),
+			site.data=select(grid.sub.DF, contains(paste0(unique(spp.samples.sub.DF$species)[i], '_neutral'))),
+			species.data=na.omit(select(grid.sub.DF, contains(paste0(unique(spp.samples.sub.DF$species)[i], '_neutral')))),
 			spp.pos=i,
-			n.species=n_distinct(spp.samples.DF$species),
+			n.species=n_distinct(spp.samples.sub.DF$species),
 			distance.metric='euclidean'
 		)
 	}
@@ -52,7 +66,7 @@ neutral.ASL <- neutral.ASL[!sapply(neutral.ASL, is.null)]
 
 # make table with targets
 target.DF <- make.targets(
-	species=unique(spp.samples.DF$species),
+	species=unique(spp.samples.sub.DF$species),
 	environmental.space=surrogate.ASL[[1]], geographic.space=surrogate.ASL[[2]],
 	adaptive.spaces=adaptive.ASL, neutral.spaces=neutral.ASL,
 	amount.target=0.2, space.target=0.2
@@ -62,24 +76,24 @@ target.DF <- make.targets(
 rd <- RapData(
 	polygon=SpatialPolygons2PolySet(grid.PLY),
 	pu=data.frame(
-		cost=grid.DF$pop.density,
-		area=rep(1, nrow(grid.DF)),
-		status=rep(0L, nrow(grid.DF))
+		cost=grid.sub.DF$pop.density,
+		area=rep(1, nrow(grid.sub.DF)),
+		status=rep(0L, nrow(grid.sub.DF))
 	),
-	species=data.frame(name=unique(spp.samples.DF$species)),
+	species=data.frame(name=unique(spp.samples.sub.DF$species)),
 	target=target.DF,
 	attribute.spaces=append(append(surrogate.ASL, adaptive.ASL), neutral.ASL),
 	pu.species.probabilities=ldply(
-		seq_along(unique(spp.samples.DF$species)),
+		seq_along(unique(spp.samples.sub.DF$species)),
 		.fun=function(i) {
 			data.frame(
 				species=i,
-				pu=which(grid.DF[[unique(spp.samples.DF$species)[i]]]==1),
+				pu=which(grid.sub.DF[[unique(spp.samples.sub.DF$species)[i]]]==1),
 				value=1
 			)
 		}
 	),
-	boundary=calcBoundaryData(grid.PLY)
+	boundary=calcBoundaryData(grid.sub.PLY)
 )
 
 # create RapUnsolved without cost data

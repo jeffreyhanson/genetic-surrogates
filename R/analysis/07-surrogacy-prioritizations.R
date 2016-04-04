@@ -9,7 +9,7 @@ gurobi.params.LST <- parseTOML('parameters/gurobi.toml')
 # generate prioritistions
 cat("starting environmental surrogacy prioritizations\n")
 env.correlation.prioritisations <- llply(
-	seq_along(unique(spp.samples.DF$species)),
+	seq_along(unique(spp.samples.sub.DF$species)),
 	function(i) {
 		llply(
 			rapr.params.LST[[MODE]]$surrogacy.analysis$surrogate.target,
@@ -35,11 +35,11 @@ env.correlation.prioritisations <- llply(
 cat("starting random prioritizations for the environmental surrogate prioritizations \n")
 clust <- makeCluster(general.params.LST[[MODE]]$threads, type='SOCK')
 clusterEvalQ(clust, {library(rapr)})
-clusterExport(clust, c('spp.samples.DF','grid.DF','rapr.params.LST',
+clusterExport(clust, c('spp.samples.sub.DF','grid.sub.DF','rapr.params.LST',
 	'MODE', 'species.prioritisation', 'ru', 'env.correlation.prioritisations'))
 registerDoParallel(clust)
 env.random.prioritisations <- llply(
-	seq_along(unique(spp.samples.DF$species)),
+	seq_along(unique(spp.samples.sub.DF$species)),
 	function(i) {
 		llply(
 			seq_along(rapr.params.LST[[MODE]]$surrogacy.analysis$surrogate.target),
@@ -49,8 +49,8 @@ env.random.prioritisations <- llply(
 				curr.optim_n <- table(rowSums(env.correlation.prioritisations[[i]][[j]]@results@selections))
 				curr.optim_p <- curr.optim_n / sum(curr.optim_n)
 				# identify which planning units are occupied by the species
-				curr.pu <- which(grid.DF[[unique(spp.samples.DF$species)[[i]]]]==1)
-				zeros <- rep(0, length=nrow(grid.DF))
+				curr.pu <- which(grid.sub.DF[[unique(spp.samples.sub.DF$species)[[i]]]]==1)
+				zeros <- rep(0, length=nrow(grid.sub.DF))
 				# generate portfolio of random selections
 				curr.random_n <- as.numeric(sample(
 					names(curr.optim_n),
@@ -81,7 +81,7 @@ clust <- stopCluster(clust)
 
 cat("starting geographic surrogacy prioritizations\n")
 geo.correlation.prioritisations <- llply(
-	seq_along(unique(spp.samples.DF$species)),
+	seq_along(unique(spp.samples.sub.DF$species)),
 	function(i) {
 		llply(
 			rapr.params.LST[[MODE]]$surrogacy.analysis$surrogate.target,
@@ -107,11 +107,11 @@ geo.correlation.prioritisations <- llply(
 cat("starting random prioritizations for the geographic surrogate prioritizations \n")
 clust <- makeCluster(general.params.LST[[MODE]]$threads, type='SOCK')
 clusterEvalQ(clust, {library(rapr)})
-clusterExport(clust, c('spp.samples.DF','grid.DF','rapr.params.LST',
+clusterExport(clust, c('spp.samples.sub.DF','grid.sub.DF','rapr.params.LST',
 	'MODE', 'species.prioritisation', 'ru', 'geo.correlation.prioritisations'))
 registerDoParallel(clust)
 geo.random.prioritisations <- llply(
-	seq_along(unique(spp.samples.DF$species)),
+	seq_along(unique(spp.samples.sub.DF$species)),
 	function(i) {
 		llply(
 			seq_along(rapr.params.LST[[MODE]]$surrogacy.analysis$surrogate.target),
@@ -121,8 +121,8 @@ geo.random.prioritisations <- llply(
 				curr.optim_n <- table(rowSums(geo.correlation.prioritisations[[i]][[j]]@results@selections))
 				curr.optim_p <- curr.optim_n / sum(curr.optim_n)
 				# identify which planning units are occupied by the species
-				curr.pu <- which(grid.DF[[unique(spp.samples.DF$species)[[i]]]]==1)
-				zeros <- rep(0, length=nrow(grid.DF))
+				curr.pu <- which(grid.sub.DF[[unique(spp.samples.sub.DF$species)[[i]]]]==1)
+				zeros <- rep(0, length=nrow(grid.sub.DF))
 				# generate portfolio of random selections
 				curr.random_n <- as.numeric(sample(
 					names(curr.optim_n),

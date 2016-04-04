@@ -18,10 +18,8 @@ spp.nmds.LST <- llply(
 		setMKLthreads(1)
 		cat('starting species',i,'\n')
 		if (is.null(spp.BayeScan.sample.loci.subset.LST[[i]])) {
-			# all loci are neutral since only 1 population
-			curr.spp <- spp.BayeScanData.LST[[i]]
-			# manually classify loci as neutral or adaptive
-			curr.spp.type <- rep('neutral', bayescanr:::n.loci(curr.spp))
+			# only 1 population in this species
+			return(list('adaptive'=NULL, 'neutral'=NULL))
 		} else {
 			# extract loci
 			curr.spp <- bayescanr:::loci.subset(
@@ -44,10 +42,10 @@ spp.nmds.LST <- llply(
 				curr.nmds <- bayescanr::nmds(
 					bayescanr:::loci.subset(curr.spp, curr.spp.type==j),
 					metric='gower',
-					max.stress=nmds.params.LST[[MODE]]$max.stress,
-					min.k=nmds.params.LST[[MODE]]$min.k,
-					max.k=nmds.params.LST[[MODE]]$max.k,
-					trymax=nmds.params.LST[[MODE]]$trymax
+					max.stress=nmds.params.LST[[MODE]]$genetic.space$max.stress,
+					min.k=nmds.params.LST[[MODE]]$genetic.space$min.k,
+					max.k=nmds.params.LST[[MODE]]$genetic.space$max.k,
+					trymax=nmds.params.LST[[MODE]]$genetic.space$trymax
 				)
 			)
 		}), c('adaptive','neutral')))

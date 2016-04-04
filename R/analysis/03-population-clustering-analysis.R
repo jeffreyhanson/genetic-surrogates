@@ -24,10 +24,10 @@ spp.Mclust.LST <- llply(
 				labels=spp.StructureData.LST[[i]]@sample.names
 			),
 			metric='gower',
-			max.stress=nmds.params.LST[[MODE]]$max.stress,
-			min.k=nmds.params.LST[[MODE]]$min.k,
-			max.k=nmds.params.LST[[MODE]]$max.k,
-			trymax=nmds.params.LST[[MODE]]$trymax
+			max.stress=nmds.params.LST[[MODE]]$population.clustering$max.stress,
+			min.k=nmds.params.LST[[MODE]]$population.clustering$min.k,
+			max.k=nmds.params.LST[[MODE]]$population.clustering$max.k,
+			trymax=nmds.params.LST[[MODE]]$population.clustering$trymax
 		)
 		## run mclust
 		return(
@@ -50,13 +50,13 @@ spp.BayeScanData.sample.subset.LST <- llply(
 	.fun=function(i) {
 		# get population identities
 		probs<-spp.Mclust.LST[[i]]$mclust$z
-		# if only one population return null
-		if (ncol(probs)==1)
-			return(NULL)
-		ids <- apply(probs, 1, which.max)
 		# identify individuals with uncertain population membership
+		ids <- apply(probs, 1, which.max)
 		ids[which(apply(probs, 1, function(x) {max(x) < mclust.params.LST[[MODE]]$probability.threshold}))] <- NA_integer_
 		validPos <- which(!is.na(ids))
+		# if only one population return null
+		if (n_distinct(ids)==1)
+			return(NULL)
 		# remove individuals below threshold
 		curr.spp <- spp.BayeScanData.LST[[i]]
 		curr.spp <- bayescanr:::sample.subset.BayeScanData(curr.spp, validPos)

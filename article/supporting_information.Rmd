@@ -34,6 +34,7 @@ countries.FPLY <- countriesHigh[
 	)
 ,] %>% spFortify
 grid.FPLY <- spFortify(grid.PLY)
+grid.sub.FPLY <- spFortify(grid.sub.PLY)
 
 # define ggplot2 color wheel function
 gg_color_hue <- function(n) {
@@ -42,7 +43,7 @@ gg_color_hue <- function(n) {
 }
 ```
 
-```{r, echo=FALSE, fig.width=9.5, fig.height=10, out.width='7.5in', out.height='8.5in', fig.cap='Species distributions. Squares represent planning units. For a given species, planning units that were found to be inhabited are denoted with bright blue.'}
+```{r, echo=FALSE, fig.width=9.5, fig.height=10, out.width='7.5in', out.height='8.5in', fig.cap=paste0('Species distributions. Squares represent planning units. For a given species, planning units that were found to be inhabited are denoted with bright blue. Note that \textit{',missing.species,'} was omitted from analysis.')}
 ## plot map of species distributions
 # fortify data
 spp.grid.FPLY <- ldply(unique(spp.samples.DF$species), function(x) {
@@ -190,7 +191,7 @@ suppressWarnings({
 		scale_y_reverse()+
 		theme(
 			strip.background = element_rect(fill='grey20'),
-			strip.text = element_text(color='white', face='italic', size=20)
+			strip.text = element_text(color='white', face='italic', size=1)
 		) +
 		xlab('Number of populations') +
 		ylab('BIC') +
@@ -232,7 +233,7 @@ legend.CHR <- `names<-`(
 )
 # create function
 plot.spp.pop.probs <- function(i) {
-	# init
+	# init spp.samples
 	prop <- 0.85
 	curr.spp.DF <- filter(pop.probs.DF, species==unique(pop.probs.DF$species)[i])
 	# create base map grob
@@ -432,18 +433,21 @@ plot.spp.nmds <- function(i) {
 	# get vector of adaptive and neutral column names
 	adapt.col <- grep(
 		paste0(unique(spp.samples.DF$species)[i], '_adaptive_d'),
-		names(grid.FPLY), value=TRUE, fixed=TRUE
+		names(grid.sub.FPLY), value=TRUE, fixed=TRUE
 	)
 	neutral.col <- grep(
 		paste0(unique(spp.samples.DF$species)[i], '_neutral_d'),
-		names(grid.FPLY), value=TRUE, fixed=TRUE
+		names(grid.sub.FPLY), value=TRUE, fixed=TRUE
 	)
+	# skip species if not used in analysis
+	if (length(c(adapt.col, neutral.col)==0)
+		return(NULL)
 	curr.FPLY <- grid.FPLY[,
 		c(adapt.col, neutral.col,
 		'long','lat','group'),drop=FALSE]
 	curr.FPLY <- curr.FPLY[which(!is.na(curr.FPLY[[1]])),]
 	curr.FPLY <- curr.FPLY %>% gather(d, value, contains('adaptive'), contains('neutral')) %>% mutate(
-		d=gsub(paste0(unique(spp.samples.DF$species)[i], '_'), '', d, fixed=TRUE),
+		d=gsub(paste0(unique(spp.samples.sub.DF$species)[i], '_'), '', d, fixed=TRUE),
 		d=gsub('_', ' ', d, fixed=TRUE)
 	)
 	for (j in seq_len(length(adapt.col)+length(neutral.col)))
@@ -479,8 +483,8 @@ plot.spp.nmds <- function(i) {
 
 calc.fig.height <- function(i) {
 	# init
-	adapt.col <- paste0(unique(spp.samples.DF$species)[i], '_adaptive_d1')
-	neutral.col <- paste0(unique(spp.samples.DF$species)[i], '_neutral_d1')
+	adapt.col <- paste0(unique(spp.samples.sub.DF$species)[i], '_adaptive_d1')
+	neutral.col <- paste0(unique(spp.samples.sub.DF$species)[i], '_neutral_d1')
 	n.plots <- 0 
 	# count adaptive plot
 	if (adapt.col %in% names(grid.FPLY))
@@ -618,17 +622,18 @@ knitr::kable(
 			ldply(
 				seq_along(unique(spp.samples.DF$species)), 
 				function(i) {
+				
+				rbind(
+					data.frame(
+						Species=paste0('\\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[i]),'}'),
+						Loci='all',
+						k=spp.Mclust.LST[[i]]$nmds$ndim,
+						Stress=spp.Mclust.LST[[i]]$nmds$stress,
+						Converged=spp.Mclust.LST[[i]]$nmds$converged
+					),
 					ldply(
 						seq_along(spp.nmds.LST[[i]]),
 						function(j) {
-						rbind(
-							data.frame(
-								Species=paste0('\\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[i]),'}'),
-								Loci='all',
-								k=spp.Mclust.LST[[i]]$nmds$ndim,
-								Stress=spp.Mclust.LST[[i]]$nmds$stress,
-								Converged=spp.Mclust.LST[[i]]$nmds$converged
-							),
 							data.frame(
 								Species=paste0('\\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[i]),'}'),
 								Loci=names(spp.nmds.LST[[i]])[j],
@@ -636,7 +641,6 @@ knitr::kable(
 								Stress=ifelse(is.null(spp.nmds.LST[[i]][[j]]), NA_real_, spp.nmds.LST[[i]][[j]]$stress),
 								Converged=ifelse(is.null(spp.nmds.LST[[i]][[j]]), NA, spp.nmds.LST[[i]][[j]]$converged)
 							)
-						)
 					})
 				}
 			),

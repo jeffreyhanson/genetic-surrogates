@@ -11,18 +11,18 @@ gurobi.params.LST <- parseTOML('parameters/gurobi.toml')
 # prepare cluster object
 clust <- makeCluster(general.params.LST[[MODE]]$threads, type='SOCK')
 clusterEvalQ(clust, {library(rapr)})
-clusterExport(clust, c('spp.samples.DF','grid.DF','rapr.params.LST',
+clusterExport(clust, c('spp.samples.sub.DF','grid.sub.DF','rapr.params.LST',
 	'MODE', 'species.prioritisation', 'ru'))
 registerDoParallel(clust)
 # main analysis
 single.spp.amount.prioritisations <- llply(
-	seq_along(unique(spp.samples.DF$species)),
+	seq_along(unique(spp.samples.sub.DF$species)),
 	function(x) {
 		# identify which planning units are occupied by the species
 		setMKLthreads(1)
-		curr.pu <- which(grid.DF[[unique(spp.samples.DF$species)[[x]]]]==1)
+		curr.pu <- which(grid.sub.DF[[unique(spp.samples.sub.DF$species)[[x]]]]==1)
 		n.pu <- ceiling(length(curr.pu) * rapr.params.LST[[MODE]]$scenario.analysis$amount.target)
-		zeros <- rep(0, length=nrow(grid.DF))
+		zeros <- rep(0, length=nrow(grid.sub.DF))
 		curr.sol.MTX<-t(replicate(
 			n=rapr.params.LST[[MODE]]$scenario.analysis$single.species.amount.replicates,
 			expr={replace(zeros, sample(x=curr.pu, size=n.pu), rep(1, n.pu))}
@@ -47,7 +47,7 @@ clust <- stopCluster(clust)
 
 ## surrogate-based priortisations
 single.spp.surrogate.prioritisations <- llply(
-	seq_along(unique(spp.samples.DF$species)),
+	seq_along(unique(spp.samples.sub.DF$species)),
 	function(x) {
 		species.prioritisation(
 				x=spp.subset(ru, x),
@@ -66,7 +66,7 @@ single.spp.surrogate.prioritisations <- llply(
 
 ## genetic-based prioritisations
 single.spp.genetic.prioritisations <- llply(
-	seq_along(unique(spp.samples.DF$species)),
+	seq_along(unique(spp.samples.sub.DF$species)),
 	function(x) {
 		species.prioritisation(
 				x=spp.subset(ru, x),
@@ -85,7 +85,7 @@ single.spp.genetic.prioritisations <- llply(
 ## post-processing
 # combine lists of seperate prioritisations
 single.spp.prioritisations <- llply(
-	seq_along(unique(spp.samples.DF$species)),
+	seq_along(unique(spp.samples.sub.DF$species)),
 	function(i) {
 		list(
 			single.spp.amount.prioritisations[[i]],
