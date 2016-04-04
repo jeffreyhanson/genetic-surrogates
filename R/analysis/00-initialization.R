@@ -40,8 +40,7 @@ suppressMessages(library(optimx))
 suppressMessages(library(RColorBrewer))
 suppressMessages(library(mclust))
 suppressMessages(library(cluster))
-suppressMessages(library(multcomp))
-suppressMessages(library(lme4))
+suppressMessages(library(RVAideMemoire))
 
 
 ## load github packages

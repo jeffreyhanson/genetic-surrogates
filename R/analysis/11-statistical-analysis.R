@@ -53,8 +53,8 @@ scenario.sub.DF <- scenario.DF[rowSums(apply(select(scenario.DF, Prioritisation,
 # prepare matrix with success vs. failures
 scenario.contingency.DF <- scenario.sub.DF %>% 
 	group_by(Prioritisation.Metric.Context) %>% 
-	filter(!is.na(value)) %>% 
-	summarize(count=sum(value>=rapr.params.LST[[MODE]]$scenario.analysis$genetic.target), total=length(value)) %>% 
+	filter(!is.na(genetic.held)) %>% 
+	summarize(count=sum(genetic.held>=rapr.params.LST[[MODE]]$scenario.analysis$genetic.target), total=length(genetic.held)) %>% 
 	ungroup %>% 
 	mutate(prop=count/total, secured=count, not.secured=total-count) %>%
 	select(secured, not.secured, Prioritisation.Metric.Context) %>%
