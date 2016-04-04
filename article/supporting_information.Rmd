@@ -43,7 +43,7 @@ gg_color_hue <- function(n) {
 }
 ```
 
-```{r, echo=FALSE, fig.width=9.5, fig.height=10, out.width='7.5in', out.height='8.5in', fig.cap=paste0('Species distributions. Squares represent planning units. For a given species, planning units that were found to be inhabited are denoted with bright blue. Note that \textit{',missing.species,'} was omitted from analysis.')}
+```{r, echo=FALSE, fig.width=9.5, fig.height=10, out.width='7.5in', out.height='8.5in', fig.cap=paste0('Species distributions. Squares represent planning units. For a given species, planning units that were found to be inhabited are denoted with bright blue. Note that \\textit{',gsub('\\_', '\\ ', missing.species),'} was omitted from analysis.')}
 ## plot map of species distributions
 # fortify data
 spp.grid.FPLY <- ldply(unique(spp.samples.DF$species), function(x) {
@@ -433,21 +433,19 @@ plot.spp.nmds <- function(i) {
 	# get vector of adaptive and neutral column names
 	adapt.col <- grep(
 		paste0(unique(spp.samples.DF$species)[i], '_adaptive_d'),
-		names(grid.sub.FPLY), value=TRUE, fixed=TRUE
+		names(grid.FPLY), value=TRUE, fixed=TRUE
 	)
 	neutral.col <- grep(
 		paste0(unique(spp.samples.DF$species)[i], '_neutral_d'),
-		names(grid.sub.FPLY), value=TRUE, fixed=TRUE
+		names(grid.FPLY), value=TRUE, fixed=TRUE
 	)
 	# skip species if not used in analysis
-	if (length(c(adapt.col, neutral.col)==0)
-		return(NULL)
 	curr.FPLY <- grid.FPLY[,
 		c(adapt.col, neutral.col,
 		'long','lat','group'),drop=FALSE]
 	curr.FPLY <- curr.FPLY[which(!is.na(curr.FPLY[[1]])),]
 	curr.FPLY <- curr.FPLY %>% gather(d, value, contains('adaptive'), contains('neutral')) %>% mutate(
-		d=gsub(paste0(unique(spp.samples.sub.DF$species)[i], '_'), '', d, fixed=TRUE),
+		d=gsub(paste0(unique(spp.samples.DF$species)[i], '_'), '', d, fixed=TRUE),
 		d=gsub('_', ' ', d, fixed=TRUE)
 	)
 	for (j in seq_len(length(adapt.col)+length(neutral.col)))
@@ -483,8 +481,8 @@ plot.spp.nmds <- function(i) {
 
 calc.fig.height <- function(i) {
 	# init
-	adapt.col <- paste0(unique(spp.samples.sub.DF$species)[i], '_adaptive_d1')
-	neutral.col <- paste0(unique(spp.samples.sub.DF$species)[i], '_neutral_d1')
+	adapt.col <- paste0(unique(spp.samples.DF$species)[i], '_adaptive_d1')
+	neutral.col <- paste0(unique(spp.samples.DF$species)[i], '_neutral_d1')
 	n.plots <- 0 
 	# count adaptive plot
 	if (adapt.col %in% names(grid.FPLY))
@@ -493,116 +491,116 @@ calc.fig.height <- function(i) {
 	if (neutral.col %in% names(grid.FPLY))
 		n.plots <- n.plots + spp.nmds.LST[[i]][['neutral']]$ndim
 	# exports
-	return(ceiling(n.plots/4) * 3.5)
+	return(((n.plots %/% 5)+1) * 2.5)
 }
 ```
 
 ```{r, echo=FALSE, fig.width=15, fig.height=calc.fig.height(1), fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[1]),'}. Each panel shows a different dimension of the variation as indicated by its title. Squares represent planning units. The color of each planning unit panel corresponds to the average ordinated values associated with individuals sampled inside it. No indiviudals of this species were found inside the gray planning units.')}
-if (1 <= general.params.LST[[MODE]]$n.spp) plot.spp.nmds(1)
-```
+if (1 <= general.params.LST[[MODE]]$n.spp & (!unique(spp.samples.DF$species)[1] %in% missing.species)) plot.spp.nmds(1)
+ ```
 
 ```{r, echo=FALSE, fig.width=15, fig.height=calc.fig.height(2), fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[2]),'}. See Figure S6 caption for conventions.')}
-if (2 <= general.params.LST[[MODE]]$n.spp) plot.spp.nmds(2)
+if (2 <= general.params.LST[[MODE]]$n.spp & (!unique(spp.samples.DF$species)[2] %in% missing.species)) plot.spp.nmds(2)
 ```
 
 ```{r, echo=FALSE, fig.width=15, fig.height=calc.fig.height(3), fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[3]),'}. See Figure S6 caption for conventions.')}
-if (3 <= general.params.LST[[MODE]]$n.spp) plot.spp.nmds(3)
+if (3 <= general.params.LST[[MODE]]$n.spp & (!unique(spp.samples.DF$species)[3] %in% missing.species)) plot.spp.nmds(3)
 ```
 
 ```{r, echo=FALSE, fig.width=15, fig.height=calc.fig.height(4), fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[4]),'}. See Figure S6 caption for conventions.')}
-if (4 <= general.params.LST[[MODE]]$n.spp) plot.spp.nmds(4)
+if (4 <= general.params.LST[[MODE]]$n.spp & (!unique(spp.samples.DF$species)[4] %in% missing.species)) plot.spp.nmds(4)
 ```
 
 ```{r, echo=FALSE, fig.width=15, fig.height=calc.fig.height(5), fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[5]),'}. See Figure S6 caption for conventions.')}
-if (5 <= general.params.LST[[MODE]]$n.spp) plot.spp.nmds(5)
+if (5 <= general.params.LST[[MODE]]$n.spp & (!unique(spp.samples.DF$species)[5] %in% missing.species)) plot.spp.nmds(5)
 ```
 
 ```{r, echo=FALSE, fig.width=15, fig.height=calc.fig.height(6), fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[6]),'}. See Figure S6 caption for conventions.')}
-if (6 <= general.params.LST[[MODE]]$n.spp) plot.spp.nmds(6)
+if (6 <= general.params.LST[[MODE]]$n.spp & (!unique(spp.samples.DF$species)[6] %in% missing.species)) plot.spp.nmds(6)
 ```
 
 ```{r, echo=FALSE, fig.width=15, fig.height=calc.fig.height(7), fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[7]),'}. See Figure S6 caption for conventions.')}
-if (7 <= general.params.LST[[MODE]]$n.spp) plot.spp.nmds(7)
+if (7 <= general.params.LST[[MODE]]$n.spp & (!unique(spp.samples.DF$species)[7] %in% missing.species)) plot.spp.nmds(7)
 ```
 
 ```{r, echo=FALSE, fig.width=15, fig.height=calc.fig.height(8), fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[8]),'}. See Figure S6 caption for conventions.')}
-if (8 <= general.params.LST[[MODE]]$n.spp) plot.spp.nmds(8)
+if (8 <= general.params.LST[[MODE]]$n.spp & (!unique(spp.samples.DF$species)[8] %in% missing.species)) plot.spp.nmds(8)
 ```
 
 ```{r, echo=FALSE, fig.width=15, fig.height=calc.fig.height(9), fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[9]),'}. See Figure S6 caption for conventions.')}
-if (9 <= general.params.LST[[MODE]]$n.spp) plot.spp.nmds(9)
+if (9 <= general.params.LST[[MODE]]$n.spp & (!unique(spp.samples.DF$species)[9] %in% missing.species)) plot.spp.nmds(9)
 ```
 
 ```{r, echo=FALSE, fig.width=15, fig.height=calc.fig.height(10), fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[10]),'}. See Figure S6 caption for conventions.')}
-if (10 <= general.params.LST[[MODE]]$n.spp) plot.spp.nmds(10)
+if (10 <= general.params.LST[[MODE]]$n.spp & (!unique(spp.samples.DF$species)[10] %in% missing.species)) plot.spp.nmds(10)
 ```
 
 ```{r, echo=FALSE, fig.width=15, fig.height=calc.fig.height(11), fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[11]),'}. See Figure S6 caption for conventions.')}
-if (11 <= general.params.LST[[MODE]]$n.spp) plot.spp.nmds(11)
+if (11 <= general.params.LST[[MODE]]$n.spp & (!unique(spp.samples.DF$species)[11] %in% missing.species)) plot.spp.nmds(11)
 ```
 
 ```{r, echo=FALSE, fig.width=15, fig.height=calc.fig.height(12), fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[12]),'}. See Figure S6 caption for conventions.')}
-if (12 <= general.params.LST[[MODE]]$n.spp) plot.spp.nmds(12)
+if (12 <= general.params.LST[[MODE]]$n.spp & (!unique(spp.samples.DF$species)[12] %in% missing.species)) plot.spp.nmds(12)
 ```
 
 ```{r, echo=FALSE, fig.width=15, fig.height=calc.fig.height(13), fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[13]),'}. See Figure S6 caption for conventions.')}
-if (13 <= general.params.LST[[MODE]]$n.spp) plot.spp.nmds(13)
+if (13 <= general.params.LST[[MODE]]$n.spp & (!unique(spp.samples.DF$species)[13] %in% missing.species)) plot.spp.nmds(13)
 ```
 
 ```{r, echo=FALSE, fig.width=15, fig.height=calc.fig.height(14), fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[14]),'}. See Figure S6 caption for conventions.')}
-if (14 <= general.params.LST[[MODE]]$n.spp) plot.spp.nmds(14)
+if (14 <= general.params.LST[[MODE]]$n.spp & (!unique(spp.samples.DF$species)[14] %in% missing.species)) plot.spp.nmds(14)
 ```
 
 ```{r, echo=FALSE, fig.width=15, fig.height=calc.fig.height(15), fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[15]),'}. See Figure S6 caption for conventions.')}
-if (15 <= general.params.LST[[MODE]]$n.spp) plot.spp.nmds(15)
+if (15 <= general.params.LST[[MODE]]$n.spp & (!unique(spp.samples.DF$species)[15] %in% missing.species)) plot.spp.nmds(15)
 ```
 
 ```{r, echo=FALSE, fig.width=15, fig.height=calc.fig.height(16), fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[16]),'}. See Figure S6 caption for conventions.')}
-if (16 <= general.params.LST[[MODE]]$n.spp) plot.spp.nmds(16)
+if (16 <= general.params.LST[[MODE]]$n.spp & (!unique(spp.samples.DF$species)[16] %in% missing.species)) plot.spp.nmds(16)
 ```
 
 ```{r, echo=FALSE, fig.width=15, fig.height=calc.fig.height(17), fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[17]),'}. See Figure S6 caption for conventions.')}
-if (17 <= general.params.LST[[MODE]]$n.spp) plot.spp.nmds(17)
+if (17 <= general.params.LST[[MODE]]$n.spp & (!unique(spp.samples.DF$species)[17] %in% missing.species)) plot.spp.nmds(17)
 ```
 
 ```{r, echo=FALSE, fig.width=15, fig.height=calc.fig.height(18), fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[18]),'}. See Figure S6 caption for conventions.')}
-if (18 <= general.params.LST[[MODE]]$n.spp) plot.spp.nmds(18)
+if (18 <= general.params.LST[[MODE]]$n.spp & (!unique(spp.samples.DF$species)[18] %in% missing.species)) plot.spp.nmds(18)
 ```
 
 ```{r, echo=FALSE, fig.width=15, fig.height=calc.fig.height(19), fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[19]),'}. See Figure S6 caption for conventions.')}
-if (19 <= general.params.LST[[MODE]]$n.spp) plot.spp.nmds(19)
+if (19 <= general.params.LST[[MODE]]$n.spp & (!unique(spp.samples.DF$species)[19] %in% missing.species)) plot.spp.nmds(19)
 ```
 
 ```{r, echo=FALSE, fig.width=15, fig.height=calc.fig.height(20), fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[20]),'}. See Figure S6 caption for conventions.')}
-if (20 <= general.params.LST[[MODE]]$n.spp) plot.spp.nmds(20)
+if (20 <= general.params.LST[[MODE]]$n.spp & (!unique(spp.samples.DF$species)[20] %in% missing.species)) plot.spp.nmds(20)
 ```
 
 ```{r, echo=FALSE, fig.width=15, fig.height=calc.fig.height(21), fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[21]),'}. See Figure S6 caption for conventions.')}
-if (21 <= general.params.LST[[MODE]]$n.spp) plot.spp.nmds(21)
+if (21 <= general.params.LST[[MODE]]$n.spp & (!unique(spp.samples.DF$species)[21] %in% missing.species)) plot.spp.nmds(21)
 ```
 
 ```{r, echo=FALSE, fig.width=15, fig.height=calc.fig.height(22), fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[22]),'}. See Figure S6 caption for conventions.')}
-if (22 <= general.params.LST[[MODE]]$n.spp) plot.spp.nmds(22)
+if (22 <= general.params.LST[[MODE]]$n.spp & (!unique(spp.samples.DF$species)[22] %in% missing.species)) plot.spp.nmds(22)
 ```
 
 ```{r, echo=FALSE, fig.width=15, fig.height=calc.fig.height(23), fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[23]),'}. See Figure S6 caption for conventions.')}
-if (23 <= general.params.LST[[MODE]]$n.spp) plot.spp.nmds(23)
+if (23 <= general.params.LST[[MODE]]$n.spp & (!unique(spp.samples.DF$species)[23] %in% missing.species)) plot.spp.nmds(23)
 ```
 
 ```{r, echo=FALSE, fig.width=15, fig.height=calc.fig.height(24), fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[24]),'}. See Figure S6 caption for conventions.')}
-if (24 <= general.params.LST[[MODE]]$n.spp) plot.spp.nmds(24)
+if (24 <= general.params.LST[[MODE]]$n.spp & (!unique(spp.samples.DF$species)[24] %in% missing.species)) plot.spp.nmds(24)
 ```
 
 ```{r, echo=FALSE, fig.width=15, fig.height=calc.fig.height(25), fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[25]),'}. See Figure S6 caption for conventions.')}
-if (25 <= general.params.LST[[MODE]]$n.spp) plot.spp.nmds(25)
+if (25 <= general.params.LST[[MODE]]$n.spp & (!unique(spp.samples.DF$species)[25] %in% missing.species)) plot.spp.nmds(25)
 ```
 
 ```{r, echo=FALSE, fig.width=15, fig.height=calc.fig.height(26), fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[26]),'}. See Figure S6 caption for conventions.')}
-if (26 <= general.params.LST[[MODE]]$n.spp) plot.spp.nmds(26)
+if (26 <= general.params.LST[[MODE]]$n.spp & (!unique(spp.samples.DF$species)[26] %in% missing.species)) plot.spp.nmds(26)
 ```
 
 ```{r, echo=FALSE, fig.width=15, fig.height=calc.fig.height(27), fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[27]),'}. See Figure S6 caption for conventions.')}
-if (27 <= general.params.LST[[MODE]]$n.spp) plot.spp.nmds(27)
+if (27 <= general.params.LST[[MODE]]$n.spp & (!unique(spp.samples.DF$species)[27] %in% missing.species)) plot.spp.nmds(27)
 ```
 
 ```{r, echo=FALSE}
@@ -622,26 +620,26 @@ knitr::kable(
 			ldply(
 				seq_along(unique(spp.samples.DF$species)), 
 				function(i) {
-				
-				rbind(
-					data.frame(
-						Species=paste0('\\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[i]),'}'),
-						Loci='all',
-						k=spp.Mclust.LST[[i]]$nmds$ndim,
-						Stress=spp.Mclust.LST[[i]]$nmds$stress,
-						Converged=spp.Mclust.LST[[i]]$nmds$converged
-					),
-					ldply(
-						seq_along(spp.nmds.LST[[i]]),
-						function(j) {
-							data.frame(
-								Species=paste0('\\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[i]),'}'),
-								Loci=names(spp.nmds.LST[[i]])[j],
-								k=ifelse(is.null(spp.nmds.LST[[i]][[j]]), NA_integer_, spp.nmds.LST[[i]][[j]]$ndim),
-								Stress=ifelse(is.null(spp.nmds.LST[[i]][[j]]), NA_real_, spp.nmds.LST[[i]][[j]]$stress),
-								Converged=ifelse(is.null(spp.nmds.LST[[i]][[j]]), NA, spp.nmds.LST[[i]][[j]]$converged)
-							)
-					})
+					rbind(
+						data.frame(
+							Species=paste0('\\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[i]),'}'),
+							Loci='all',
+							k=spp.Mclust.LST[[i]]$nmds$ndim,
+							Stress=spp.Mclust.LST[[i]]$nmds$stress,
+							Converged=spp.Mclust.LST[[i]]$nmds$converged
+						),
+						ldply(
+							seq_along(spp.nmds.LST[[i]]),
+							function(j) {
+								data.frame(
+									Species=paste0('\\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[i]),'}'),
+									Loci=names(spp.nmds.LST[[i]])[j],
+									k=ifelse(is.null(spp.nmds.LST[[i]][[j]]), NA_integer_, spp.nmds.LST[[i]][[j]]$ndim),
+									Stress=ifelse(is.null(spp.nmds.LST[[i]][[j]]), NA_real_, spp.nmds.LST[[i]][[j]]$stress),
+									Converged=ifelse(is.null(spp.nmds.LST[[i]][[j]]), NA, spp.nmds.LST[[i]][[j]]$converged)
+								)
+						})
+					)
 				}
 			),
 			!is.na(Stress)

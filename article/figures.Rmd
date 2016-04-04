@@ -176,6 +176,8 @@ suppressWarnings({
 			strip.text = element_text(color='white'),
 			panel.border = element_rect(color='black', fill=NA),
 			axis.text.x=element_text(angle=45, hjust=1, vjust=1)) +
+		geom_abline(intercept=intercept=rapr.params.LST[[MODE]]$surrogacy.analysis$genetic.target,
+			slope=0 color='red', linetype='dashed') +
 		facet_grid(Context ~ Metric)
 })
 ```

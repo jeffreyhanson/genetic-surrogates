@@ -6,7 +6,13 @@ load('results/.cache/07-surrogacy-prioritizations.rda')
 
 #### Statistical analyses
 ### surrogacy analyses
-# none because significance can be acheived by generating sufficient random reps 
+## prepare data
+correlation.DF$Surrogate.target <- as.factor(correlation.DF$Surrogate.target)
+correlation.DF$Surrogate.target.Type <- with(correlation.DF, interaction(Surrogate.target, Type))
+correlation.sub.DF <- correlation.DF[rowSums(apply(select(correlation.DF, Surrogate.target, Type), 2, is.na))==0,]
+
+## models
+# none
 
 ### scenario analyses
 ## prepare data
