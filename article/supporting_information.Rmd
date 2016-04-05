@@ -122,7 +122,7 @@ ggplot() +
 ```
 
 
-```{r, fig.width=8, fig.height=3.5, fig.cap='Climatic variation. Each panel depicts variation based on a different principle component (PC). Squares represent planning units. The color of each planning unit denotes the average PC value of pixels inside it. Planning units with more similar colors have more similar climate regimes.', echo=FALSE}
+```{r, fig.width=15, fig.height=3, fig.cap='Climatic variation. Each panel depicts variation based on a different principle component (PC). Squares represent planning units. The color of each planning unit denotes the average PC value of pixels inside it. Planning units with more similar colors have more similar climate regimes.', echo=FALSE}
 do.call(
 	grid.arrange,
 		append(
@@ -150,7 +150,7 @@ do.call(
 				) +
 				facet_wrap(~ plot_title)
 		}),
-		list(ncol=2)
+		list(ncol=4)
 	)
 )
 ```
@@ -609,7 +609,7 @@ knitr::kable(
 	pca.DF,
 	digits=2,
 	caption=paste0('Summary of principle components analysis (PCA) on bioclimatic variation across the study area. The first ',as.character(as.english(surrogate.params.LST[[MODE]]$number.components)),' principle components (PCs) were used for subsequent analysis.'),
-	align=c('l', 'c', 'c', 'c')
+	align=c('c', 'c', 'c', 'c')
 )
 ```
 
@@ -649,7 +649,7 @@ knitr::kable(
 	digits=2,
 	caption='Summary of non-metric multi-dimensional scaling (MDS) analyses on genetic variation for each species. The analyses on all loci were used to transform the binary presence/absence polymorphism data to continuous variables to train Gaussian mixture models and ultimately identify adaptive loci. The analyses on adaptive and neutral loci were used to transform the polymorphism data to identify main gradients of this variation.',
 	col.names=c('Species', 'Loci Type', 'k', 'NMDS Stress', 'Converged'),
-	align=c('l', 'c', 'c', 'c', 'c')
+	align=c('c', 'c', 'c', 'c', 'c')
 )
 ```
 
@@ -676,7 +676,7 @@ knitr::kable(
 	),
 	digits=2,
 	col.names=c('Species', 'Primer', 'Probability', 'q-value', '$\\alpha$', '$F_{ST}$', 'Type'),
-	align=c('l', 'c', 'c', 'c', 'c', 'c', 'c'),
+	align=c('c', 'c', 'c', 'c', 'c', 'c', 'c'),
 	caption='Loci classifications for each species. Each row denotes a sampled loci for a given species, and the evidence for it being under selection based on outputs from the program \\texttt{Bayescan}. Note that loci in species with a single population were assumed to be neutral. Loci for these species do not appear in this table.'
 )
 ```
