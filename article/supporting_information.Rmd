@@ -491,7 +491,7 @@ calc.fig.height <- function(i) {
 	if (neutral.col %in% names(grid.FPLY))
 		n.plots <- n.plots + spp.nmds.LST[[i]][['neutral']]$ndim
 	# exports
-	return(((n.plots %/% 5)+1) * 2.5)
+	return(((n.plots %/% 5)+1) * 3)
 }
 ```
 
