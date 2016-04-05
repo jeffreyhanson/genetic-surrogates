@@ -1,0 +1,8 @@
+title = "surrogate parameters"
+
+[debug]
+number.components = 3
+
+[release]
+number.components = 3
+ 

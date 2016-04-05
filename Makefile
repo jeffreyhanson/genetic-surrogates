@@ -88,7 +88,7 @@ results/.cache/03-*.rda: results/.cache/02-*.rda R/analysis/03-*.R parameters/mc
 	R CMD BATCH --no-restore --no-save R/analysis/03-*.R
 	mv *.Rout results/.cache/
 
-results/.cache/02-*.rda: results/.cache/01-*.rda R/analysis/02-*.R
+results/.cache/02-*.rda: results/.cache/01-*.rda R/analysis/02-*.R parameters/surrogate.toml
 	R CMD BATCH --no-restore --no-save R/analysis/02-*.R
 	mv *.Rout results/.cache/
 

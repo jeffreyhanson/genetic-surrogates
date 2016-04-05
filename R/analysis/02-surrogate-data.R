@@ -1,6 +1,9 @@
 ## load .rda
 session::restore.session('results/.cache/01-load-data.rda')
 
+## load parameters
+general.params.LST <- parseTOML('parameters/surrogate.toml')
+
 ## create spatial data
 # grid data as SpatialPolygonsDataFrame
 grid.PTS <- SpatialPoints(as.matrix(grid.DF[,2:3]))
@@ -41,6 +44,7 @@ grid.DF <- cbind(grid.DF, centroids.DF)
 ## extract climatic data
 # load climatic data
 bioclim.STK <- stack('data/BioClim_variables/bioclim_pca.tif')
+bioclim.STK <- bioclim.STK[[seq_len(surrogate.params.LST[[MODE]]$number.components)]]
 # zscore layers --note that they already have unit sd
 bioclim.means <- cellStats(bioclim.STK, 'mean')
 bioclim.STK <- (bioclim.STK - bioclim.means)
@@ -80,7 +84,7 @@ grid.PLY$id <- seq_len(nrow(grid.DF))
 grid.PPLY$id <- seq_len(nrow(grid.DF))
 
 ## load and save pca summary
-pca.DF <- read.table('data/BioClim_variables/pca.TXT', skip=80) %>% `names<-`(
+pca.DF <- read.table('data/BioClim_variables/bioclim_pca.TXT', skip=94) %>% `names<-`(
 	c('Principle Component', 'Eigen Value', 'Variation explained (%)',
 	'Accumulative variation explained (%)')
 )

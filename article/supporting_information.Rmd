@@ -608,7 +608,7 @@ if (27 <= general.params.LST[[MODE]]$n.spp & (!unique(spp.samples.DF$species)[27
 knitr::kable(
 	pca.DF,
 	digits=2,
-	caption='Summary of principle components analysis (PCA) on bioclimatic variation across the study area. The first two principle components (PCs) were used for subsequent analysis.',
+	caption=paste0('Summary of principle components analysis (PCA) on bioclimatic variation across the study area. The first ',as.character(as.english(surrogate.params.LST[[MODE]]$number.components)),' principle components (PCs) were used for subsequent analysis.'),
 	align=c('l', 'c', 'c', 'c')
 )
 ```
