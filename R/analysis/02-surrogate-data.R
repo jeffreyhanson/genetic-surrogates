@@ -2,7 +2,7 @@
 session::restore.session('results/.cache/01-load-data.rda')
 
 ## load parameters
-general.params.LST <- parseTOML('parameters/surrogate.toml')
+surrogate.params.LST <- parseTOML('parameters/surrogate.toml')
 
 ## create spatial data
 # grid data as SpatialPolygonsDataFrame
@@ -41,6 +41,19 @@ centroids.DF <- sweep(centroids.DF, 2, MARGIN=2, FUN='/', apply(centroids.DF, 2,
 # append to main data.frame
 grid.DF <- cbind(grid.DF, centroids.DF)
 
+## remove grids without any species occurences
+# idenitfy pus with occurences
+valid.rows <- which(apply(grid.DF[,unique(spp.samples.DF$species),drop=FALSE], 1, sum)>0)
+# subset objects
+grid.DF <- grid.DF[valid.rows,,drop=FALSE]
+grid.PLY <- grid.PLY[valid.rows,]
+grid.PPLY <- grid.PPLY[valid.rows,]
+centroids.DF <- centroids.DF[valid.rows,,drop=FALSE]
+# reset ids
+grid.DF$id <- seq_len(nrow(grid.DF))
+grid.PLY$id <- seq_len(nrow(grid.DF))
+grid.PPLY$id <- seq_len(nrow(grid.DF))
+
 ## extract climatic data
 # load climatic data
 bioclim.STK <- stack('data/BioClim_variables/bioclim_pca.tif')
@@ -69,19 +82,6 @@ grid.DF <- cbind(grid.DF, extract2.DF)
 ## update @data slot in spatial objects
 grid.PLY@data <- grid.DF
 grid.PPLY@data <- grid.DF
-
-## remove grids without any species occurences
-# idenitfy pus with occurences
-valid.rows <- which(apply(grid.DF[,unique(spp.samples.DF$species),drop=FALSE], 1, sum)>0)
-# subset objects
-grid.DF <- grid.DF[valid.rows,,drop=FALSE]
-grid.PLY <- grid.PLY[valid.rows,]
-grid.PPLY <- grid.PPLY[valid.rows,]
-centroids.DF <- centroids.DF[valid.rows,,drop=FALSE]
-# reset ids
-grid.DF$id <- seq_len(nrow(grid.DF))
-grid.PLY$id <- seq_len(nrow(grid.DF))
-grid.PPLY$id <- seq_len(nrow(grid.DF))
 
 ## load and save pca summary
 pca.DF <- read.table('data/BioClim_variables/bioclim_pca.TXT', skip=94) %>% `names<-`(
