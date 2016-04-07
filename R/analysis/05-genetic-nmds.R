@@ -7,7 +7,7 @@ nmds.params.LST <- parseTOML('parameters/nmds.toml')
 # init snow cluster
 clust <- makeCluster(general.params.LST[[MODE]]$threads, type='SOCK')
 clusterEvalQ(clust, {library(structurer);library(bayescanr);library(cluster);library(plyr);library(vegan)})
-clusterExport(clust, c('MODE', 'spp.BayeScanData.LST', 'spp.BayeScan.sample.loci.subset.LST', 'nmds.params.LST'))
+clusterExport(clust, c('MODE', 'spp.StructureData.LST', 'spp.BayeScan.sample.loci.subset.LST', 'nmds.params.LST'))
 registerDoParallel(clust)
 
 # run mds
@@ -24,10 +24,9 @@ spp.nmds.LST <- llply(
 			# extract loci
 			curr.spp <- bayescanr:::BayeScanData(spp.StructureData.LST[[i]]@matrix,
 				spp.StructureData.LST[[i]]@loci.names, rep('A', nrow(spp.StructureData.LST[[i]]@matrix)),
-				spp.StructureData.LST[[i]]@sample.names) %>%
-				bayescanr:::loci.subset(
-					which(spp.BayeScanData.LST[[i]]@primers %in% spp.BayeScan.sample.loci.subset.LST[[i]]@data@primers)
-				)
+				spp.StructureData.LST[[i]]@sample.names)
+			curr.spp <- bayescanr:::loci.subset(curr.spp,
+					which(spp.StructureData.LST[[i]]@loci.names %in% spp.BayeScan.sample.loci.subset.LST[[i]]@data@primers))
 			# manually classify loci as neutral or adaptive
 			curr.spp.type <- replace(
 				rep('neutral', bayescanr:::n.loci(curr.spp)),
