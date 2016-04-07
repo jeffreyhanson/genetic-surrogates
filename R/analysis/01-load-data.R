@@ -2,8 +2,7 @@
 session::restore.session('results/.cache/00-initialization.rda')
 
 # compile spatial grid data
-# all.spp <- seq_len(general.params.LST[[MODE]]$n.spp)
-all.spp <- c(1,2,16,3,19)
+all.spp <- seq_len(general.params.LST[[MODE]]$n.spp)
 
 ### load data
 ## load grid cell centroids
