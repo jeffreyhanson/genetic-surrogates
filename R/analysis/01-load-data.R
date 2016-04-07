@@ -2,7 +2,8 @@
 session::restore.session('results/.cache/00-initialization.rda')
 
 # compile spatial grid data
-all.spp <- seq_len(general.params.LST[[MODE]]$n.spp)
+# all.spp <- seq_len(general.params.LST[[MODE]]$n.spp)
+all.spp <- c(1,2,16,3,19)
 
 ### load data
 ## load grid cell centroids
@@ -59,14 +60,16 @@ spp.AFLP.LST <- llply(spp.names.DF[[1]], function(x) {
 })
 
 # store omitted species
-omitted.species <- spp.names.DF[[3]][sapply(spp.AFLP.LST, is.null)]
+omitted.species.names.DF <- spp.names.DF[sapply(spp.AFLP.LST, is.null),]
+spp.names.DF <- spp.names.DF[!sapply(spp.AFLP.LST, is.null),]
+
+# remove omitted species
+spp.AFLP.LST <- spp.AFLP.LST[!sapply(spp.AFLP.LST, is.null)]
 
 # construct StructureData objects 
 spp.StructureData.LST <- llply(
 	spp.AFLP.LST,
 	function(x) {
-		if (is.null(x))
-			return(NULL)
 		curr.sub <- select(x, -Cell, -longitude, -latitude)
 		return(
 				structurer:::StructureData(
@@ -80,23 +83,17 @@ spp.StructureData.LST <- llply(
 
 ## compile species occurence data
 # load in data
-spp.samples.DF <- llply(
+spp.samples.DF <- ldply(
 	seq_along(spp.AFLP.LST),
 	.fun=function(i) {
-		if (is.null(spp.AFLP.LST[[i]]))
-			return(NULL)
 		spp.AFLP.LST[[i]] %>%
 			filter(!grepl('B', Cell, fixed=TRUE)) %>% #remove replicate runs for the sample individuals
-			mutate(species=spp.names.DF[[3]][i],
-				Cell=gsub('\\-.*$', '', Cell)
-			) %>%
+			mutate(species=spp.names.DF[[3]][i], Cell=gsub('\\-.*$', '', Cell)) %>%
 			rename(cell=Cell, sample.longitude=longitude, sample.latitude=latitude) %>%
 			select(cell, sample.longitude, sample.latitude, species) %>%
 			return()
 	}
-)
-spp.samples.DF <- spp.samples.DF[!sapply(spp.samples.DF,is.null)] %>% 
-	rbind.fill %>%
+) %>%
 	left_join(grid.DF,by='cell')
 
 ## remove individuals that are all NAs
