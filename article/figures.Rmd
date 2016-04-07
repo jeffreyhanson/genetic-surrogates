@@ -30,7 +30,7 @@ knitr::opts_chunk$set(echo=FALSE, warning=FALSE, message=FALSE)
 
 ```{r, echo=FALSE, message=FALSE, fig.width=6, fig.height=4.5, fig.cap='The relationship between surrogates and genetic variation secured in prioritizations. White boxplots show the proportion of genetic variation secured by prioritizations generated using surrogate-based targets. Grey boxplots show the proportion of genetic variation secured by randomly generated prioritizations with the same number of planning units as the surrogate-based prioritizations. Panel (a) shows the relationship between environmental surrogate targets used to generate a prioritization and the proportion of adaptive genetic variation it secures. Similarly, panel (b) shows that for geographic surrogate targets and neutral genetic variation. Box-plots show inter-specific variation in the proportion of genetic variation secured using different surrogate-based targets.'}
 # prepare data
-correlation.PDF <- correlation.sub.DF %>%
+correlation.PDF <- correlation.DF %>%
 	group_by(Type, Surrogate.target, Method, Species) %>% 
 	summarize(genetic.held=mean(genetic.held, na.rm=TRUE)) %>%
 	data.frame()

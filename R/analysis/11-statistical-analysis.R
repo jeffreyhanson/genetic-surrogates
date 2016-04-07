@@ -8,6 +8,8 @@ load('results/.cache/07-surrogacy-prioritizations.rda')
 ### surrogacy analyses
 ## prepare data
 correlation.DF$Surrogate.target <- as.factor(correlation.DF$Surrogate.target)
+correlation.DF$Type.Surrogate.target.Method=with(correlation.DF, interaction(Type, Surrogate.target, Method))
+
 surrogacy.DF <- correlation.DF %>% ddply(.(Species, Surrogate.target, Type), .fun=function(x) {
 	df1 <- filter(x, Method=='Optimal')
 	df2 <- filter(x, Method=='Random')
@@ -23,7 +25,7 @@ surrogacy.test.DF <- surrogacy.DF %>% ddply(.(Species, Surrogate.target, Type), 
 		)
 	)
 })
-surrogacy.test.DF$P=p.adjust(surrogacy.test$raw.P, 'bonferroni')
+surrogacy.test.DF$P=p.adjust(surrogacy.test.DF$raw.P, 'bonferroni')
 
 surrogacy.counts.DF <- surrogacy.test.DF %>% 
 	group_by(Surrogate.target,Type) %>%
@@ -68,11 +70,8 @@ scenario.DF <- rbind.fill(list(single.spp.SDF, multi.spp.SDF, multi.spp.with.cos
 	) %>%
 	mutate(Prioritisation.Metric.Context=interaction(Prioritisation,Metric,Context))
 	
-# remove NA values
-scenario.sub.DF <- scenario.DF[rowSums(apply(select(scenario.DF, Prioritisation, Metric, Context), 2, is.na))==0,]
-
 # prepare matrix with success vs. failures
-scenario.contingency.DF <- scenario.sub.DF %>% 
+scenario.contingency.DF <- scenario.DF %>% 
 	group_by(Prioritisation.Metric.Context) %>% 
 	filter(!is.na(genetic.held)) %>% 
 	summarize(count=sum(genetic.held>=rapr.params.LST[[MODE]]$scenario.analysis$genetic.target), total=length(genetic.held)) %>% 
