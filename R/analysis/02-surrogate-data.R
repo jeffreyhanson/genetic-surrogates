@@ -70,7 +70,7 @@ grid.DF <- cbind(grid.DF, extract.DF)
 
 ## extract population density data
 # load pop data
-pop.RST <- raster('data/GRUMP_V1_Population_Density/grumpv1-popdensity.tif') %>% 
+pop.RST <- raster('data/GRUMP_V1_Population_Density/euuds00ag.tif') %>% 
 	crop(grid.PLY) %>% projectRaster(crs=grid.PPLY@proj4string)
 # extract total for each cell
 extract2.DF <- grid.PPLY %>% rasterize(pop.RST, field='id') %>% 
@@ -78,7 +78,7 @@ extract2.DF <- grid.PPLY %>% rasterize(pop.RST, field='id') %>%
 	select(-1) %>% `names<-`('pop.density') %>% mutate(pop.density=pop.density/1000)
 # merge with grid.DF
 grid.DF <- cbind(grid.DF, extract2.DF)
-	
+
 ## update @data slot in spatial objects
 grid.PLY@data <- grid.DF
 grid.PPLY@data <- grid.DF

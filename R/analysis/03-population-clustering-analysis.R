@@ -46,7 +46,7 @@ clust <- stopCluster(clust)
 
 ## assign populations
 spp.BayeScanData.sample.subset.LST <- llply(
-	seq_along(spp.BayeScanData.LST),
+	seq_along(spp.StructureData.LST),
 	.fun=function(i) {
 		# get population identities
 		probs<-spp.Mclust.LST[[i]]$mclust$z
@@ -57,11 +57,10 @@ spp.BayeScanData.sample.subset.LST <- llply(
 		# if only one population return null
 		if (n_distinct(ids)==1)
 			return(NULL)
-		# remove individuals below threshold
-		curr.spp <- spp.BayeScanData.LST[[i]]
-		curr.spp <- bayescanr:::sample.subset.BayeScanData(curr.spp, validPos)
-		curr.spp@labels <- filter(spp.samples.DF, species==unique(spp.samples.DF$species)[i])$cell[validPos]
-		curr.spp@populations <- as.character(ids[validPos])
+		# return BayeScanData object 
+		curr.spp <- bayescanr:::BayeScanData(spp.StructureData.LST[[i]]@matrix[validPos,,drop=FALSE],
+			spp.StructureData.LST[[i]]@loci.names, as.character(ids[validPos]),
+			spp.StructureData.LST[[i]]@sample.names[validPos])
 		return(curr.spp)
 	}
 )

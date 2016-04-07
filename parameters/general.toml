@@ -3,7 +3,9 @@ title = "general parameters"
 [debug]
 n.spp = 3
 threads = 1
+min.loci.shared.proportion = 0.1
 
 [release]
 n.spp = 27
 threads = 15
+min.loci.shared.proportion = 0.5

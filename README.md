@@ -58,6 +58,7 @@ To rerun all computational analyses, run `make all`
 	+ rworldxtra
 	+ session
 	+ snow
+	+ stringr
 	+ vegan
 * R GitHub packages
 	+ paleo13/bayescanr

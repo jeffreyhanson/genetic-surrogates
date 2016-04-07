@@ -12,7 +12,7 @@ registerDoParallel(clust)
 
 # run mds
 spp.nmds.LST <- llply(
-	seq_along(spp.BayeScanData.LST),
+	seq_along(spp.StructureData.LST),
 	.fun=function(i) {
 		# subset loci for species
 		setMKLthreads(1)
@@ -22,10 +22,12 @@ spp.nmds.LST <- llply(
 			return(list('adaptive'=NULL, 'neutral'=NULL))
 		} else {
 			# extract loci
-			curr.spp <- bayescanr:::loci.subset(
-				spp.BayeScanData.LST[[i]],
-				which(spp.BayeScanData.LST[[i]]@primers %in% spp.BayeScan.sample.loci.subset.LST[[i]]@data@primers)
-			)
+			curr.spp <- bayescanr:::BayeScanData(spp.StructureData.LST[[i]]@matrix,
+				spp.StructureData.LST[[i]]@loci.names, rep('A', nrow(spp.StructureData.LST[[i]]@matrix)),
+				spp.StructureData.LST[[i]]@sample.names) %>%
+				bayescanr:::loci.subset(
+					which(spp.BayeScanData.LST[[i]]@primers %in% spp.BayeScan.sample.loci.subset.LST[[i]]@data@primers)
+				)
 			# manually classify loci as neutral or adaptive
 			curr.spp.type <- replace(
 				rep('neutral', bayescanr:::n.loci(curr.spp)),

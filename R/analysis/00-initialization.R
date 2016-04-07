@@ -41,7 +41,7 @@ suppressMessages(library(RColorBrewer))
 suppressMessages(library(mclust))
 suppressMessages(library(cluster))
 suppressMessages(library(RVAideMemoire))
-
+suppressMessages(library(stringr))
 
 ## load github packages
 # devtools::install_github('paleo13/raspr')

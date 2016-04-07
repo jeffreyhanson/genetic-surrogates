@@ -20,7 +20,10 @@ try(session::restore.session('results/results.rda'))
 
 # set options
 options(error=NULL)
+```
 
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(echo=FALSE, warning=FALSE, message=FALSE)
 ```
 
 ## Figures
@@ -133,7 +136,7 @@ ggplot() +
 	)
 ```
 
-```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.width=5, fig.height=5, fig.cap='The effectiveness of prioritizations at securing genetic variation. The top row of panels (a--b) show the performance of single-species prioritizations generated assuming equal costs among planning costs. The middle row of panels (c--d) show the performance of multi-species prioritizations generated assuming equal costs among planning units. The bottom row of panels (e--f) show the performance of multi-species prioritizations generated using opportunity costs. The left column of panels (a, c, d) and the right column of panels (b, d, f) show the proportion of adaptive and neutral genetic variation secured (respectively). Box plots show the effectiveness of prioritizations generated using amount-based targets, amount-based and surrogate-based targets, and amount-based and genetic-based targets for each species. Letters denote significant differences ($P < 0.05$).'}
+```{r, results='hide', echo=FALSE, warning=FALSE, message=FALSE, fig.width=5, fig.height=5, fig.cap='The effectiveness of prioritizations at securing genetic variation. The top row of panels (a--b) show the performance of single-species prioritizations generated assuming equal costs among planning costs. The middle row of panels (c--d) show the performance of multi-species prioritizations generated assuming equal costs among planning units. The bottom row of panels (e--f) show the performance of multi-species prioritizations generated using opportunity costs. The left column of panels (a, c, d) and the right column of panels (b, d, f) show the proportion of adaptive and neutral genetic variation secured (respectively). Box plots show the effectiveness of prioritizations generated using amount-based targets, amount-based and surrogate-based targets, and amount-based and genetic-based targets for each species. Letters denote significant differences ($P < 0.05$).'}
 # prepare data for plotting
 scenario.PDF <- scenario.DF %>% group_by(Prioritisation, Context, Metric) %>% 
 	mutate(
