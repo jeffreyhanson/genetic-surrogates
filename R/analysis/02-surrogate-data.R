@@ -65,6 +65,9 @@ bioclim.STK <- (bioclim.STK - bioclim.means)
 extract.DF <- grid.PPLY %>% rasterize(bioclim.STK, field='id') %>% 
 	zonal(x=bioclim.STK) %>%  as.data.frame() %>% select(-1) %>%
 	`names<-`(paste0('env_d',seq_len(nlayers(bioclim.STK))))
+# check for NAs
+if (any(apply(extract.DF, 2, function(x) {any(is.na(x))})))
+	stop('missing values climatic data')
 # merge with grid.DF
 grid.DF <- cbind(grid.DF, extract.DF)
 
@@ -76,8 +79,13 @@ pop.RST <- raster('data/GRUMP_V1_Population_Density/euuds00ag.tif') %>%
 extract2.DF <- grid.PPLY %>% rasterize(pop.RST, field='id') %>% 
 	zonal(x=pop.RST, fun='sum') %>% as.data.frame() %>%
 	select(-1) %>% `names<-`('pop.density') %>% mutate(pop.density=pop.density/1000)
+# check for NAs
+if (any(is.na(extract2.DF$pop.density)))
+	stop('missing values for pop.density')
 # merge with grid.DF
 grid.DF <- cbind(grid.DF, extract2.DF)
+
+
 
 ## update @data slot in spatial objects
 grid.PLY@data <- grid.DF
