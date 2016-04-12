@@ -10,26 +10,26 @@ load('results/.cache/07-surrogacy-prioritizations.rda')
 correlation.DF$Surrogate.target <- as.factor(correlation.DF$Surrogate.target)
 correlation.DF$Type.Surrogate.target.Method=with(correlation.DF, interaction(Type, Surrogate.target, Method))
 
-surrogacy.DF <- correlation.DF %>% ddply(.(Species, Surrogate.target, Type), .fun=function(x) {
-	df1 <- filter(x, Method=='Optimal')
-	df2 <- filter(x, Method=='Random')
-	df3 <- mutate(df2, genetic.held = mean(df1$genetic.held)-genetic.held) %>% select(-Method)
-	return(df3)
-})
-
-surrogacy.test.DF <- surrogacy.DF %>% ddply(.(Species, Surrogate.target, Type), .fun=function(x) {
-	return(
-		data.frame(
-			Species=x$Species[[1]], Surrogate.target=x$Surrogate.target[[1]], Type=x$Type[[1]],
-			raw.P=prop.test(x=sum(x$genetic.held>0), n=nrow(x))$p.value
-		)
-	)
-})
-surrogacy.test.DF$P=p.adjust(surrogacy.test.DF$raw.P, 'bonferroni')
-
-surrogacy.counts.DF <- surrogacy.test.DF %>% 
-	group_by(Surrogate.target,Type) %>%
-	summarize(number.species=sum(P<0.05))
+# surrogacy.DF <- correlation.DF %>% ddply(.(Species, Surrogate.target, Type), .fun=function(x) {
+# 	df1 <- filter(x, Method=='Optimal')
+# 	df2 <- filter(x, Method=='Random')
+# 	df3 <- mutate(df2, genetic.held = mean(df1$genetic.held)-genetic.held) %>% select(-Method)
+# 	return(df3)
+# })
+# 
+# surrogacy.test.DF <- surrogacy.DF %>% ddply(.(Species, Surrogate.target, Type), .fun=function(x) {
+# 	return(
+# 		data.frame(
+# 			Species=x$Species[[1]], Surrogate.target=x$Surrogate.target[[1]], Type=x$Type[[1]],
+# 			raw.P=prop.test(x=sum(x$genetic.held>0), n=nrow(x))$p.value
+# 		)
+# 	)
+# })
+# surrogacy.test.DF$P=p.adjust(surrogacy.test.DF$raw.P, 'bonferroni')
+# 
+# surrogacy.counts.DF <- surrogacy.test.DF %>% 
+# 	group_by(Surrogate.target,Type) %>%
+# 	summarize(number.species=sum(P<0.05))
 
 ### scenario analyses
 ## prepare data
