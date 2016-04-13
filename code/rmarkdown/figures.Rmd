@@ -14,9 +14,10 @@ output:
 ```{r, include=FALSE}
 # set wd
 setwd('..')
+setwd('..')
 
 # load .rda file
-try(session::restore.session('results/results.rda'))
+try(session::restore.session('data/results/results.rda'))
 
 # set options
 options(error=NULL)

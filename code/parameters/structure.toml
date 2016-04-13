@@ -1,0 +1,19 @@
+title = "structure parameters"
+
+[debug]
+probability.threshold = 0.75
+numruns = 4
+burnin = 20
+numreps = 30
+noadmix = true
+admburnin = 10
+repeats = 1000
+
+[release]
+probability.threshold = 0.75
+numruns = 10
+burnin = 200000
+numreps = 1000000
+noadmix = true
+admburnin = 5000
+repeats = 1000

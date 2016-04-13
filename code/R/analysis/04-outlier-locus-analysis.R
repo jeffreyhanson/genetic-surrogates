@@ -1,5 +1,5 @@
 ## load .rda
-session::restore.session('data/results/03-population-clustering-analysis.rda')
+session::restore.session('data/intermediate/03-population-clustering-analysis.rda')
 
 ## load parameters
 bayescan.params.LST <- parseTOML('code/parameters/bayescan.toml')
@@ -21,7 +21,7 @@ spp.OutlierDetectionData.LST <- llply(
 )
 
 # run BayeScan over subsetted objects
-dir.create('data/results/bayescan')
+dir.create('data/intermediate/bayescan')
 spp.BayeScan.LST <- llply(
 	seq_along(spp.OutlierDetectionData.LST),
 	.fun=function(i) {
@@ -29,7 +29,7 @@ spp.BayeScan.LST <- llply(
 		if (is.null(spp.OutlierDetectionData.LST[[i]]))
 			return(NULL)
 		# else run bayescan
-		curr.dir <- paste0('data/results/bayescan/',unique(spp.samples.DF$species)[i])
+		curr.dir <- paste0('data/intermediate/bayescan/',unique(spp.samples.DF$species)[i])
 		dir.create(curr.dir)
 		curr.spp <- run.BayeScan(
 			spp.OutlierDetectionData.LST[[i]],
@@ -105,4 +105,4 @@ spp.OutlierDetectionResults.LST <- llply(
 )
 
 ## save .rda
-save.session('data/results/04-outlier-locus-analysis.rda', compress='xz')
+save.session('data/intermediate/04-outlier-locus-analysis.rda', compress='xz')

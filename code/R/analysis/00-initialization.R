@@ -78,5 +78,5 @@ cat('MODE = ',MODE,'\n')
 general.params.LST <- parseTOML('code/parameters/general.toml')
 
 # save workspace
-save.session('data/results/00-initialization.rda', compress='xz')
+save.session('data/intermediate/00-initialization.rda', compress='xz')
 

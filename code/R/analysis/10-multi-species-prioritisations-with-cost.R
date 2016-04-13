@@ -1,5 +1,5 @@
 ## load .rda
-session::restore.session('data/results/06-format-data-for-prioritisations.rda')
+session::restore.session('data/intermediate/06-format-data-for-prioritisations.rda')
 
 ## load parameters
 rapr.params.LST <- parseTOML('code/parameters/rapr.toml')
@@ -49,4 +49,4 @@ multi.spp.with.cost.DF <- ldply(
 
 
 ## save .rda
-save.session('data/results/10-multi-species-prioritisations-with-cost.rda', compress='xz')
+save.session('data/intermediate/10-multi-species-prioritisations-with-cost.rda', compress='xz')

@@ -1,26 +1,12 @@
 title = "mds parameters"
 
 [debug]
-[debug."population.clustering"]
-min.k = 2
-max.k = 5
-max.stress = 0.25
-trymax = 10
-
-[debug."genetic.space"]
 min.k = 2
 max.k = 5
 max.stress = 0.25
 trymax = 10
 
 [release]
-[release."population.clustering"]
-min.k = 2
-max.k = 100000
-max.stress = 0.05
-trymax = 100
-
-[release."genetic.space"]
 min.k = 2
 max.k = 100000
 max.stress = 0.25

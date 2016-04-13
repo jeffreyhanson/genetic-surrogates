@@ -8,9 +8,9 @@ MODE=debug
 all: clean analysis manuscript
 
 clean:
-	rm -f *.aux *.bbl *.blg *.log *.pdf *.bak *~ *.Rout */*.Rout */*.pdf */*.aux */*.log *.rda */*.rda data/results/*.rda data/results/*.Rout
-	rm data/results/structure -rf
-	rm data/results/bayescan -rf
+	rm -f *.aux *.bbl *.blg *.log *.pdf *.bak *~ *.Rout */*.Rout */*.pdf */*.aux */*.log *.rda */*.rda data/intermediate/*.rda data/intermediate/*.Rout
+	rm data/intermediate/structure -rf
+	rm data/intermediate/bayescan -rf
 	rm code/rmarkdown/article_files/figure-latex/*.pdf -f
 	rm code/rmarkdown/supporting_information_files/figure-latex/*.pdf -f
 	rm code/rmarkdown/figures_files/figure-latex/*.pdf -f
@@ -50,58 +50,58 @@ article/supporting_information.pdf: code/rmarkdown/supporting_information.Rmd co
 	rm code/rmarkdown/supporting_information.md -f
 
 # commands for running analysis
-analysis: data/results/results.rda
+analysis: data/final/results.rda
 
-data/results/results.rda: data/results/11-*.rda code/R/analysis/12-*.R
+data/final/results.rda: data/intermediate/11-*.rda code/R/analysis/12-*.R
 	R CMD BATCH --no-restore --no-save code/R/analysis/12-*.R
-	mv *.Rout data/results/
+	mv *.Rout data/intermediate/
 
-data/results/11-*.rda: data/results/07-*.rda data/results/08-*.rda data/results/09-*.rda data/results/10-*.rda code/R/analysis/11-*.R
+data/intermediate/11-*.rda: data/intermediate/07-*.rda data/intermediate/08-*.rda data/intermediate/09-*.rda data/intermediate/10-*.rda code/R/analysis/11-*.R
 	R CMD BATCH --no-restore --no-save code/R/analysis/11-*.R
-	mv *.Rout data/results/
+	mv *.Rout data/intermediate/
 
-data/results/10-*.rda: data/results/06-*.rda code/R/analysis/10-*.R code/parameters/rapr.toml code/parameters/gurobi.toml
+data/intermediate/10-*.rda: data/intermediate/06-*.rda code/R/analysis/10-*.R code/parameters/rapr.toml code/parameters/gurobi.toml
 	R CMD BATCH --no-restore --no-save code/R/analysis/10-*.R
-	mv *.Rout data/results/
+	mv *.Rout data/intermediate/
 
-data/results/09-*.rda: data/results/06-*.rda code/R/analysis/09-*.R code/parameters/rapr.toml code/parameters/gurobi.toml
+data/intermediate/09-*.rda: data/intermediate/06-*.rda code/R/analysis/09-*.R code/parameters/rapr.toml code/parameters/gurobi.toml
 	R CMD BATCH --no-restore --no-save code/R/analysis/09-*.R
-	mv *.Rout data/results/
+	mv *.Rout data/intermediate/
 
-data/results/08-*.rda: data/results/06-*.rda code/R/analysis/08-*.R code/parameters/rapr.toml code/parameters/gurobi.toml
+data/intermediate/08-*.rda: data/intermediate/06-*.rda code/R/analysis/08-*.R code/parameters/rapr.toml code/parameters/gurobi.toml
 	R CMD BATCH --no-restore --no-save code/R/analysis/08-*.R
-	mv *.Rout data/results/
+	mv *.Rout data/intermediate/
 
-data/results/07-*.rda: data/results/06-*.rda code/R/analysis/07-*.R code/parameters/rapr.toml code/parameters/gurobi.toml
+data/intermediate/07-*.rda: data/intermediate/06-*.rda code/R/analysis/07-*.R code/parameters/rapr.toml code/parameters/gurobi.toml
 	R CMD BATCH --no-restore --no-save code/R/analysis/07-*.R
-	mv *.Rout data/results/
+	mv *.Rout data/intermediate/
 
-data/results/06-*.rda: data/results/05-*.rda code/R/analysis/06-*.R
+data/intermediate/06-*.rda: data/intermediate/05-*.rda code/R/analysis/06-*.R
 	R CMD BATCH --no-restore --no-save code/R/analysis/06-*.R
-	mv *.Rout data/results/
+	mv *.Rout data/intermediate/
 
-data/results/05-*.rda: data/results/04-*.rda code/R/analysis/05-*.R code/parameters/nmds.toml
+data/intermediate/05-*.rda: data/intermediate/04-*.rda code/R/analysis/05-*.R code/parameters/nmds.toml
 	R CMD BATCH --no-restore --no-save code/R/analysis/05-*.R
-	mv *.Rout data/results/
+	mv *.Rout data/intermediate/
 
-data/results/04-*.rda: data/results/03-*.rda code/R/analysis/04-*.R code/parameters/bayescan.toml code/parameters/pcadapt.toml
+data/intermediate/04-*.rda: data/intermediate/03-*.rda code/R/analysis/04-*.R code/parameters/bayescan.toml code/parameters/pcadapt.toml
 	R CMD BATCH --no-restore --no-save code/R/analysis/04-*.R
-	mv *.Rout data/results/
+	mv *.Rout data/intermediate/
 
-data/results/03-*.rda: data/results/02-*.rda code/R/analysis/03-*.R code/parameters/mclust.toml code/parameters/nmds.toml
+data/intermediate/03-*.rda: data/intermediate/02-*.rda code/R/analysis/03-*.R code/parameters/structure.toml
 	R CMD BATCH --no-restore --no-save code/R/analysis/03-*.R
-	mv *.Rout data/results/
+	mv *.Rout data/intermediate/
 
-data/results/02-*.rda: data/results/01-*.rda code/R/analysis/02-*.R code/parameters/surrogate.toml
+data/intermediate/02-*.rda: data/intermediate/01-*.rda code/R/analysis/02-*.R code/parameters/surrogate.toml
 	R CMD BATCH --no-restore --no-save code/R/analysis/02-*.R
-	mv *.Rout data/results/
+	mv *.Rout data/intermediate/
 
-data/results/01-*.rda: data/results/00-*.rda code/R/analysis/01-*.R
+data/intermediate/01-*.rda: data/intermediate/00-*.rda code/R/analysis/01-*.R
 	R CMD BATCH --no-restore --no-save code/R/analysis/01-*.R
-	mv *.Rout data/results/
+	mv *.Rout data/intermediate/
 
-data/results/00-*.rda: code/R/analysis/00-*.R code/parameters/general.toml
+data/intermediate/00-*.rda: code/R/analysis/00-*.R code/parameters/general.toml
 	R CMD BATCH --no-restore --no-save '--args MODE=$(MODE)' code/R/analysis/00-*.R
-	mv *.Rout data/results/
+	mv *.Rout data/intermediate/
 
 

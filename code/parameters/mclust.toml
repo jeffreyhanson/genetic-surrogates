@@ -1,9 +1,0 @@
-title = "adegenet parameters"
-
-[debug]
-G = [1, 2, 3, 4, 5]
-probability.threshold = 0.75
-
-[release]
-G = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
-probability.threshold = 0.75

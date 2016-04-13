@@ -1,58 +1,38 @@
 ## load .rda
-session::restore.session('data/results/02-surrogate-data.rda')
+session::restore.session('data/intermediate/02-surrogate-data.rda')
 
 ## load parameters
-mclust.params.LST <- parseTOML('code/parameters/mclust.toml')
-nmds.params.LST <- parseTOML('code/parameters/nmds.toml')
+structure.params.LST <- parseTOML('code/parameters/structure.toml')
 
-### mclust analyses
+### stucture analyses
 ## run analyses
-clust <- makeCluster(general.params.LST[[MODE]]$threads, type='SOCK')
-clusterEvalQ(clust, {library(structurer);library(cluster);library(mclust);library(vegan)})
-clusterExport(clust, c('nmds.params.LST','mclust.params.LST','MODE', 'spp.StructureData.LST', 'spp.samples.DF'))
-registerDoParallel(clust)
-spp.Mclust.LST <- llply(
+spp.StructureAnalysis.LST <- llply(
 	seq_along(spp.StructureData.LST),
 		.fun=function(i) {
-		## generate ordination
+		## init
 		setMKLthreads(1)
-		curr.nmds <- bayescanr::nmds(
-			bayescanr::BayeScanData(
-				spp.StructureData.LST[[i]]@matrix,
-				primers=spp.StructureData.LST[[i]]@loci.names,
-				populations=rep('1', nrow(spp.StructureData.LST[[i]]@matrix)),
-				labels=spp.StructureData.LST[[i]]@sample.names
-			),
-			metric='gower',
-			max.stress=nmds.params.LST[[MODE]]$population.clustering$max.stress,
-			min.k=nmds.params.LST[[MODE]]$population.clustering$min.k,
-			max.k=nmds.params.LST[[MODE]]$population.clustering$max.k,
-			trymax=nmds.params.LST[[MODE]]$population.clustering$trymax
-		)
-		## run mclust
+		curr.spp.dir <- file.path('data/intermediate/structure',unique(spp.samples.DF$species)[i])
+		dir.create(curr.spp.dir, showWarnings=FALSE, recursive=TRUE)
+		## run structure analysis and return results
 		return(
-			list(
-				nmds=curr.nmds,
-				mclust=Mclust(
-					curr.nmds$points,
-					G=mclust.params.LST[[MODE]]$G
-				)
+			run.single.Structure(spp.StructureData.LST[[i]], MAXPOPS = spp.populations.DF[[2]][i], NUMRUNS = structure.params.LST[[MODE]]$numruns, 
+				BURNIN = structure.params.LST[[MODE]]$burnin, NUMREPS = structure.params.LST[[MODE]]$numreps, NOADMIX = structure.params.LST[[MODE]]$noadmix, 
+				ADMBURNIN = structure.params.LST[[MODE]]$admburnin, SEED = NA_real_, M = "LargeKGreedy", W = TRUE, S = FALSE, 
+				REPEATS = structure.params.LST[[MODE]]$repeats, dir = curr.spp.dir, clean = FALSE, verbose = FALSE, threads=general.params.LST[[MODE]]$threads
 			)
 		)
-	},
-	.parallel=TRUE
+	}
 )
-clust <- stopCluster(clust)
 
 ## assign populations
 spp.OutlierDetectionData.LST <- llply(
 	seq_along(spp.StructureData.LST),
 	.fun=function(i) {
 		# get population identities
-		probs<-spp.Mclust.LST[[i]]$mclust$z
+		probs<-spp.StructureAnalysis.LST[[i]]@results@summary
 		# identify individuals with uncertain population membership
 		ids <- apply(probs, 1, which.max)
-		ids[which(apply(probs, 1, function(x) {max(x) < mclust.params.LST[[MODE]]$probability.threshold}))] <- NA_integer_
+		ids[which(apply(probs, 1, function(x) {max(x) < structure.params.LST[[MODE]]$probability.threshold}))] <- NA_integer_
 		validPos <- which(!is.na(ids))
 		# if only one population return null
 		if (n_distinct(ids)==1)
@@ -66,4 +46,4 @@ spp.OutlierDetectionData.LST <- llply(
 )
 
 ## load .rda
-save.session('data/results/03-population-clustering-analysis.rda', compress='xz')
+save.session('data/intermediate/03-population-clustering-analysis.rda', compress='xz')

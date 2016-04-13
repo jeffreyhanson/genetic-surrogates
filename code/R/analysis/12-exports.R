@@ -1,7 +1,7 @@
 ## load .rda
-session::restore.session('data/results/11-statistical-analysis.rda')
+session::restore.session('data/intermediate/11-statistical-analysis.rda')
 
 #### save results
-session::save.session('results/results.rda', compress='xz')
+session::save.session('data/final/results.rda', compress='xz')
 
 

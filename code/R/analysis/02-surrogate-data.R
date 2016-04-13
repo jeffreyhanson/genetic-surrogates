@@ -1,5 +1,5 @@
 ## load .rda
-session::restore.session('data/results/01-load-data.rda')
+session::restore.session('data/intermediate/01-load-data.rda')
 
 ## load parameters
 surrogate.params.LST <- parseTOML('code/parameters/surrogate.toml')
@@ -90,4 +90,4 @@ pca.DF <- read.table('data/raw/BioClim_variables/bioclim_pca.TXT', skip=94) %>% 
 )
 
 ## save .rda
-save.session('data/results/02-surrogate-data.rda', compress='xz')
+save.session('data/intermediate/02-surrogate-data.rda', compress='xz')

@@ -1,5 +1,5 @@
 ## load .rda
-session::restore.session('data/results/04-outlier-locus-analysis.rda')
+session::restore.session('data/intermediate/04-outlier-locus-analysis.rda')
 
 ## load parameters
 nmds.params.LST <- parseTOML('code/parameters/nmds.toml')
@@ -44,10 +44,10 @@ spp.nmds.LST <- llply(
 				curr.nmds <- bayescanr::nmds(
 					bayescanr:::loci.subset(curr.spp, curr.spp.type==j),
 					metric='gower',
-					max.stress=nmds.params.LST[[MODE]]$genetic.space$max.stress,
-					min.k=nmds.params.LST[[MODE]]$genetic.space$min.k,
-					max.k=nmds.params.LST[[MODE]]$genetic.space$max.k,
-					trymax=nmds.params.LST[[MODE]]$genetic.space$trymax
+					max.stress=nmds.params.LST[[MODE]]$max.stress,
+					min.k=nmds.params.LST[[MODE]]$min.k,
+					max.k=nmds.params.LST[[MODE]]$max.k,
+					trymax=nmds.params.LST[[MODE]]$trymax
 				)
 			)
 		}), c('adaptive','neutral')))
@@ -97,4 +97,4 @@ for (i in seq_along(unique(spp.samples.DF$species))) {
 grid.PLY@data <- grid.DF
 
 ## save .rda
-save.session('data/results/05-genetic-nmds.rda', compress='xz')
+save.session('data/intermediate/05-genetic-nmds.rda', compress='xz')

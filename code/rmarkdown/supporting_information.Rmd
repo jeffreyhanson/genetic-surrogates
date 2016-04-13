@@ -17,9 +17,10 @@ All data and code is stored in an online repository (\url{www.github.com/paleo13
 ```{r, include=FALSE}
 # set wd
 setwd('..')
+setwd('..')
 
 # load .rda file
-try(session::restore.session('results/results.rda'))
+try(session::restore.session('data/results/results.rda'))
 
 # set options
 options(error=NULL)
