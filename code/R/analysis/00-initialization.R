@@ -1,5 +1,5 @@
 #### set default error message
-options(error=function(){
+options(error=function() {
   save.image(paste0('results-error-',as.character(Sys.time()),'.rda'))
   traceback()
 })
@@ -14,6 +14,11 @@ if (length(args)>0) {
 	
 	
 #### Load pacakges
+## load bioconductor packages
+# install packages
+# source('http://bioconductor.org/biocLite.R')
+# biocLite('qvalue')
+
 # load CRAN packages
 suppressMessages(library(stats))
 suppressMessages(library(data.table))
@@ -41,7 +46,7 @@ suppressMessages(library(RColorBrewer))
 suppressMessages(library(mclust))
 suppressMessages(library(cluster))
 suppressMessages(library(RVAideMemoire))
-
+suppressMessages(library(pcadapt))
 
 ## load github packages
 # devtools::install_github('paleo13/raspr')
@@ -65,13 +70,13 @@ set.seed(500)
 select <- dplyr::select
 
 ### Load functions
-for (x in dir(file.path('R', 'functions'), full.names=TRUE)) source(x)
+for (x in dir(file.path('code', 'R', 'functions'), full.names=TRUE)) source(x)
 
 ### set parameters
 if (!exists('MODE')) MODE <- 'debug'
 cat('MODE = ',MODE,'\n')
-general.params.LST <- parseTOML('parameters/general.toml')
+general.params.LST <- parseTOML('code/parameters/general.toml')
 
 # save workspace
-save.session('results/.cache/00-initialization.rda', compress='xz')
+save.session('data/results/00-initialization.rda', compress='xz')
 

@@ -1,38 +1,40 @@
 ## load .rda
-session::restore.session('results/.cache/04-outlier-locus-analysis.rda')
+session::restore.session('data/results/04-outlier-locus-analysis.rda')
 
 ## load parameters
-nmds.params.LST <- parseTOML('parameters/nmds.toml')
+nmds.params.LST <- parseTOML('code/parameters/nmds.toml')
 
 # init snow cluster
 clust <- makeCluster(general.params.LST[[MODE]]$threads, type='SOCK')
 clusterEvalQ(clust, {library(structurer);library(bayescanr);library(cluster);library(plyr);library(vegan)})
-clusterExport(clust, c('MODE', 'spp.BayeScanData.LST', 'spp.BayeScan.sample.loci.subset.LST', 'nmds.params.LST'))
+clusterExport(clust, c('MODE', 'spp.OutlierDetectionResults.LST', 'spp.OutlierDetectionData.LST', 'spp.StructureData.LST', 'nmds.params.LST'))
 registerDoParallel(clust)
 
 # run mds
 spp.nmds.LST <- llply(
-	seq_along(spp.BayeScanData.LST),
+	seq_along(spp.OutlierDetectionData.LST),
 	.fun=function(i) {
 		# subset loci for species
 		setMKLthreads(1)
 		cat('starting species',i,'\n')
-		if (is.null(spp.BayeScan.sample.loci.subset.LST[[i]])) {
+		if (is.null(spp.OutlierDetectionData.LST[[i]])) {
 			# only 1 population in this species
 			return(list('adaptive'=NULL, 'neutral'=NULL))
-		} else {
-			# extract loci
-			curr.spp <- bayescanr:::loci.subset(
-				spp.BayeScanData.LST[[i]],
-				which(spp.BayeScanData.LST[[i]]@primers %in% spp.BayeScan.sample.loci.subset.LST[[i]]@data@primers)
-			)
-			# manually classify loci as neutral or adaptive
-			curr.spp.type <- replace(
-				rep('neutral', bayescanr:::n.loci(curr.spp)),
-				spp.BayeScan.sample.loci.subset.LST[[i]]@results@summary$type=='adaptive',
-				'adaptive'
-			)
 		}
+		# manually classify loci as neutral or adaptive
+		curr.spp <- bayescanr::BayeScanData(
+			spp.StructureData.LST[[i]]@matrix,
+			primers=spp.StructureData.LST[[i]]@loci.names,
+			populations=rep('1', nrow(spp.StructureData.LST[[i]]@matrix)),
+			labels=spp.StructureData.LST[[i]]@sample.names
+		)
+		outlier.pos <- which(spp.StructureData.LST[[i]]@loci.names %in% spp.OutlierDetectionData.LST[[i]]@primers[spp.OutlierDetectionResults.LST[[i]]])
+		curr.spp.type <- replace(
+			rep('neutral', ncol(spp.StructureData.LST[[i]]@matrix)),
+			outlier.pos,
+			'adaptive'
+		)
+	
 		# run nmds over neutral and/or adaptive loci
 		return(`names<-`(llply(c('adaptive', 'neutral'), function(j) {
 			if (sum(curr.spp.type==j)==0)
@@ -95,4 +97,4 @@ for (i in seq_along(unique(spp.samples.DF$species))) {
 grid.PLY@data <- grid.DF
 
 ## save .rda
-save.session('results/.cache/05-genetic-nmds.rda', compress='xz')
+save.session('data/results/05-genetic-nmds.rda', compress='xz')

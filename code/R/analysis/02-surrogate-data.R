@@ -1,8 +1,8 @@
 ## load .rda
-session::restore.session('results/.cache/01-load-data.rda')
+session::restore.session('data/results/01-load-data.rda')
 
 ## load parameters
-surrogate.params.LST <- parseTOML('parameters/surrogate.toml')
+surrogate.params.LST <- parseTOML('code/parameters/surrogate.toml')
 
 ## create spatial data
 # grid data as SpatialPolygonsDataFrame
@@ -56,7 +56,7 @@ grid.PPLY$id <- seq_len(nrow(grid.DF))
 
 ## extract climatic data
 # load climatic data
-bioclim.STK <- stack('data/BioClim_variables/bioclim_pca.tif')
+bioclim.STK <- stack('data/raw/BioClim_variables/bioclim_pca.tif')
 bioclim.STK <- bioclim.STK[[seq_len(surrogate.params.LST[[MODE]]$number.components)]]
 # zscore layers --note that they already have unit sd
 bioclim.means <- cellStats(bioclim.STK, 'mean')
@@ -70,7 +70,7 @@ grid.DF <- cbind(grid.DF, extract.DF)
 
 ## extract population density data
 # load pop data
-pop.RST <- raster('data/GRUMP_V1_Population_Density/grumpv1-popdensity.tif') %>% 
+pop.RST <- raster('data/raw/GRUMP_V1_Population_Density/grumpv1-popdensity.tif') %>% 
 	crop(grid.PLY) %>% projectRaster(crs=grid.PPLY@proj4string)
 # extract total for each cell
 extract2.DF <- grid.PPLY %>% rasterize(pop.RST, field='id') %>% 
@@ -84,10 +84,10 @@ grid.PLY@data <- grid.DF
 grid.PPLY@data <- grid.DF
 
 ## load and save pca summary
-pca.DF <- read.table('data/BioClim_variables/bioclim_pca.TXT', skip=94) %>% `names<-`(
+pca.DF <- read.table('data/raw/BioClim_variables/bioclim_pca.TXT', skip=94) %>% `names<-`(
 	c('Principle Component', 'Eigen Value', 'Variation explained (%)',
 	'Accumulative variation explained (%)')
 )
 
 ## save .rda
-save.session('results/.cache/02-surrogate-data.rda', compress='xz')
+save.session('data/results/02-surrogate-data.rda', compress='xz')

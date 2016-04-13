@@ -1,8 +1,8 @@
 ## load .rda
-session::restore.session('results/.cache/05-genetic-nmds.rda')
+session::restore.session('data/results/05-genetic-nmds.rda')
 
 # subset data.frames for species with identifiable adaptive and/or neutral genetic variation
-missing.species <- unique(spp.samples.DF$species)[laply(spp.BayeScanData.sample.subset.LST, function(x) {is.null(x)})]
+missing.species <- unique(spp.samples.DF$species)[laply(spp.OutlierDetectionData.LST, function(x) {is.null(x)})]
 
 if (length(missing.species)>0) { 
 	grid.sub.DF <- grid.DF
@@ -108,4 +108,4 @@ ru@data@pu$cost <- 1
 ru_with_cost <- RapUnsolved(RapUnreliableOpts(), rd)
 
 ## save .rda
-save.session('results/.cache/06-format-data-for-prioritisations.rda', compress='xz')
+save.session('data/results/06-format-data-for-prioritisations.rda', compress='xz')

@@ -1,9 +1,9 @@
 ## load .rda
-session::restore.session('results/.cache/02-surrogate-data.rda')
+session::restore.session('data/results/02-surrogate-data.rda')
 
 ## load parameters
-mclust.params.LST <- parseTOML('parameters/mclust.toml')
-nmds.params.LST <- parseTOML('parameters/nmds.toml')
+mclust.params.LST <- parseTOML('code/parameters/mclust.toml')
+nmds.params.LST <- parseTOML('code/parameters/nmds.toml')
 
 ### mclust analyses
 ## run analyses
@@ -45,8 +45,8 @@ spp.Mclust.LST <- llply(
 clust <- stopCluster(clust)
 
 ## assign populations
-spp.BayeScanData.sample.subset.LST <- llply(
-	seq_along(spp.BayeScanData.LST),
+spp.OutlierDetectionData.LST <- llply(
+	seq_along(spp.StructureData.LST),
 	.fun=function(i) {
 		# get population identities
 		probs<-spp.Mclust.LST[[i]]$mclust$z
@@ -58,13 +58,12 @@ spp.BayeScanData.sample.subset.LST <- llply(
 		if (n_distinct(ids)==1)
 			return(NULL)
 		# remove individuals below threshold
-		curr.spp <- spp.BayeScanData.LST[[i]]
-		curr.spp <- bayescanr:::sample.subset.BayeScanData(curr.spp, validPos)
-		curr.spp@labels <- filter(spp.samples.DF, species==unique(spp.samples.DF$species)[i])$cell[validPos]
-		curr.spp@populations <- as.character(ids[validPos])
+		curr.spp <- bayescanr::BayeScanData(spp.StructureData.LST[[i]]@matrix[validPos,,drop=FALSE],
+			spp.StructureData.LST[[i]]@loci.names, as.character(ids[validPos]),
+			spp.StructureData.LST[[i]]@sample.names[validPos])
 		return(curr.spp)
 	}
 )
 
 ## load .rda
-save.session('results/.cache/03-population-clustering-analysis.rda', compress='xz')
+save.session('data/results/03-population-clustering-analysis.rda', compress='xz')

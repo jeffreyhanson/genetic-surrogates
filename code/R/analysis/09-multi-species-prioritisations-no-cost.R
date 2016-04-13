@@ -1,13 +1,13 @@
 ## load .rda
-session::restore.session('results/.cache/06-format-data-for-prioritisations.rda')
+session::restore.session('data/results/06-format-data-for-prioritisations.rda')
 
 ## load parameters
-rapr.params.LST <- parseTOML('parameters/rapr.toml')
-gurobi.params.LST <- parseTOML('parameters/gurobi.toml')
+rapr.params.LST <- parseTOML('code/parameters/rapr.toml')
+gurobi.params.LST <- parseTOML('code/parameters/gurobi.toml')
 
 ## multispecies analysis
 # make prioritisations
-multi.spp.prioritisations.with.cost <- llply(
+multi.spp.prioritisations <- llply(
 	list(
 		list(rapr.params.LST[[MODE]]$scenario.analysis$amount.target,NA,NA,
 			rapr.params.LST[[MODE]]$scenario.analysis$other.replicates),
@@ -20,7 +20,7 @@ multi.spp.prioritisations.with.cost <- llply(
 	), 
 	function(y) {
 		species.prioritisation(
-			x=ru_with_cost,
+			x=ru,
 			amount.targets=y[[1]],
 			env.surrogate.targets=y[[2]],
 			geo.surrogate.targets=y[[2]],
@@ -34,11 +34,11 @@ multi.spp.prioritisations.with.cost <- llply(
 )
 
 # generate results table
-multi.spp.with.cost.DF <- ldply(
-	seq_along(multi.spp.prioritisations.with.cost),
+multi.spp.DF <- ldply(
+	seq_along(multi.spp.prioritisations),
 	.fun=function(i) {
 		mutate(
-			extractResults(multi.spp.prioritisations.with.cost[[i]]),
+			extractResults(multi.spp.prioritisations[[i]]),
 			Prioritisation=c('Amount','Surrogate','Genetic')[i]
 		)
 	}
@@ -49,4 +49,4 @@ multi.spp.with.cost.DF <- ldply(
 
 
 ## save .rda
-save.session('results/.cache/10-multi-species-prioritisations-with-cost.rda', compress='xz')
+save.session('data/results/09-multi-species-prioritisations-no-cost.rda', compress='xz')

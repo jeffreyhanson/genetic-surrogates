@@ -1,12 +1,12 @@
 ## load .rda
-session::restore.session('results/.cache/00-initialization.rda')
+session::restore.session('data/results/00-initialization.rda')
 
 ## compile spatial grid data
 all.spp <- seq_len(general.params.LST[[MODE]]$n.spp)
 
 # load grid cell centroids
 grid.DF <- fread(
-	'data/Data_Meirmans_et_al_IntrabioDiv/ReadMe.txt',
+	'data/raw/Data_Meirmans_et_al_IntrabioDiv/ReadMe.txt',
 	data.table=FALSE,
 	skip='cell\tLong\tLat'
 ) %>% rename(
@@ -18,15 +18,10 @@ grid.DF <- fread(
 
 # load in aflp data
 spp.aflp.paths <- dir(
-	'data/Data_Meirmans_et_al_IntrabioDiv',
+	'data/raw/Data_Meirmans_et_al_IntrabioDiv',
 	'^.*AFLP\\.dat$',
 	full.names=TRUE
 )[all.spp]
-
-spp.BayeScanData.LST <- llply(
-	spp.aflp.paths,
-	read.BayeScanData
-)
 
 spp.StructureData.LST <- llply(
 	spp.aflp.paths,
@@ -36,7 +31,7 @@ spp.StructureData.LST <- llply(
 ## compile species occurence data
 # load in data
 spp.loc.paths <- dir(
-	'data/Data_Meirmans_et_al_IntrabioDiv',
+	'data/raw/Data_Meirmans_et_al_IntrabioDiv',
 	'^.*locations\\.txt$',
 	full.names=TRUE
 )[all.spp]
@@ -51,7 +46,7 @@ spp.samples.DF <- ldply(
 			sample.longitude=longitude,
 			sample.latitude=latitude
 		)
-		return(x[as.numeric(spp.BayeScanData.LST[[i]]@populations),])
+		return(x[as.numeric(spp.StructureData.LST[[i]]@sample.names),])
 	}
 ) %>% left_join(
 		grid.DF,
@@ -68,8 +63,6 @@ for (i in seq_along(spp.StructureData.LST)) {
 		curr.valid <- which(rowSums(is.na(spp.StructureData.LST[[i]]@matrix))!=ncol(spp.StructureData.LST[[i]]@matrix))
 		# subset from StructureData
 		spp.StructureData.LST[[i]] <- structurer:::sample.subset.StructureData(spp.StructureData.LST[[i]], curr.valid)
-		# subset from BayescanData
-		spp.BayeScanData.LST[[i]] <- bayescanr:::sample.subset.BayeScanData(spp.BayeScanData.LST[[i]], curr.valid)
 		# remove from spp.samples.DF
 		spp.samples.DF <- spp.samples.DF[-which(spp.samples.DF$species==unique(spp.samples.DF$species)[i])[curr.invalid],]
 	}
@@ -85,4 +78,4 @@ for (i in unique(spp.samples.DF$species))
 
 
 ## save .rda
-save.session('results/.cache/01-load-data.rda', compress='xz')
+save.session('data/results/01-load-data.rda', compress='xz')

@@ -46,6 +46,7 @@ To rerun all computational analyses, run `make all`
 	+ optimx
 	+ pander
 	+ parallel
+	+ pcadapt
 	+ plotrix
 	+ plyr
 	+ RColorBrewer

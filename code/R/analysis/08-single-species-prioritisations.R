@@ -1,9 +1,9 @@
 ## load .rda
-session::restore.session('results/.cache/06-format-data-for-prioritisations.rda')
+session::restore.session('data/results/06-format-data-for-prioritisations.rda')
 
 ## load parameters
-rapr.params.LST <- parseTOML('parameters/rapr.toml')
-gurobi.params.LST <- parseTOML('parameters/gurobi.toml')
+rapr.params.LST <- parseTOML('code/parameters/rapr.toml')
+gurobi.params.LST <- parseTOML('code/parameters/gurobi.toml')
 
 #### single species analysis
 ### generate RapSolved objects
@@ -114,4 +114,4 @@ single.spp.DF <- ldply(
 )
 
 ## save .rda
-save.session('results/.cache/08-single-species-prioritisations.rda', compress='xz')
+save.session('data/results/08-single-species-prioritisations.rda', compress='xz')

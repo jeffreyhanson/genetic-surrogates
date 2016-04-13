@@ -1,8 +1,8 @@
 ## load .rda
-session::restore.session('results/.cache/10-multi-species-prioritisations-with-cost.rda')
-load('results/.cache/09-multi-species-prioritisations-no-cost.rda')
-load('results/.cache/08-single-species-prioritisations.rda')
-load('results/.cache/07-surrogacy-prioritizations.rda')
+session::restore.session('data/results/10-multi-species-prioritisations-with-cost.rda')
+load('data/results/09-multi-species-prioritisations-no-cost.rda')
+load('data/results/08-single-species-prioritisations.rda')
+load('data/results/07-surrogacy-prioritizations.rda')
 
 #### Statistical analyses
 ### surrogacy analyses
@@ -93,4 +93,4 @@ scenario.G.multcomp <- pairwise.G.test(scenario.MTX, 'bonferroni')
 scenario.G.cld <- cld.RV.multcomp(scenario.G.multcomp)
 
 ## save .rda
-save.session('results/.cache/11-statistical-analysis.rda', compress='xz')
+save.session('data/results/11-statistical-analysis.rda', compress='xz')
