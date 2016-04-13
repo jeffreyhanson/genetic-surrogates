@@ -1,7 +1,7 @@
 title = "structure parameters"
 
 [debug]
-probability.threshold = 0.75
+probability.threshold = 0.01
 numruns = 4
 burnin = 20
 numreps = 30
