@@ -10,7 +10,6 @@ spp.StructureAnalysis.LST <- llply(
 	seq_along(spp.StructureData.LST),
 		.fun=function(i) {
 		## init
-		setMKLthreads(1)
 		curr.spp.dir <- file.path('data/intermediate/structure',unique(spp.samples.DF$species)[i])
 		dir.create(curr.spp.dir, showWarnings=FALSE, recursive=TRUE)
 		## run structure analysis and return results
