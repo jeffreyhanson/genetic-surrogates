@@ -11,7 +11,7 @@ repeats = 1000
 
 [release]
 probability.threshold = 0.75
-numruns = 10
+numruns = 5
 burnin = 200000
 numreps = 1000000
 noadmix = true
