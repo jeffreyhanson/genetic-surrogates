@@ -46,7 +46,6 @@ suppressMessages(library(RColorBrewer))
 suppressMessages(library(mclust))
 suppressMessages(library(cluster))
 suppressMessages(library(RVAideMemoire))
-suppressMessages(library(pcadapt))
 suppressMessages(library(ResistanceGA))
 suppressMessages(library(MuMIn))
 suppressMessages(library(knitr))
@@ -62,6 +61,10 @@ suppressMessages(library(structurer))
 suppressMessages(library(ggplot2))
 # devtools::install_github('paleo13/rgurobi')
 suppressMessages(library(rgurobi))
+# devtools::install_github('wpeterman/ResistanceGA')
+suppressMessages(library(ResistanceGA))
+# devtools::install_github('cran/pcadapt@2.2') # install version 2.2 to manually control scaling
+suppressMessages(library(pcadapt))
 
 # set pander options
 panderOptions('knitr.auto.asis', FALSE)
