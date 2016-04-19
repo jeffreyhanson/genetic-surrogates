@@ -9,7 +9,7 @@ gurobi.params.LST <- parseTOML('code/parameters/gurobi.toml')
 ### generate RapSolved objects
 ## amount-based prioritisations
 # prepare cluster object
-clust <- makeCluster(general.params.LST[[MODE]]$threads, type='SOCK')
+clust <- makeCluster(general.params.LST[[MODE]]$threads, type='PSOCK', outfile="")
 clusterEvalQ(clust, {library(rapr)})
 clusterExport(clust, c('spp.samples.sub.DF','grid.sub.DF','rapr.params.LST',
 	'MODE', 'species.prioritisation', 'ru'))

@@ -18,6 +18,7 @@ if (length(args)>0) {
 # install packages
 # source('http://bioconductor.org/biocLite.R')
 # biocLite('qvalue')
+suppressMessages(library(qvalue))
 
 # load CRAN packages
 suppressMessages(library(stats))
@@ -35,7 +36,6 @@ suppressMessages(library(testthat))
 suppressMessages(library(parallel))
 suppressMessages(library(cluster))
 suppressMessages(library(rworldxtra))
-suppressMessages(library(snow))
 suppressMessages(library(doParallel))
 suppressMessages(library(english))
 suppressMessages(library(session))
@@ -47,6 +47,9 @@ suppressMessages(library(mclust))
 suppressMessages(library(cluster))
 suppressMessages(library(RVAideMemoire))
 suppressMessages(library(pcadapt))
+suppressMessages(library(ResistanceGA))
+suppressMessages(library(MuMIn))
+suppressMessages(library(knitr))
 
 ## load github packages
 # devtools::install_github('paleo13/raspr')

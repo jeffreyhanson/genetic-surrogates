@@ -16,11 +16,12 @@ All data and code is stored in an online repository (\url{www.github.com/paleo13
 
 ```{r, include=FALSE}
 # set wd
-setwd('..')
-setwd('..')
+knitr::opts_knit$set(root.dir=normalizePath('../..'))
+```
 
+```{r, include=FALSE}
 # load .rda file
-try(session::restore.session('data/results/results.rda'))
+try(session::restore.session('data/final/results.rda'))
 
 # set options
 options(error=NULL)
@@ -156,53 +157,6 @@ do.call(
 )
 ```
 
-```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.width=9.5, fig.height=10, fig.cap='Relative support ($BIC$) for the number of populations in each species. Each panel denotes a different species. Each line denotes a different model parametrization. Asterisks indicate the model and number of populations with the most support.'}
-# format data
-bic.DF <- ldply(
-	seq_along(unique(spp.samples.DF$species)),
-	.fun=function(i) {
-		curr.MTX <- spp.Mclust.LST[[i]]$mclust$BIC
-		attr(curr.MTX, 'dim') <- c(nrow(curr.MTX), ncol(curr.MTX))
-		attr(curr.MTX, 'dimnames') <- list(
-			seq_len(nrow(curr.MTX)),
-			attr(curr.MTX, 'modelNames')
-		)
-		class(curr.MTX) <- 'matrix'
-		curr.DF <- curr.MTX %>% as.data.frame %>% 
-			mutate(G=attr(curr.MTX, 'G')) %>% 
-			gather(Model,BIC,-G)
-		curr.DF$BIC=curr.DF$BIC*-1
-		return(
-			mutate(
-				curr.DF,
-				Species=gsub('_', ' ', unique(spp.samples.DF$species)[i], fixed=TRUE),
-				best_G=curr.DF[which.min(curr.DF$BIC),'G'][[1]],
-				best_stat=min(curr.DF$BIC,na.rm=TRUE),
-				asterisk_col=c('black', rep(NA_character_, length(Species)-1))
-			)
-		)
-	}
-)
-# make plot
-suppressWarnings({
-	ggplot(data=bic.DF) +
-		geom_line(aes(y=BIC, x=G, color=Model, linetype=Model)) +
-		geom_point(aes(y=best_stat, x=best_G), size=4, shape=8) +
-		theme_classic() +
-		scale_y_reverse()+
-		theme(
-			strip.background = element_rect(fill='grey20'),
-			strip.text = element_text(color='white', face='italic', size=1)
-		) +
-		xlab('Number of populations') +
-		ylab('BIC') +
-		scale_linetype_manual(values=rep(c('solid','dashed'),each=7)) +
-		scale_color_manual(values=rep(gg_color_hue(7),2)) +
-		facet_wrap(~ Species, ncol=4, scales='free_y')
-})
-```
-
-
 ```{r, echo=FALSE}
 # prepare data
 pop.probs.DF <- llply(
@@ -214,7 +168,7 @@ pop.probs.DF <- llply(
 		) %>% mutate(
 			Individual=seq_along(species)
 		) 	
-		curr.probs <- spp.Mclust.LST[[i]]$mclust$z %>%
+		curr.probs <- spp.StructureAnalysis.LST[[i]]@results@summary %>%
 			as.data.frame() %>%
 			mutate(
 				species=unique(spp.samples.DF$species)[i],
@@ -615,72 +569,32 @@ knitr::kable(
 ```
 
 ```{r, echo=FALSE}
-knitr::kable(
-	format.dataframe(
-		filter(
-			ldply(
-				seq_along(unique(spp.samples.DF$species)), 
-				function(i) {
-					rbind(
-						data.frame(
-							Species=paste0('\\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[i]),'}'),
-							Loci='all',
-							k=spp.Mclust.LST[[i]]$nmds$ndim,
-							Stress=spp.Mclust.LST[[i]]$nmds$stress,
-							Converged=spp.Mclust.LST[[i]]$nmds$converged
-						),
-						ldply(
-							seq_along(spp.nmds.LST[[i]]),
-							function(j) {
-								data.frame(
-									Species=paste0('\\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[i]),'}'),
-									Loci=names(spp.nmds.LST[[i]])[j],
-									k=ifelse(is.null(spp.nmds.LST[[i]][[j]]), NA_integer_, spp.nmds.LST[[i]][[j]]$ndim),
-									Stress=ifelse(is.null(spp.nmds.LST[[i]][[j]]), NA_real_, spp.nmds.LST[[i]][[j]]$stress),
-									Converged=ifelse(is.null(spp.nmds.LST[[i]][[j]]), NA, spp.nmds.LST[[i]][[j]]$converged)
-								)
-						})
-					)
-				}
-			),
-			!is.na(Stress)
-		),
-		omit=c('Loci','Converged')
-	),
-	digits=2,
-	caption='Summary of non-metric multi-dimensional scaling (MDS) analyses on genetic variation for each species. The analyses on all loci were used to transform the binary presence/absence polymorphism data to continuous variables to train Gaussian mixture models and ultimately identify adaptive loci. The analyses on adaptive and neutral loci were used to transform the polymorphism data to identify main gradients of this variation.',
-	col.names=c('Species', 'Loci Type', 'k', 'NMDS Stress', 'Converged'),
-	align=c('c', 'c', 'c', 'c', 'c')
-)
-```
-
-```{r, echo=FALSE}
 loci_classification.DF <- ldply(
 	seq_along(unique(spp.samples.DF$species)), 
 	function(i) {
-		if (!is.null(spp.BayeScan.sample.loci.subset.LST[[i]])) {
+		if (!is.null(spp.BayeScan.LST[[i]])) {
 			data.frame(
 				Species=paste0('\\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[i]),'}'),
 				Primer=spp.BayeScan.LST[[i]]$bayescan@data@primers,
 				
-				Bayescan_Probability=spp.BayeScan.LST[[i]]$bayescan@results@summary[[2]],
-				Bayescan_qval=spp.BayeScan.LST[[i]]$bayescan@results@summary[[4]],
-				Bayescan_alpha=spp.BayeScan.LST[[i]]$bayescan@results@summary[[5]],
 				Bayescan_fst=spp.BayeScan.LST[[i]]$bayescan@results@summary[[6]],
+				Bayescan_Probability=spp.BayeScan.LST[[i]]$bayescan@results@summary[[2]],
+				Bayescan_alpha=spp.BayeScan.LST[[i]]$bayescan@results@summary[[5]],
+				Bayescan_qvalue=spp.BayeScan.LST[[i]]$bayescan@results@summary[[4]],
 				Bayescan_Type=spp.BayeScan.LST[[i]]$bayescan@results@summary[[7]],
 				
 				PCadapt_K=spp.pcadapt.LST[[i]]$K,
-				PCadapt_chi2_statistic=spp.pcadapt.LST[[i]]$chi2.stat,
+				PCadapt_chi2_statistic=spp.pcadapt.LST[[i]]$stats$chi2.stat,
 				PCadapt_pvalue=spp.pcadapt.LST[[i]]$pvalues,
-				PCadapt_Type=replace(rep('neutral, length(spp.pcadapt.LST[[i]]$pvalues)), spp.pcadapt.LST[[i]]$adaptive.loci, 'adaptive')
+				PCadapt_qvalue=spp.pcadapt.LST[[i]]$qvalues$qvalues,
+				PCadapt_Type=replace(rep('neutral', length(spp.pcadapt.LST[[i]]$pvalues)), spp.pcadapt.LST[[i]]$adaptive.loci, 'adaptive'),
 				
-				Overall_Type=replace(rep('neutral, length(spp.pcadapt.LST[[i]]$pvalues)), spp.OutlierDetectionResults.LST[[i]], 'adaptive')
+				Overall_Type=replace(rep('neutral', length(spp.pcadapt.LST[[i]]$pvalues)), spp.OutlierDetectionResults.LST[[i]], 'adaptive')
 			)
 		}
 	}
 )
 
-# save to file
-write.table(loci_classification.DF, 'article/Table_S2', sep=',', row.names=FALSE)
+write.table(loci_classification.DF, 'article/Table_S2.csv', sep=',', row.names=FALSE)
 ```
 

@@ -5,10 +5,10 @@ session::restore.session('data/intermediate/06-format-data-for-prioritisations.r
 rapr.params.LST <- parseTOML('code/parameters/rapr.toml')
 gurobi.params.LST <- parseTOML('code/parameters/gurobi.toml')
 
-## correlation analysis
+## surrogacy analysis
 # generate prioritistions
 cat("starting environmental surrogacy prioritizations\n")
-env.correlation.prioritisations <- llply(
+env.surrogacy.prioritisations <- llply(
 	seq_along(unique(spp.samples.sub.DF$species)),
 	function(i) {
 		llply(
@@ -33,10 +33,10 @@ env.correlation.prioritisations <- llply(
 )
 
 cat("starting random prioritizations for the environmental surrogate prioritizations \n")
-clust <- makeCluster(general.params.LST[[MODE]]$threads, type='SOCK')
+clust <- makeCluster(general.params.LST[[MODE]]$threads, type='PSOCK', outfile="")
 clusterEvalQ(clust, {library(rapr)})
 clusterExport(clust, c('spp.samples.sub.DF','grid.sub.DF','rapr.params.LST',
-	'MODE', 'species.prioritisation', 'ru', 'env.correlation.prioritisations'))
+	'MODE', 'species.prioritisation', 'ru', 'env.surrogacy.prioritisations'))
 registerDoParallel(clust)
 env.random.prioritisations <- llply(
 	seq_along(unique(spp.samples.sub.DF$species)),
@@ -46,7 +46,7 @@ env.random.prioritisations <- llply(
 			function(j) {
 				setMKLthreads(1)
 				# extract number of planning units
-				curr.optim_n <- table(rowSums(env.correlation.prioritisations[[i]][[j]]@results@selections))
+				curr.optim_n <- table(rowSums(env.surrogacy.prioritisations[[i]][[j]]@results@selections))
 				curr.optim_p <- curr.optim_n / sum(curr.optim_n)
 				# identify which planning units are occupied by the species
 				curr.pu <- which(grid.sub.DF[[unique(spp.samples.sub.DF$species)[[i]]]]==1)
@@ -80,7 +80,7 @@ env.random.prioritisations <- llply(
 clust <- stopCluster(clust)
 
 cat("starting geographic surrogacy prioritizations\n")
-geo.correlation.prioritisations <- llply(
+geo.surrogacy.prioritisations <- llply(
 	seq_along(unique(spp.samples.sub.DF$species)),
 	function(i) {
 		llply(
@@ -105,10 +105,10 @@ geo.correlation.prioritisations <- llply(
 )
 
 cat("starting random prioritizations for the geographic surrogate prioritizations \n")
-clust <- makeCluster(general.params.LST[[MODE]]$threads, type='SOCK')
+clust <- makeCluster(general.params.LST[[MODE]]$threads, type='PSOCK', outfile="")
 clusterEvalQ(clust, {library(rapr)})
 clusterExport(clust, c('spp.samples.sub.DF','grid.sub.DF','rapr.params.LST',
-	'MODE', 'species.prioritisation', 'ru', 'geo.correlation.prioritisations'))
+	'MODE', 'species.prioritisation', 'ru', 'geo.surrogacy.prioritisations'))
 registerDoParallel(clust)
 geo.random.prioritisations <- llply(
 	seq_along(unique(spp.samples.sub.DF$species)),
@@ -118,7 +118,7 @@ geo.random.prioritisations <- llply(
 			function(j) {
 				# extract number of planning units
 				setMKLthreads(1)
-				curr.optim_n <- table(rowSums(geo.correlation.prioritisations[[i]][[j]]@results@selections))
+				curr.optim_n <- table(rowSums(geo.surrogacy.prioritisations[[i]][[j]]@results@selections))
 				curr.optim_p <- curr.optim_n / sum(curr.optim_n)
 				# identify which planning units are occupied by the species
 				curr.pu <- which(grid.sub.DF[[unique(spp.samples.sub.DF$species)[[i]]]]==1)
@@ -152,13 +152,13 @@ geo.random.prioritisations <- llply(
 clust <- stopCluster(clust)
 
 # extract results
-env.correlation.DF <- ldply(
-	seq_along(env.correlation.prioritisations), 
+env.surrogacy.DF <- ldply(
+	seq_along(env.surrogacy.prioritisations), 
 	function(i) {
 		mutate(
 			rbind(
 				mutate(
-					ldply(env.correlation.prioritisations[[i]], extractResults),
+					ldply(env.surrogacy.prioritisations[[i]], extractResults),
 					Surrogate.target=rep(
 						rapr.params.LST[[MODE]]$surrogacy.analysis$surrogate.target,
 						each=rapr.params.LST[[MODE]]$surrogacy.analysis$optimal.replicates
@@ -185,13 +185,13 @@ env.correlation.DF <- ldply(
 )
 
 
-geo.correlation.DF <- ldply(
-	seq_along(geo.correlation.prioritisations), 
+geo.surrogacy.DF <- ldply(
+	seq_along(geo.surrogacy.prioritisations), 
 	function(i) {
 		mutate(
 			rbind(
 				mutate(
-					ldply(geo.correlation.prioritisations[[i]], extractResults),
+					ldply(geo.surrogacy.prioritisations[[i]], extractResults),
 					Surrogate.target=rep(
 						rapr.params.LST[[MODE]]$surrogacy.analysis$surrogate.target,
 						each=rapr.params.LST[[MODE]]$surrogacy.analysis$optimal.replicates
@@ -216,7 +216,7 @@ geo.correlation.DF <- ldply(
 	adaptive.held=replace(adaptive.held, which(adaptive.held<0), 0),
 	neutral.held=replace(neutral.held, which(neutral.held<0),0)
 )
-correlation.DF <- rbind(env.correlation.DF, geo.correlation.DF)
+surrogacy.DF <- rbind(env.surrogacy.DF, geo.surrogacy.DF)
 
 ## save .rda
 save.session('data/intermediate/07-surrogacy-prioritizations.rda', compress='xz')

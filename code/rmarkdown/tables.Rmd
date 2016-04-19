@@ -1,0 +1,38 @@
+---
+fontsize: 11pt
+documentclass: article
+bibliography: Endnote_lib.bib
+csl: reference-style.csl
+output:
+  rmarkdown::pdf_document:
+    fig_caption: yes
+    keep_tex: yes
+    includes:
+      in_header: [preamble-latex.tex, preamble-latex2.tex]
+---
+
+```{r, include=FALSE}
+# set wd
+knitr::opts_knit$set(root.dir=normalizePath('../..'))
+```
+
+```{r, include=FALSE}
+# load .rda file
+try(session::restore.session('data/final/results.rda'))
+
+# set options
+options(error=NULL)
+
+```
+
+## Tables
+
+```{r, echo=FALSE}
+knitr::kable(
+	format.dataframe(correlation.DF),
+	digits=2,
+	caption='Correlation between surrogate variables and genetic variation. The $R^2$ columns show the proportion of genetic variation explained by surrogates. Specifically, marginal $R^2$ represents the proportion of variation explained by the fixed effects alone. The conditional $R^2$ represents the proportion of variation explained by the fixed and random effects. All $\\chi^2$ tests were based on one degree of freedom. Significant $P$ values ($P$ < 0.05) indicate that surrogate variables correlate with genetic variation.',
+	col.names=c('Species', 'Test', 'Marginal $R^2$', 'Conditional $R^2$', '$\\chi^2$', '\\textit{P}'),
+	align=rep('c', ncol(correlation.DF)),
+)
+```

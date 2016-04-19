@@ -5,7 +5,7 @@ session::restore.session('data/intermediate/04-outlier-locus-analysis.rda')
 nmds.params.LST <- parseTOML('code/parameters/nmds.toml')
 
 # init snow cluster
-clust <- makeCluster(general.params.LST[[MODE]]$threads, type='SOCK')
+clust <- makeCluster(general.params.LST[[MODE]]$threads, type='PSOCK', outfile="")
 clusterEvalQ(clust, {library(structurer);library(bayescanr);library(cluster);library(plyr);library(vegan)})
 clusterExport(clust, c('MODE', 'spp.OutlierDetectionResults.LST', 'spp.OutlierDetectionData.LST', 'spp.StructureData.LST', 'nmds.params.LST'))
 registerDoParallel(clust)

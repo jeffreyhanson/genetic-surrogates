@@ -5,9 +5,70 @@ load('data/intermediate/08-single-species-prioritisations.rda')
 load('data/intermediate/07-surrogacy-prioritizations.rda')
 
 #### Statistical analyses
+### correlation analysis
+# species-level models
+correlation.LST <- llply(
+	seq_along(unique(spp.samples.sub.DF$species)),
+	function(i) {
+		## init
+		curr.spp.DF <- select(grid.sub.DF, contains(unique(spp.samples.sub.DF$species)[i]))
+		## prelim
+		curr.spp.coords.LST <- list(
+			select(grid.sub.DF, starts_with('geo_')),
+			select(grid.sub.DF, starts_with('env_')),
+			select(curr.spp.DF, contains('adaptive')),
+			select(curr.spp.DF, contains('neutral'))
+		)
+		curr.spp.coords.LST <- llply(curr.spp.coords.LST, function(x) {
+			return(x[!is.na(curr.spp.coords.LST[[4]][[1]]),])
+		})
+		curr.spp.dists.LST <- llply(curr.spp.coords.LST, dist) %>% llply(as.matrix)
+		names(curr.spp.dists.LST) <- c('geo', 'env', 'adapt', 'neutral')
+		curr.spp.dists.LST$null <- matrix(1, ncol=ncol(curr.spp.dists.LST[[1]]), nrow=nrow(curr.spp.dists.LST[[1]]))
+		## main
+		if (nrow(curr.spp.coords.LST[[3]])>0) {
+			adapt.MLPE <- MLPE(x=curr.spp.dists.LST[['env']], y=curr.spp.dists.LST[['adapt']], REML=FALSE)
+		} else {
+			adapt.MLPE  <- NULL
+		}
+		neutral.MLPE <- MLPE(x=curr.spp.dists.LST[['geo']], y=curr.spp.dists.LST[['neutral']], REML=FALSE)
+		## exports
+		return(list(adapt.MLPE, neutral.MLPE))
+	}
+)
+
+# extract statistics
+correlation.DF <- ldply(
+	seq_along(unique(spp.samples.sub.DF$species)),
+	function(i) {
+		if (!is.null(correlation.LST[[i]][[1]])) {
+			env.ANOVA <- as.data.frame(anova(correlation.LST[[i]][[1]][[1]], correlation.LST[[i]][[1]][[2]]))
+			env.df <- paste0(env.ANOVA$Df[[1]], ', ', env.ANOVA$Df[[2]])
+			env.r2 <- r.squaredGLMM(correlation.LST[[i]][[1]][[1]])
+		} else {
+			env.ANOVA <- data.frame(F=c(NA, NA), Df=c(NA, NA), P=c(NA, NA))
+			env.df <- NA
+			env.r2 <- c(NA, NA)
+		}
+		geo.ANOVA <- as.data.frame(anova(correlation.LST[[i]][[2]][[1]], correlation.LST[[i]][[2]][[2]]))
+		geo.df=paste0(geo.ANOVA$Df[[1]], ', ', geo.ANOVA$Df[[2]])
+		geo.r2 <- r.squaredGLMM(correlation.LST[[i]][[2]][[1]])
+		pvalues <- as.character(round(c(geo.ANOVA[['Pr(>Chisq)']][[2]], env.ANOVA[['Pr(>Chisq)']][[2]]),3))
+		pvalues[which(as.numeric(pvalues) < 0.001)] <- '< 0.001'
+		data.frame(
+			species=rep(paste0('\\textit{',gsub('\\_', '\\ ', unique(spp.samples.sub.DF$species)[i]),'}'),2),
+			Test=c('geographic vs neutral', 'environmental vs adaptive'),
+			Marginal_R2=c(geo.r2[1], env.r2[1]),
+			Conditional_R2=c(geo.r2[2], env.r2[2]),
+			Chisq=c(geo.ANOVA$Chisq[[2]], env.ANOVA$Chisq[[2]]),
+			P=pvalues
+		)
+	}
+)
+
 ### surrogacy analyses
 ## prepare data
-correlation.DF$Surrogate.target <- as.factor(correlation.DF$Surrogate.target)
+surrogacy.DF$Surrogate.target <- as.factor(surrogacy.DF$Surrogate.target)
 
 ### scenario analyses
 ## prepare data

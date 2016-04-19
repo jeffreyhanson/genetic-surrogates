@@ -68,25 +68,36 @@ spp.pcadapt.LST <- llply(
 			v[which(is.na(v))] <- mean(v, na.rm=TRUE)
 			return(v)
 		})
-		
-		# run pcadapt with all principle components and
-		# determine the number needed to secure a acceptable
-		# level of variation
-		curr.first.pca <- pcadapt(curr.spp, K=pcadapt.params.LST[[MODE]]$initial.K, ploidy=1, min.maf=0) # super rare/abundant loci already omitted from analysis
-		prop.var.explained <- ((curr.first.pca$singular_values)^2)/length(curr.first.pca$pvalues) # adapted from code in pcadapt:::screePlot
+
+		# run first principle components to determine the number needed to secure a acceptable level of variation
+		initial.pca <- corpca(curr.spp, K=pcadapt.params.LST[[MODE]]$initial.K, ploidy=1, scale=FALSE)
+		prop.var.explained <- initial.pca$singular_values/sum(initial.pca$singular_values)
 		curr.spp.K <- which(cumsum(prop.var.explained) > pcadapt.params.LST[[MODE]]$min.variance.explained)[1]
 		
-		# run pcadapt with minimum number of principle components
-		# needed to secure a acceptable level of variation
-		curr.second.pca <- pcadapt(curr.spp, K=curr.spp.K, ploidy=1, min.maf=0)
+		# run second pica with minimum number of principle components needed to secure a acceptable level of variation
+		inference.pca <- corpca(curr.spp, K=curr.spp.K, ploidy=1, scale=FALSE)
 		
+		# compute statistics from pcadapt
+		stats.LST <- computeStats(
+			data=curr.spp, res=inference.pca, method='mahalanobis', 
+			nSNP=ncol(curr.spp), K=curr.spp.K, data.type='genotype', min.maf=0
+		)
+		
+		# calculate pvalues
+		pvalues.DBL <- pval(stats.LST, method='mahalanobis', K=curr.spp.K)
+		qvalues.LST <- qvalue(pvalues.DBL)
+		outliers <- which(qvalues.LST$qvalues < pcadapt.params.LST[[MODE]]$alpha.level)
+
 		# return list 
 		return(
 			list(
 				K=curr.spp.K,
-				first.pca=curr.first.pca,
-				second.pca=curr.second.pca,
-				adaptive.loci=which(curr.second.pca$pvalue < pcadapt.params.LST[[MODE]]$alpha.level)
+				initial.pca=initial.pca,
+				inference.pca=inference.pca,
+				stats=stats.LST,
+				pvalues=pvalues.DBL,
+				qvalues=qvalues.LST,
+				adaptive.loci=outliers
 			)
 		)
 	}

@@ -13,11 +13,12 @@ output:
 
 ```{r, include=FALSE}
 # set wd
-setwd('..')
-setwd('..')
+knitr::opts_knit$set(root.dir=normalizePath('../..'))
+```
 
+```{r, include=FALSE}
 # load .rda file
-try(session::restore.session('data/results/results.rda'))
+try(session::restore.session('data/final/results.rda'))
 
 # set options
 options(error=NULL)
@@ -28,7 +29,7 @@ options(error=NULL)
 
 ```{r, echo=FALSE, message=FALSE, fig.width=6, fig.height=4.5, fig.cap='The relationship between surrogates and genetic variation secured in prioritizations. White boxplots show the proportion of genetic variation secured by prioritizations generated using surrogate-based targets. Grey boxplots show the proportion of genetic variation secured by randomly generated prioritizations with the same number of planning units as the surrogate-based prioritizations. Panel (a) shows the relationship between environmental surrogate targets used to generate a prioritization and the proportion of adaptive genetic variation it secures. Similarly, panel (b) shows that for geographic surrogate targets and neutral genetic variation. Box-plots show inter-specific variation in the proportion of genetic variation secured using different surrogate-based targets.'}
 # prepare data
-correlation.PDF <- correlation.sub.DF %>%
+surrogacy.PDF <- surrogacy.DF %>%
 	group_by(Type, Surrogate.target, Method, Species) %>% 
 	summarize(genetic.held=mean(genetic.held, na.rm=TRUE)) %>%
 	data.frame()
@@ -36,7 +37,7 @@ correlation.PDF <- correlation.sub.DF %>%
 
 # make figure
 p1 <- ggplot(aes(x=Surrogate.target,y=genetic.held, fill=Method),
-		data=filter(correlation.PDF, Type=='Environmental')) +
+		data=filter(surrogacy.PDF, Type=='Environmental')) +
 	geom_boxplot(position=position_dodge(0.9)) +
 	xlab('Environmental surrogate target (%)') + 
 	ylab('Adaptive genetic\nvariation secured (%)') +
@@ -46,7 +47,7 @@ p1 <- ggplot(aes(x=Surrogate.target,y=genetic.held, fill=Method),
 	scale_fill_manual(name='Prioritization', values=c('Optimal'='white', 'Random'='grey50'))
 
 p2 <- ggplot(aes(x=Surrogate.target,y=genetic.held, fill=Method),
-			data=filter(correlation.PDF, Type=='Geographic')) +
+			data=filter(surrogacy.PDF, Type=='Geographic')) +
 	geom_boxplot(position=position_dodge(0.9)) +
 	xlab('Geographic surrogate target (%)') + 
 	ylab('Neutral genetic\nvariation secured (%)') +

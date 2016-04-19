@@ -41,8 +41,10 @@ To rerun all computational analyses, run `make all`
 	+ ggplot2
 	+ grid
 	+ gridExtra
+	+ knitr
 	+ maptools
 	+ mclust
+	+ MuMIn
 	+ optimx
 	+ pander
 	+ parallel
@@ -53,6 +55,7 @@ To rerun all computational analyses, run `make all`
 	+ RcppTOML
 	+ rgeos
 	+ RVAideMemoire
+	+ ResistanceGA
 	+ stats
 	+ testthat
 	+ tidyr
