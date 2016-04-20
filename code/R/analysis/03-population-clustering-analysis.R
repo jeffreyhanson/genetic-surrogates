@@ -6,9 +6,10 @@ structure.params.LST <- parseTOML('code/parameters/structure.toml')
 
 ### stucture analyses
 ## run analyses
-clust <- makeCluster(max(floor(general.params.LST[[MODE]]$threads/general.params.LST[[MODE]]$threads),1), type="PSOCK")
+clust <- makeCluster(max(floor(general.params.LST[[MODE]]$threads/structure.params.LST[[MODE]]$numruns),1), type="PSOCK", outfile="")
 clusterEvalQ(clust, {library(structurer)})
 clusterExport(clust, c('spp.samples.DF','spp.StructureData.LST', 'spp.populations.DF', 'structure.params.LST', 'MODE'))
+registerDoParallel(clust)
 spp.StructureAnalysis.LST <- llply(
 	seq_along(spp.StructureData.LST),
 		.fun=function(i) {
@@ -20,11 +21,11 @@ spp.StructureAnalysis.LST <- llply(
 			run.single.Structure(spp.StructureData.LST[[i]], MAXPOPS = spp.populations.DF[[2]][i], NUMRUNS = structure.params.LST[[MODE]]$numruns, 
 				BURNIN = structure.params.LST[[MODE]]$burnin, NUMREPS = structure.params.LST[[MODE]]$numreps, NOADMIX = structure.params.LST[[MODE]]$noadmix, 
 				ADMBURNIN = structure.params.LST[[MODE]]$admburnin, SEED = NA_real_, M = "LargeKGreedy", W = TRUE, S = FALSE, 
-				REPEATS = structure.params.LST[[MODE]]$repeats, dir = curr.spp.dir, clean = FALSE, verbose = FALSE, threads=general.params.LST[[MODE]]$threads
+				REPEATS = structure.params.LST[[MODE]]$repeats, dir = curr.spp.dir, clean = FALSE, verbose = FALSE, threads=structure.params.LST[[MODE]]$numruns
 			)
 		)
 	},
-	parallel=TRUE
+	.parallel=TRUE
 )
 stopCluster(clust)
 
