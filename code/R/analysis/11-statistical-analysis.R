@@ -26,7 +26,7 @@ correlation.LST <- llply(
 		names(curr.spp.dists.LST) <- c('geo', 'env', 'adapt', 'neutral')
 		curr.spp.dists.LST$null <- matrix(1, ncol=ncol(curr.spp.dists.LST[[1]]), nrow=nrow(curr.spp.dists.LST[[1]]))
 		## main
-		if (nrow(curr.spp.coords.LST[[3]])>0) {
+		if (ncol(curr.spp.coords.LST[[3]])>0) {
 			adapt.MLPE <- MLPE(x=curr.spp.dists.LST[['env']], y=curr.spp.dists.LST[['adapt']], REML=FALSE)
 		} else {
 			adapt.MLPE  <- NULL
@@ -46,7 +46,8 @@ correlation.DF <- ldply(
 			env.df <- paste0(env.ANOVA$Df[[1]], ', ', env.ANOVA$Df[[2]])
 			env.r2 <- r.squaredGLMM(correlation.LST[[i]][[1]][[1]])
 		} else {
-			env.ANOVA <- data.frame(F=c(NA, NA), Df=c(NA, NA), P=c(NA, NA))
+			env.ANOVA <- data.frame(F=c(NA, NA), Df=c(NA, NA), Chisq=c(NA,NA), P=c(NA, NA))
+			names(env.ANOVA)[4]='Pr(>Chisq)'
 			env.df <- NA
 			env.r2 <- c(NA, NA)
 		}
