@@ -20,38 +20,6 @@ spp.OutlierDetectionData.LST <- llply(
 	}
 )
 
-# run BayeScan over subsetted objects
-dir.create('data/intermediate/bayescan')
-spp.BayeScan.LST <- llply(
-	seq_along(spp.OutlierDetectionData.LST),
-	.fun=function(i) {
-		# skip if null
-		if (is.null(spp.OutlierDetectionData.LST[[i]]))
-			return(NULL)
-		# else run bayescan
-		curr.dir <- paste0('data/intermediate/bayescan/',unique(spp.samples.DF$species)[i])
-		dir.create(curr.dir)
-		curr.spp <- run.BayeScan(
-			spp.OutlierDetectionData.LST[[i]],
-			fdr=bayescan.params.LST[[MODE]]$fdr,
-			threads=general.params.LST[[MODE]]$threads,
-			n=bayescan.params.LST[[MODE]]$n,
-			thin=bayescan.params.LST[[MODE]]$thin,
-			nbp=bayescan.params.LST[[MODE]]$nbp,
-			pilot=bayescan.params.LST[[MODE]]$pilot,
-			burn=bayescan.params.LST[[MODE]]$burn,
-			dir=curr.dir,
-			clean=FALSE
-		)
-		return(
-			list(
-				bayescan=curr.spp,
-				adaptive.loci=which(curr.spp@results@summary$type=='adaptive')
-			)
-		)
-	}
-)
-
 # run pcadapt over subsetted objects
 spp.pcadapt.LST <- llply(
 	seq_along(spp.OutlierDetectionData.LST),
@@ -85,7 +53,7 @@ spp.pcadapt.LST <- llply(
 		
 		# calculate pvalues
 		pvalues.DBL <- pval(stats.LST, method='mahalanobis', K=curr.spp.K)
-		qvalues.LST <- qvalue(pvalues.DBL)
+		qvalues.LST <- qvalue(pvalues.DBL, lambda=seq(max(0,min(pvalues.DBL,na.rm=TRUE)+1e-10), min(1,max(pvalues.DBL,na.rm=TRUE)-1e-10), length.out=50))
 		outliers <- which(qvalues.LST$qvalues < pcadapt.params.LST[[MODE]]$alpha.level)
 
 		# return list 
@@ -98,6 +66,38 @@ spp.pcadapt.LST <- llply(
 				pvalues=pvalues.DBL,
 				qvalues=qvalues.LST,
 				adaptive.loci=outliers
+			)
+		)
+	}
+)
+
+# run BayeScan over subsetted objects
+dir.create('data/intermediate/bayescan')
+spp.BayeScan.LST <- llply(
+	seq_along(spp.OutlierDetectionData.LST),
+	.fun=function(i) {
+		# skip if null
+		if (is.null(spp.OutlierDetectionData.LST[[i]]))
+			return(NULL)
+		# else run bayescan
+		curr.dir <- paste0('data/intermediate/bayescan/',unique(spp.samples.DF$species)[i])
+		dir.create(curr.dir)
+		curr.spp <- run.BayeScan(
+			spp.OutlierDetectionData.LST[[i]],
+			fdr=bayescan.params.LST[[MODE]]$fdr,
+			threads=general.params.LST[[MODE]]$threads,
+			n=bayescan.params.LST[[MODE]]$n,
+			thin=bayescan.params.LST[[MODE]]$thin,
+			nbp=bayescan.params.LST[[MODE]]$nbp,
+			pilot=bayescan.params.LST[[MODE]]$pilot,
+			burn=bayescan.params.LST[[MODE]]$burn,
+			dir=curr.dir,
+			clean=FALSE
+		)
+		return(
+			list(
+				bayescan=curr.spp,
+				adaptive.loci=which(curr.spp@results@summary$type=='adaptive')
 			)
 		)
 	}
