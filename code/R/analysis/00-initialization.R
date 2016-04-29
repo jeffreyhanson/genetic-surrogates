@@ -49,6 +49,8 @@ suppressMessages(library(RVAideMemoire))
 suppressMessages(library(ResistanceGA))
 suppressMessages(library(MuMIn))
 suppressMessages(library(knitr))
+suppressMessages(library(pscl))
+suppressMessages(library(lazyWeave))
 
 ## load github packages
 # devtools::install_github('paleo13/raspr')

@@ -5,6 +5,81 @@ load('data/intermediate/08-single-species-prioritisations.rda')
 load('data/intermediate/07-surrogacy-prioritizations.rda')
 
 #### Statistical analyses
+### compute statistics reported for methods
+loci_classification.DF <- ldply(
+	seq_along(unique(spp.samples.DF$species)), 
+	function(i) {
+		if (!is.null(spp.BayeScan.LST[[i]])) {
+			data.frame(
+				Species=paste0('\\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[i]),'}'),
+				Primer=spp.BayeScan.LST[[i]]$bayescan@data@primers,
+				
+				Bayescan_fst=spp.BayeScan.LST[[i]]$bayescan@results@summary[[6]],
+				Bayescan_Probability=spp.BayeScan.LST[[i]]$bayescan@results@summary[[2]],
+				Bayescan_alpha=spp.BayeScan.LST[[i]]$bayescan@results@summary[[5]],
+				Bayescan_qvalue=spp.BayeScan.LST[[i]]$bayescan@results@summary[[4]],
+				Bayescan_Type=spp.BayeScan.LST[[i]]$bayescan@results@summary[[7]],
+				
+				PCadapt_K=spp.pcadapt.LST[[i]]$K,
+				PCadapt_chi2_statistic=spp.pcadapt.LST[[i]]$stats$chi2.stat,
+				PCadapt_pvalue=spp.pcadapt.LST[[i]]$pvalues,
+				PCadapt_qvalue=spp.pcadapt.LST[[i]]$qvalues$qvalues,
+				PCadapt_Type=replace(rep('neutral', length(spp.pcadapt.LST[[i]]$pvalues)), spp.pcadapt.LST[[i]]$adaptive.loci, 'adaptive'),
+				
+				Overall_Type=replace(rep('neutral', length(spp.pcadapt.LST[[i]]$pvalues)), spp.OutlierDetectionResults.LST[[i]], 'adaptive')
+			)
+		}
+	}
+)
+
+spp.outlier.methods.congruence <- loci_classification.DF %>% 
+	group_by(Species) %>%
+	summarize(prop = (sum(Bayescan_Type==PCadapt_Type) / length(Species))*100) %>%
+	ungroup() %>%
+	select(prop) %>%
+	data.frame() %>%
+	`[[`(1)
+
+spp.outlier.loci.props <- loci_classification.DF %>% 
+	group_by(Species) %>%
+	summarize(prop = (sum(Overall_Type=='adaptive') / length(Species))*100) %>%
+	ungroup() %>%
+	filter(prop > 0) %>%
+	select(prop) %>%
+	data.frame() %>%
+	`[[`(1)
+	
+	
+spp.nmds.summary.DF <- ldply(
+	seq_along(spp.nmds.LST),
+	function(i) {
+		ldply(
+			seq_along(spp.nmds.LST[[i]]),
+			function(j) {
+				data.frame(
+					Species=paste0('\\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[i]),'}'),
+					Loci=names(spp.nmds.LST[[i]])[j],
+					k=ifelse(is.null(spp.nmds.LST[[i]][[j]]), NA_integer_, spp.nmds.LST[[i]][[j]]$ndim),
+					Stress=ifelse(is.null(spp.nmds.LST[[i]][[j]]), NA_real_, spp.nmds.LST[[i]][[j]]$stress),
+					Converged=ifelse(is.null(spp.nmds.LST[[i]][[j]]), NA, spp.nmds.LST[[i]][[j]]$converged)
+				)
+			}
+		)
+	}
+)
+
+adaptive.k <- spp.nmds.summary.DF %>%
+	filter(Loci=='adaptive') %>%
+	select(k) %>%
+	data.frame() %>%
+	`[[`(1)
+
+neutral.k <- spp.nmds.summary.DF %>%
+	filter(Loci=='neutral') %>%
+	select(k) %>%
+	data.frame() %>%
+	`[[`(1)
+
 ### correlation analysis
 # species-level models
 correlation.LST <- llply(
@@ -38,7 +113,7 @@ correlation.LST <- llply(
 )
 
 # extract statistics
-correlation.DF <- ldply(
+correlation.model.summary.DF <- ldply(
 	seq_along(unique(spp.samples.sub.DF$species)),
 	function(i) {
 		if (!is.null(correlation.LST[[i]][[1]])) {
@@ -54,22 +129,71 @@ correlation.DF <- ldply(
 		geo.ANOVA <- as.data.frame(anova(correlation.LST[[i]][[2]][[1]], correlation.LST[[i]][[2]][[2]]))
 		geo.df=paste0(geo.ANOVA$Df[[1]], ', ', geo.ANOVA$Df[[2]])
 		geo.r2 <- r.squaredGLMM(correlation.LST[[i]][[2]][[1]])
-		pvalues <- as.character(round(c(geo.ANOVA[['Pr(>Chisq)']][[2]], env.ANOVA[['Pr(>Chisq)']][[2]]),3))
-		pvalues[which(as.numeric(pvalues) < 0.001)] <- '< 0.001'
 		data.frame(
-			species=rep(paste0('\\textit{',gsub('\\_', '\\ ', unique(spp.samples.sub.DF$species)[i]),'}'),2),
-			Test=c('geographic vs neutral', 'environmental vs adaptive'),
-			Marginal_R2=c(geo.r2[1], env.r2[1]),
-			Conditional_R2=c(geo.r2[2], env.r2[2]),
-			Chisq=c(geo.ANOVA$Chisq[[2]], env.ANOVA$Chisq[[2]]),
-			P=pvalues
+			Species=paste0('\\textit{',gsub('\\_', '\\ ', unique(spp.samples.sub.DF$species)[i]),'}'),
+			
+			Environmental.Marginal.R2=env.r2[1],
+			Environmental.Conditional.R2=env.r2[2],
+			Environmental.Chisq=env.ANOVA$Chisq[[2]],
+			Environmental.raw.P=env.ANOVA[['Pr(>Chisq)']][[2]],
+			Environmental.corr.P=NA,
+
+			Geographic.Marginal.R2=geo.r2[1],
+			Geographic.Conditional.R2=geo.r2[2],
+			Geographic.Chisq=geo.ANOVA$Chisq[[2]],
+			Geographic.raw.P=geo.ANOVA[['Pr(>Chisq)']][[2]],
+			Geographic.corr.P=NA
 		)
 	}
-)
+) 
+corr.pvalues <- p.adjust(c(correlation.model.summary.DF$Environmental.raw.P, correlation.model.summary.DF$Geographic.raw.P), 'bonferroni')
+
+correlation.model.summary.DF <- correlation.model.summary.DF %>%
+	mutate(Environmental.corr.P=corr.pvalues[seq_len(nrow(correlation.model.summary.DF))],
+	Geographic.corr.P=corr.pvalues[nrow(correlation.model.summary.DF)+seq_len(nrow(correlation.model.summary.DF))])
 
 ### surrogacy analyses
-## prepare data
-surrogacy.DF$Surrogate.target <- as.factor(surrogacy.DF$Surrogate.target)
+## run models
+env.surrogacy.LST <- list()
+for (x in unique(env.surrogacy.DF$Species)) {
+	curr.model=glm(genetic.held~surrogate.held, data=filter(env.surrogacy.DF, Species==x), family='binomial')
+	env.surrogacy.LST[[x]] <- list(model=curr.model, r2=pR2(curr.model))
+}
+
+geo.surrogacy.LST <- list()
+for (x in  unique(geo.surrogacy.DF$Species)) {
+	curr.model=glm(genetic.held~surrogate.held, data=filter(geo.surrogacy.DF, Species==x), family='binomial')
+	geo.surrogacy.LST[[x]] <- list(model=curr.model, r2=pR2(curr.model))
+}
+
+surrogacy.model.summary.DF <- rbind(
+	mutate(
+		ldply(seq_along(env.surrogacy.LST), .fun=function(i) {
+			curr.aov <- data.frame(anova(env.surrogacy.LST[[i]]$model, test='Chisq'))
+			data.frame(
+				Species=unique(env.surrogacy.DF$Species)[i],
+				Df=curr.aov[['Resid..Df']][[2]],
+				Residual.deviance=curr.aov[['Resid..Dev']][[2]],
+				R2=env.surrogacy.LST[[i]]$r2['r2CU'],
+				raw.P=curr.aov[['Pr..Chi.']][[2]]
+			)
+		}),
+		Type='Environmental'
+	),
+	mutate(
+		ldply(seq_along(geo.surrogacy.LST), function(i) {
+			curr.aov <- data.frame(anova(geo.surrogacy.LST[[i]]$model, test='Chisq'))
+			data.frame(
+				Species=unique(geo.surrogacy.DF$Species)[i],
+				Df=curr.aov[['Resid..Df']][[2]],
+				Residual.deviance=curr.aov[['Resid..Dev']][[2]],
+				R2=geo.surrogacy.LST[[i]]$r2['r2CU'],
+				raw.P=curr.aov[['Pr..Chi.']][[2]]
+			)
+		}),
+		Type='Geographic'
+	)
+) %>% mutate(corr.P=p.adjust(raw.P, 'bonferroni'))
 
 ### scenario analyses
 ## prepare data

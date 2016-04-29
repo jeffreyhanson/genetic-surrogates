@@ -3,9 +3,7 @@ title = "rapr parameters"
 [debug]
 
 	[debug."surrogacy.analysis"]
-	optimal.replicates = 1
 	random.replicates = 10
-	surrogate.target = [0.75, 0.9, 0.95, 0.99]
 
 	[debug."scenario.analysis"]
 	amount.target = 0.1
@@ -17,9 +15,7 @@ title = "rapr parameters"
 [release]
 
 	[release."surrogacy.analysis"]
-	optimal.replicates = 1
-	random.replicates = 1000
-	surrogate.target = [0.5, 0.6, 0.7, 0.8, 0.9, 0.95, 0.99]
+	random.replicates = 10000
 
 	[release."scenario.analysis"]
 	amount.target = 0.1

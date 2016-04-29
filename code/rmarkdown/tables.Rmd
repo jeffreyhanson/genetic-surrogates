@@ -28,11 +28,30 @@ options(error=NULL)
 ## Tables
 
 ```{r, echo=FALSE}
-knitr::kable(
-	format.dataframe(correlation.DF),
+curr.DF <- correlation.model.summary.DF %>%
+	select(-contains('raw')) %>%
+	mutate(Environmental.corr.P=pvalString(Environmental.corr.P),
+		Geographic.corr.P=pvalString(Geographic.corr.P), blank=NA, Species=gsub('\\ ', '\\n', Species)) %>%
+	select(Species:Environmental.corr.P, blank, Geographic.Marginal.R2:Geographic.corr.P) %>%
+	format.dataframe 
+emphasize.strong.cells(which(curr.DF$Environmental.corr.P < 0.05, arr.ind=TRUE))
+emphasize.strong.cells(which(curr.DF$Geographic.corr.P < 0.05, arr.ind=TRUE))
+curr.txt=knitr::kable(
+	curr.DF,
 	digits=2,
 	caption='Correlation between surrogate variables and genetic variation. The $R^2$ columns show the proportion of genetic variation explained by surrogates. Specifically, marginal $R^2$ represents the proportion of variation explained by the fixed effects alone. The conditional $R^2$ represents the proportion of variation explained by the fixed and random effects. All $\\chi^2$ tests were based on one degree of freedom. Significant $P$ values ($P$ < 0.05) indicate that surrogate variables correlate with genetic variation.',
-	col.names=c('Species', 'Test', 'Marginal $R^2$', 'Conditional $R^2$', '$\\chi^2$', '\\textit{P}'),
-	align=rep('c', ncol(correlation.DF)),
-)
+	col.names=c('\\textbf{Species}', '\\textbf{Marginal $R^2$}', '\\textbf{Conditional $R^2$}', '\\textbf{$\\chi^2$}', '\\textbf{\\textit{P}}', '', '\\textbf{Marginal $R^2$}', '\\textbf{Conditional $R^2$}', '\\textbf{$\\chi^2$}', '\\textbf{\\textit{P}}'),
+	align=rep('c', ncol(curr.DF)),
+	format='latex'
+) %>% as.character()
+
+curr.txt <- gsub('\\hline\nSpecies',
+'
+\\hline
+& \\multicolumn{4}{c}{Environmental} & & \\multicolumn{4}{c}{Geographic} \\\\ \\cmidrule{2-5} \\cmidrule{7-10}
+Species', curr.txt, fixed=TRUE)
+
+class(curr.txt) <- 'knitr_kable'
+attr(curr.txt, 'format') <- 'latex'
+curr.txt
 ```

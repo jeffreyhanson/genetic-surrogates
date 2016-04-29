@@ -42,6 +42,7 @@ To rerun all computational analyses, run `make all`
 	+ grid
 	+ gridExtra
 	+ knitr
+	+ lazyWeave
 	+ maptools
 	+ mclust
 	+ MuMIn
@@ -51,6 +52,7 @@ To rerun all computational analyses, run `make all`
 	+ pcadapt
 	+ plotrix
 	+ plyr
+	+ pscl
 	+ RColorBrewer
 	+ RcppTOML
 	+ rgeos

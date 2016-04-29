@@ -23,46 +23,6 @@ try(session::restore.session('data/final/results.rda'))
 # set options
 options(error=NULL)
 
-```
-
-## Figures
-
-```{r, echo=FALSE, message=FALSE, fig.width=6, fig.height=4.5, fig.cap='The relationship between surrogates and genetic variation secured in prioritizations. White boxplots show the proportion of genetic variation secured by prioritizations generated using surrogate-based targets. Grey boxplots show the proportion of genetic variation secured by randomly generated prioritizations with the same number of planning units as the surrogate-based prioritizations. Panel (a) shows the relationship between environmental surrogate targets used to generate a prioritization and the proportion of adaptive genetic variation it secures. Similarly, panel (b) shows that for geographic surrogate targets and neutral genetic variation. Box-plots show inter-specific variation in the proportion of genetic variation secured using different surrogate-based targets.'}
-# prepare data
-surrogacy.PDF <- surrogacy.DF %>%
-	group_by(Type, Surrogate.target, Method, Species) %>% 
-	summarize(genetic.held=mean(genetic.held, na.rm=TRUE)) %>%
-	data.frame()
-
-
-# make figure
-p1 <- ggplot(aes(x=Surrogate.target,y=genetic.held, fill=Method),
-		data=filter(surrogacy.PDF, Type=='Environmental')) +
-	geom_boxplot(position=position_dodge(0.9)) +
-	xlab('Environmental surrogate target (%)') + 
-	ylab('Adaptive genetic\nvariation secured (%)') +
-	geom_text(aes(x=0.55, y=1.115, label='(a)'), color='black', size=5) +
-	theme_classic() +
-	theme(legend.position=c(0.9,0.4)) +
-	scale_fill_manual(name='Prioritization', values=c('Optimal'='white', 'Random'='grey50'))
-
-p2 <- ggplot(aes(x=Surrogate.target,y=genetic.held, fill=Method),
-			data=filter(surrogacy.PDF, Type=='Geographic')) +
-	geom_boxplot(position=position_dodge(0.9)) +
-	xlab('Geographic surrogate target (%)') + 
-	ylab('Neutral genetic\nvariation secured (%)') +
-	geom_text(aes(x=0.55, y=1.115, label='(b)'), color='black', size=5) +
-	theme_classic() +
-	theme(legend.position='none') +
-	scale_fill_manual(name='Prioritization', values=c('Optimal'='white', 'Random'='grey50'))
-
-# render figure
-grid.arrange(p1,p2,nrow=2)
-
-```
-
-
-```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.width=5, fig.height=5, fig.cap='Planning unit selection frequencies. The top row of panels (a, b, c) show single-species prioritizations generated assuming equal costs. The middle row of panels (d, e, f) show multi-species prioritizations generated assuming equal costs. The bottom row of panels (g, h, i) show multi-species generated using opportunity costs. The left column of panels (a, d, g) show prioritizations generated using only amount-based targets. The middle column of panels (b, e, h) show prioritizations generated using amount- and surrogate-based targets. The right column of panels (c, f, i) show prioritizations generated using amount- and genetic-based targets.'}
 # download basemap
 data(countriesHigh)
 countries.FPLY <- countriesHigh[
@@ -72,6 +32,124 @@ countries.FPLY <- countriesHigh[
 		'Monaco', 'Germany', 'Slovakia', 'Czech Republic'
 	)
 ,] %>% spFortify
+grid.FPLY <- spFortify(grid.PLY)
+grid.sub.FPLY <- spFortify(grid.sub.PLY)
+
+# define ggplot2 color wheel function
+gg_color_hue <- function(n) {
+	hues <- seq(15, 375, length=n+1)
+	hcl(h=hues, l=65, c=100)[1:n]
+}
+
+```
+
+## Figures
+
+```{r, echo=FALSE, fig.width=8, fig.height=2.5, fig.cap="Map of the study area. Squares denote planning units. Panel (a) depicts patterns of species riches. Planning units with a brighter color are inhabited by more species. Panel (b) shows the distribution of opportunity cost across the study area (computed as total population density)."}
+
+# calculate species richness
+grid.PLY$Species_richness <- grid.PLY@data %>%
+	select(5:(4+n_distinct(spp.samples.DF$species))) %>% as.matrix() %>% rowSums()
+	
+panel.DF <- grid.sub.FPLY %>% 
+	summarize(lat=min(lat)+(diff(range(lat))*0.98),
+		long=min(long)+(diff(range(long))*0.02))
+	
+# plot species richness
+p1 <- ggplot() +
+	geom_polygon(data=countries.FPLY, aes(x=long, y=lat, group=group),
+		fill='grey85', color='grey70') +
+	geom_polygon(data=spFortify(grid.PLY), aes(x=long, y=lat, 
+		group=group, fill=Species_richness), color='grey10') +
+	scale_fill_gradientn(name='Richness',
+		colors=brewer.pal(9,'PuBu'),
+		guide=guide_colorbar(ticks=element_line(color='black'), border=element_line(color='black'))
+	) +
+	theme_classic() +
+	theme(
+		axis.ticks=element_blank(), axis.text=element_blank(), axis.line=element_blank(), plot.margin = unit(c(0, 0, 0, 0), "lines"), axis.title=element_blank(),
+		panel.border=element_rect(color='black', fill=NA, size=1)
+	) +
+	coord_cartesian(
+		xlim=buffered.range(grid.FPLY$long, 0),
+		ylim=buffered.range(grid.FPLY$lat, 0)
+	) + geom_text(aes_string(x='long',y='lat'), data=panel.DF, label='(a)')
+	
+qn01 <- scales::rescale(quantile(grid.PLY@data$pop.density, seq(0,1,length.out=9), na.rm=TRUE))
+p2 <- ggplot() +
+	geom_polygon(data=countries.FPLY, aes(x=long, y=lat, group=group),
+		fill='grey85', color='grey70') +
+	geom_polygon(data=spFortify(grid.PLY), aes(x=long, y=lat, 
+		group=group, fill=pop.density), color='grey10') +
+	scale_fill_gradientn(name='Cost',
+		colors=brewer.pal(9, 'PuBu'),
+		values=qn01,
+		guide=guide_colorbar(ticks=element_line(color='black'), border=element_line(color='black'))
+	) +
+	theme_classic() +
+	theme(
+		axis.ticks=element_blank(), axis.text=element_blank(), axis.line=element_blank(), plot.margin = unit(c(0, 0, 0, 0), "lines"), axis.title=element_blank(),
+		panel.border=element_rect(color='black', fill=NA, size=1)
+	) +
+	coord_cartesian(
+		xlim=buffered.range(grid.FPLY$long, 0),
+		ylim=buffered.range(grid.FPLY$lat, 0)
+	)  + geom_text(aes_string(x='long',y='lat'), data=panel.DF, label='(b)')
+	
+grid.arrange(p1,p2,nrow=1)
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE, fig.width=6, fig.height=4.5, fig.cap='The relationship between surrogates and genetic variation secured in prioritizations. Lines indicate the average trend for each species. Grey sillhouettes indicate their uncertainty in these trends. Histogram inserts show the distribution of $R^2$ values. Panel (a) shows the relationship between the proportion of environmental variation and adaptive genetic variation secured in a prioritization. Similarly, panel (b) shows that for geographic surrogate targets and neutral genetic variation.'}
+# make figure
+p1 <- ggplot(aes(x=surrogate.held,y=genetic.held), data=env.surrogacy.DF) +
+	xlab(expression(atop('Environmental variation','secured (%)'))) + 
+	ylab('Adaptive genetic\nvariation secured (%)') +
+	theme_classic() + theme(axis.line.x=element_line(color='black'),
+		axis.line.y=element_line(color='black')) +
+	geom_text(x=0.05, y=0.95, label='(a)') +
+	coord_cartesian(xlim=c(0, 1))
+for (i in seq_along(env.surrogacy.LST))
+	p1 <- p1 + stat_smooth(method='glm', method.args=list(family='binomial'),
+		data=filter(env.surrogacy.DF, Species==unique(Species)[i]),
+		fullrange=TRUE, se=FALSE, colour='black')
+
+p2 <- ggplot(aes(x=surrogate.held,y=genetic.held), data=geo.surrogacy.DF) +
+	xlab(expression(atop('Geographic variation','secured (%)'))) + 
+	ylab('Neutral genetic\nvariation secured (%)') +
+	theme_classic() + theme(axis.line.x=element_line(color='black'),
+		axis.line.y=element_line(color='black', colour='transparent')) +
+	geom_text(x=0.05, y=0.95, label='(b)') +
+	coord_cartesian(xlim=c(0, 1))
+for (i in seq_along(geo.surrogacy.LST))
+	p2 <- p2 + stat_smooth(method='glm', method.args=list(family='binomial'),
+		data=filter(geo.surrogacy.DF, Species==unique(Species)[i]),
+		fullrange=TRUE, se=FALSE, colour='black')
+
+p1.hist <- ggplot(aes(R2),
+		data=filter(surrogacy.model.summary.DF, Type=='Environmental')) +
+	geom_histogram(fill='grey10') +
+	ylab('\nFrequency') + xlab(expression(atop('Effectiveness of environmental', variables~(R^2~coefficient)))) +
+	theme_classic() + theme(axis.line.x=element_line(color='black'),
+		axis.line.y=element_line(color='black'),
+		plot.background=element_rect(fill='transparent', colour='transparent')) +
+		geom_text(x=-1.375, y=0.95, label='(c)') +
+		coord_cartesian(xlim=c(-1.5, 1))
+
+p2.hist <- ggplot(aes(R2),
+		data=filter(surrogacy.model.summary.DF, Type=='Geographic')) +
+	geom_histogram(fill='grey10') +
+	ylab('\nFrequency') + xlab(expression(atop('Effectiveness of geographic', variables~(R^2~coefficient)))) +
+	theme_classic() + theme(axis.line.x=element_line(color='black'),
+		axis.line.y=element_line(color='black'), 
+		plot.background=element_rect(fill='transparent')) +
+		geom_text(x=-1.375, y=0.95, label='(d)') +
+		coord_cartesian(xlim=c(-1.5, 1))
+
+# render figure
+grid.arrange(p1,p2,p1.hist,p2.hist,nrow=2)
+```
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.width=5, fig.height=5, fig.cap='Planning unit selection frequencies. The top row of panels (a, b, c) show single-species prioritizations generated assuming equal costs. The middle row of panels (d, e, f) show multi-species prioritizations generated assuming equal costs. The bottom row of panels (g, h, i) show multi-species generated using opportunity costs. The left column of panels (a, d, g) show prioritizations generated using only amount-based targets. The middle column of panels (b, e, h) show prioritizations generated using amount- and surrogate-based targets. The right column of panels (c, f, i) show prioritizations generated using amount- and genetic-based targets.'}
 # prepare data for plotting
 grid.sub.FPLY <- grid.sub.PLY
 for (i in seq_along(single.spp.prioritisations[[1]]))

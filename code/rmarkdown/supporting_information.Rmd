@@ -76,54 +76,6 @@ ggplot() +
 	facet_wrap(~ species, ncol=4)
 ```
 
-```{r, echo=FALSE, fig.width=4, fig.height=2.5, fig.cap="Species richness. Squares denote planning units. Planning units with a brighter color are inhabited by more species."}
-# calculate species richness
-grid.PLY$Species_richness <- grid.PLY@data %>%
-	select(5:(4+n_distinct(spp.samples.DF$species))) %>% as.matrix() %>% rowSums()
-# plot species richness
-ggplot() +
-	geom_polygon(data=countries.FPLY, aes(x=long, y=lat, group=group),
-		fill='grey85', color='grey70') +
-	geom_polygon(data=spFortify(grid.PLY), aes(x=long, y=lat, 
-		group=group, fill=Species_richness), color='grey10') +
-	scale_fill_gradientn(name='Richness (#)',
-		colors=brewer.pal(9,'PuBu'),
-		guide=guide_colorbar(ticks=element_line(color='black'), border=element_line(color='black'))
-	) +
-	theme_classic() +
-	theme(
-		axis.ticks=element_blank(), axis.text=element_blank(), axis.line=element_blank(), plot.margin = unit(c(0, 0, 0, 0), "lines"), axis.title=element_blank(),
-		panel.border=element_rect(color='black', fill=NA, size=1)
-	) +
-	coord_cartesian(
-		xlim=buffered.range(grid.FPLY$long, 0),
-		ylim=buffered.range(grid.FPLY$lat, 0)
-	)
-```
-
-```{r, echo=FALSE, fig.width=4, fig.height=2.5, fig.cap="Opportunity cost. Squares denote planning units. The color of each planning unit represents its opportunity cost (computed as total population density)"}
-# plot opportunity costs
-ggplot() +
-	geom_polygon(data=countries.FPLY, aes(x=long, y=lat, group=group),
-		fill='grey85', color='grey70') +
-	geom_polygon(data=spFortify(grid.PLY), aes(x=long, y=lat, 
-		group=group, fill=pop.density), color='grey10') +
-	scale_fill_gradientn(name='Cost',
-		colors=brewer.pal(9, 'PuBu'),
-		guide=guide_colorbar(ticks=element_line(color='black'), border=element_line(color='black'))
-	) +
-	theme_classic() +
-	theme(
-		axis.ticks=element_blank(), axis.text=element_blank(), axis.line=element_blank(), plot.margin = unit(c(0, 0, 0, 0), "lines"), axis.title=element_blank(),
-		panel.border=element_rect(color='black', fill=NA, size=1)
-	) +
-	coord_cartesian(
-		xlim=buffered.range(grid.FPLY$long, 0),
-		ylim=buffered.range(grid.FPLY$lat, 0)
-	)
-```
-
-
 ```{r, fig.width=15, fig.height=3, fig.cap='Climatic variation. Each panel depicts variation based on a different principle component (PC). Squares represent planning units. The color of each planning unit denotes the average PC value of pixels inside it. Planning units with more similar colors have more similar climate regimes.', echo=FALSE}
 do.call(
 	grid.arrange,
@@ -569,32 +521,19 @@ knitr::kable(
 ```
 
 ```{r, echo=FALSE}
-loci_classification.DF <- ldply(
-	seq_along(unique(spp.samples.DF$species)), 
-	function(i) {
-		if (!is.null(spp.BayeScan.LST[[i]])) {
-			data.frame(
-				Species=paste0('\\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[i]),'}'),
-				Primer=spp.BayeScan.LST[[i]]$bayescan@data@primers,
-				
-				Bayescan_fst=spp.BayeScan.LST[[i]]$bayescan@results@summary[[6]],
-				Bayescan_Probability=spp.BayeScan.LST[[i]]$bayescan@results@summary[[2]],
-				Bayescan_alpha=spp.BayeScan.LST[[i]]$bayescan@results@summary[[5]],
-				Bayescan_qvalue=spp.BayeScan.LST[[i]]$bayescan@results@summary[[4]],
-				Bayescan_Type=spp.BayeScan.LST[[i]]$bayescan@results@summary[[7]],
-				
-				PCadapt_K=spp.pcadapt.LST[[i]]$K,
-				PCadapt_chi2_statistic=spp.pcadapt.LST[[i]]$stats$chi2.stat,
-				PCadapt_pvalue=spp.pcadapt.LST[[i]]$pvalues,
-				PCadapt_qvalue=spp.pcadapt.LST[[i]]$qvalues$qvalues,
-				PCadapt_Type=replace(rep('neutral', length(spp.pcadapt.LST[[i]]$pvalues)), spp.pcadapt.LST[[i]]$adaptive.loci, 'adaptive'),
-				
-				Overall_Type=replace(rep('neutral', length(spp.pcadapt.LST[[i]]$pvalues)), spp.OutlierDetectionResults.LST[[i]], 'adaptive')
-			)
-		}
-	}
+knitr::kable(
+	format.dataframe(
+		filter(spp.nmds.summary.DF,!is.na(Stress)),
+		omit=c('Loci','Converged')
+	),
+	digits=2,
+	caption='Summary of non-metric multi-dimensional scaling (MDS) analyses on genetic variation for each species. The analyses were used to identify the main gradients of variation in binary binary adaptive and neutral loci data.',
+	col.names=c('Species', 'Loci Type', 'K', 'NMDS Stress', 'Converged'),
+	align=c('c', 'c', 'c', 'c', 'c')
 )
+```
 
+```{r, echo=FALSE}
 write.table(loci_classification.DF, 'article/Table_S2.csv', sep=',', row.names=FALSE)
 ```
 
