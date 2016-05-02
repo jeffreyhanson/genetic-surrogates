@@ -127,23 +127,23 @@ for (i in seq_along(geo.surrogacy.LST))
 
 p1.hist <- ggplot(aes(R2),
 		data=filter(surrogacy.model.summary.DF, Type=='Environmental')) +
-	geom_histogram(fill='grey10') +
+	geom_histogram(fill='grey10', bins=10) +
 	ylab('\nFrequency') + xlab(expression(atop('Effectiveness of environmental', variables~(R^2~coefficient)))) +
 	theme_classic() + theme(axis.line.x=element_line(color='black'),
 		axis.line.y=element_line(color='black'),
 		plot.background=element_rect(fill='transparent', colour='transparent')) +
-		geom_text(x=-1.375, y=0.95, label='(c)') +
-		coord_cartesian(xlim=c(-1.5, 1))
+		geom_text(x=0.05, y=0.95, label='(c)') +
+		coord_cartesian(xlim=c(0, 1))
 
 p2.hist <- ggplot(aes(R2),
 		data=filter(surrogacy.model.summary.DF, Type=='Geographic')) +
-	geom_histogram(fill='grey10') +
+	geom_histogram(fill='grey10', bins=10) +
 	ylab('\nFrequency') + xlab(expression(atop('Effectiveness of geographic', variables~(R^2~coefficient)))) +
 	theme_classic() + theme(axis.line.x=element_line(color='black'),
 		axis.line.y=element_line(color='black'), 
 		plot.background=element_rect(fill='transparent')) +
-		geom_text(x=-1.375, y=0.95, label='(d)') +
-		coord_cartesian(xlim=c(-1.5, 1))
+		geom_text(x=0.05, y=0.95, label='(d)') +
+		coord_cartesian(xlim=c(0, 1))
 
 # render figure
 grid.arrange(p1,p2,p1.hist,p2.hist,nrow=2)

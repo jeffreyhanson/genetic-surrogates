@@ -2,17 +2,17 @@
 session::restore.session('data/intermediate/05-genetic-nmds.rda')
 
 # subset data.frames for species with identifiable adaptive and/or neutral genetic variation
-missing.species <- unique(spp.samples.DF$species)[laply(spp.OutlierDetectionData.LST, function(x) {is.null(x)})]
+missing.species2 <- unique(spp.samples.DF$species)[laply(spp.OutlierDetectionData.LST, function(x) {is.null(x)})]
 
-if (length(missing.species)>0) { 
+if (length(missing.species2)>0) { 
 	grid.sub.DF <- grid.DF
 	grid.sub.PLY <- grid.PLY
-	for (i in missing.species) {
+	for (i in missing.species2) {
 		cols <- names(grid.sub.DF)[(-1 * grep(paste0('^.*',i,'.*$'), names(grid.sub.DF)))]
 		grid.sub.DF <- grid.sub.DF[,cols]
 		grid.sub.PLY <- grid.sub.PLY[,cols]
 	}
-	spp.samples.sub.DF <- filter(spp.samples.DF, !species %in% missing.species)
+	spp.samples.sub.DF <- filter(spp.samples.DF, !species %in% missing.species2)
 } else {
 	grid.sub.DF <- grid.DF
 	grid.sub.PLY <- grid.PLY

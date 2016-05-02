@@ -31,9 +31,9 @@ options(error=NULL)
 curr.DF <- correlation.model.summary.DF %>%
 	select(-contains('raw')) %>%
 	mutate(Environmental.corr.P=pvalString(Environmental.corr.P),
-		Geographic.corr.P=pvalString(Geographic.corr.P), blank=NA, Species=gsub('\\ ', '\\n', Species)) %>%
+		Geographic.corr.P=pvalString(Geographic.corr.P), blank='', Species=gsub('\\ ', '\\n', Species)) %>%
 	select(Species:Environmental.corr.P, blank, Geographic.Marginal.R2:Geographic.corr.P) %>%
-	format.dataframe 
+	format.dataframe(omit=c('Environmental.corr.P', 'blank', 'Geographic.corr.P')) 
 emphasize.strong.cells(which(curr.DF$Environmental.corr.P < 0.05, arr.ind=TRUE))
 emphasize.strong.cells(which(curr.DF$Geographic.corr.P < 0.05, arr.ind=TRUE))
 curr.txt=knitr::kable(
