@@ -534,6 +534,6 @@ knitr::kable(
 ```
 
 ```{r, echo=FALSE}
-write.table(loci_classification.DF, 'article/Table_S2.csv', sep=',', row.names=FALSE)
+write.table(loci_classification.DF, 'article/Table_S3.csv', sep=',', row.names=FALSE)
 ```
 
