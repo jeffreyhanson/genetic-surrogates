@@ -31,7 +31,11 @@ clean:
 	rm code/rmarkdown/tables.docx -f
 	rm code/rmarkdown/tables.pdf -f
 	rm article/*.csv -f
-	
+
+pull_ms:
+	git fetch
+	git checkout master code/rmarkdown
+
 # commands for generating manuscript
 manuscript: article/article.pdf article/figures.pdf article/supporting_information.pdf article/tables.pdf
 
