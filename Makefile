@@ -4,6 +4,9 @@
 # set parameters for debugging code
 MODE=debug
 
+# set misc parameters
+COMMIT_ID=$(shell git ls-remote https://paleo13@bitbucket.org/paleo13/genetic.surrogates.git HEAD | grep -o '^\S*')
+
 # main operations
 all: clean analysis manuscript
 
@@ -33,8 +36,7 @@ clean:
 	rm article/*.csv -f
 
 pull_ms:
-	git fetch
-	git checkout $(git ls-remote https://paleo13@bitbucket.org/paleo13/genetic.surrogates.git HEAD | grep -o '^\S*') code/rmarkdown
+	git checkout '$(COMMIT_ID)' code/rmarkdown
 
 # commands for generating manuscript
 manuscript: article/article.pdf article/figures.pdf article/supporting_information.pdf article/tables.pdf
