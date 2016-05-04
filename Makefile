@@ -34,7 +34,7 @@ clean:
 
 pull_ms:
 	git fetch
-	git checkout master code/rmarkdown
+	git checkout $(git rev-parse HEAD) code/rmarkdown
 
 # commands for generating manuscript
 manuscript: article/article.pdf article/figures.pdf article/supporting_information.pdf article/tables.pdf
