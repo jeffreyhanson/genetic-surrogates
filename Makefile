@@ -36,6 +36,7 @@ clean:
 	rm article/*.csv -f
 
 pull_ms:
+	git fetch
 	git checkout '$(COMMIT_ID)' code/rmarkdown
 
 # commands for generating manuscript
