@@ -14,6 +14,7 @@ clean:
 	rm -f *.aux *.bbl *.blg *.log *.pdf *.bak *~ *.Rout */*.Rout */*.pdf */*.aux */*.log *.rda */*.rda */*/*.rda data/intermediate/*.rda data/intermediate/*.Rout
 	rm data/intermediate/structure -rf
 	rm data/intermediate/bayescan -rf
+	rm data/intermediate/pcadapt -rf
 	rm code/rmarkdown/article_files/figure-latex/*.pdf -f
 	rm code/rmarkdown/supporting_information_files/figure-latex/*.pdf -f
 	rm code/rmarkdown/figures_files/figure-latex/*.pdf -f

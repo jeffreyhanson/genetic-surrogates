@@ -21,6 +21,7 @@ spp.OutlierDetectionData.LST <- llply(
 )
 
 # run pcadapt over subsetted objects
+dir.create('data/intermediate/pcadapt', showWarnings=FALSE)
 spp.pcadapt.LST <- llply(
 	seq_along(spp.OutlierDetectionData.LST),
 	.fun=function(i) {
@@ -28,7 +29,15 @@ spp.pcadapt.LST <- llply(
 		if (is.null(spp.OutlierDetectionData.LST[[i]]))
 			return(NULL)
 		## else run pcadapt
-		# imput missing values
+		# init
+		curr.dir <- paste0('data/intermediate/pcadapt/', unique(spp.samples.DF$species)[i]) 
+		dir.create(curr.dir, showWarnings=FALSE, recursive=TRUE)
+		initial.file.names1 <- paste0(unique(spp.samples.DF$species)[i], '_initial', c(".loadings", ".scores", ".zscores", ".maf", ".sigma"))
+		initial.file.names2 <- paste0(curr.dir, '/initial', c(".loadings", ".scores", ".zscores", ".maf", ".sigma"))
+		inference.file.names1 <- paste0(unique(spp.samples.DF$species)[i], '_inference', c(".loadings", ".scores", ".zscores", ".maf", ".sigma"))
+		inference.file.names2 <- paste0(curr.dir, '/inference', c(".loadings", ".scores", ".zscores", ".maf", ".sigma"))
+		
+		# set missing values
 		curr.spp <- spp.OutlierDetectionData.LST[[i]]@matrix
 		curr.spp <- apply(curr.spp, 2, function(v) {
 			if (sum(is.na(v))==0)
@@ -37,32 +46,40 @@ spp.pcadapt.LST <- llply(
 			return(v)
 		})
 
-		# run first principle components to determine the number needed to secure a acceptable level of variation
-		initial.pca <- corpca(curr.spp, K=pcadapt.params.LST[[MODE]]$initial.K, ploidy=1, scale=FALSE)
-		prop.var.explained <- initial.pca$singular_values/sum(initial.pca$singular_values)
+		# run initial analysis to determine suitable K
+		curr.K <- pcadapt.params.LST[[MODE]]$initial.K
+		initial.run <- try(stop(),silent=TRUE)
+		while(inherits(initial.run, 'try-error')) {
+			curr.K <- curr.K - 1
+			initial.run <- try(pcadapt(curr.spp, K=as.numeric(curr.K), ploidy=1, transpose=TRUE,
+				method='mahalanobis', data.type='genotype', min.maf=pcadapt.params.LST[[MODE]]$min.maf,
+				clean.files=FALSE, output.filename=paste0(unique(spp.samples.DF$species)[i],'_initial')), silent=TRUE)
+		}
+		file.copy(initial.file.names1, initial.file.names2, overwrite=TRUE)
+		file.remove(initial.file.names1)
+		
+		# choose apropriate K
+		prop.var.explained <- initial.run$singular.values/sum(initial.run$singular.values)
 		curr.spp.K <- which(cumsum(prop.var.explained) > pcadapt.params.LST[[MODE]]$min.variance.explained)[1]
 		
 		# run second pica with minimum number of principle components needed to secure a acceptable level of variation
-		inference.pca <- corpca(curr.spp, K=curr.spp.K, ploidy=1, scale=FALSE)
-		
-		# compute statistics from pcadapt
-		stats.LST <- computeStats(
-			data=curr.spp, res=inference.pca, method='mahalanobis', 
-			nSNP=ncol(curr.spp), K=curr.spp.K, data.type='genotype', min.maf=0
-		)
+		inference.run <- pcadapt(curr.spp, K=as.numeric(curr.spp.K), ploidy=1, transpose=TRUE,
+			method='mahalanobis', data.type='genotype', min.maf=pcadapt.params.LST[[MODE]]$min.maf,
+			clean.files=FALSE, output.filename=paste0(unique(spp.samples.DF$species)[i],'_inference'))
+		file.copy(inference.file.names1, inference.file.names2, overwrite=TRUE)
+		file.remove(inference.file.names1)
 		
 		# calculate pvalues
-		pvalues.DBL <- pval(stats.LST, method='mahalanobis', K=curr.spp.K)
-		qvalues.LST <- qvalue(pvalues.DBL, lambda=seq(max(0,min(pvalues.DBL,na.rm=TRUE)+1e-10), min(1,max(pvalues.DBL,na.rm=TRUE)-1e-10), length.out=50))
+		pvalues.DBL <- inference.run$pvalues
+		qvalues.LST <- qvalue(pvalues.DBL)
 		outliers <- which(qvalues.LST$qvalues < pcadapt.params.LST[[MODE]]$alpha.level)
 
 		# return list 
 		return(
 			list(
 				K=curr.spp.K,
-				initial.pca=initial.pca,
-				inference.pca=inference.pca,
-				stats=stats.LST,
+				initial.run=initial.run,
+				inference.run=inference.run,
 				pvalues=pvalues.DBL,
 				qvalues=qvalues.LST,
 				adaptive.loci=outliers

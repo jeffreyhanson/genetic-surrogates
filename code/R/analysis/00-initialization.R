@@ -51,6 +51,7 @@ suppressMessages(library(MuMIn))
 suppressMessages(library(knitr))
 suppressMessages(library(pscl))
 suppressMessages(library(lazyWeave))
+suppressMessages(library(pcadapt))
 
 ## load github packages
 # devtools::install_github('paleo13/raspr')
@@ -65,8 +66,6 @@ suppressMessages(library(ggplot2))
 suppressMessages(library(rgurobi))
 # devtools::install_github('wpeterman/ResistanceGA')
 suppressMessages(library(ResistanceGA))
-# devtools::install_github('cran/pcadapt@2.2') # install version 2.2 to manually control scaling
-suppressMessages(library(pcadapt))
 
 # set pander options
 panderOptions('knitr.auto.asis', FALSE)

@@ -21,7 +21,7 @@ loci_classification.DF <- ldply(
 				Bayescan_Type=spp.BayeScan.LST[[i]]$bayescan@results@summary[[7]],
 				
 				PCadapt_K=spp.pcadapt.LST[[i]]$K,
-				PCadapt_chi2_statistic=spp.pcadapt.LST[[i]]$stats$chi2.stat,
+				PCadapt_chi2_statistic=spp.pcadapt.LST[[i]]$inference.run$chi2.stat,
 				PCadapt_pvalue=spp.pcadapt.LST[[i]]$pvalues,
 				PCadapt_qvalue=spp.pcadapt.LST[[i]]$qvalues$qvalues,
 				PCadapt_Type=replace(rep('neutral', length(spp.pcadapt.LST[[i]]$pvalues)), spp.pcadapt.LST[[i]]$adaptive.loci, 'adaptive'),

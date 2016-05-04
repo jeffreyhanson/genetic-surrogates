@@ -45,15 +45,15 @@ gg_color_hue <- function(n) {
 
 ## Figures
 
-```{r, echo=FALSE, fig.width=8, fig.height=2.5, fig.cap="Map of the study area. Squares denote planning units. Panel (a) depicts patterns of species riches. Planning units with a brighter color are inhabited by more species. Panel (b) shows the distribution of opportunity cost across the study area (computed as total population density)."}
+```{r, echo=FALSE, fig.width=6, fig.height=1.5, fig.cap="Map of the study area. Squares denote planning units. Panel (a) depicts patterns of species riches. Planning units with a brighter color are inhabited by more species. Panel (b) shows the distribution of opportunity cost across the study area (computed as total population density). Note that a quantile-based color ramp is used in this panel."}
 
 # calculate species richness
 grid.PLY$Species_richness <- grid.PLY@data %>%
 	select(5:(4+n_distinct(spp.samples.DF$species))) %>% as.matrix() %>% rowSums()
 	
 panel.DF <- grid.sub.FPLY %>% 
-	summarize(lat=min(lat)+(diff(range(lat))*0.98),
-		long=min(long)+(diff(range(long))*0.02))
+	summarize(lat=min(lat)+(diff(range(lat))*0.96),
+		long=min(long)+(diff(range(long))*0.04))
 	
 # plot species richness
 p1 <- ggplot() +
@@ -213,7 +213,7 @@ ggplot() +
 	)
 ```
 
-```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.width=5, fig.height=5, fig.cap='The effectiveness of prioritizations at securing genetic variation. The top row of panels (a--b) show the performance of single-species prioritizations generated assuming equal costs among planning costs. The middle row of panels (c--d) show the performance of multi-species prioritizations generated assuming equal costs among planning units. The bottom row of panels (e--f) show the performance of multi-species prioritizations generated using opportunity costs. The left column of panels (a, c, d) and the right column of panels (b, d, f) show the proportion of adaptive and neutral genetic variation secured (respectively). Box plots show the effectiveness of prioritizations generated using amount-based targets, amount-based and surrogate-based targets, and amount-based and genetic-based targets for each species. Letters denote significant differences ($P < 0.05$).'}
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.width=5, fig.height=5.5, fig.cap='The effectiveness of prioritizations at securing genetic variation. The top row of panels (a--b) show the performance of single-species prioritizations generated assuming equal costs among planning costs. The middle row of panels (c--d) show the performance of multi-species prioritizations generated assuming equal costs among planning units. The bottom row of panels (e--f) show the performance of multi-species prioritizations generated using opportunity costs. The left column of panels (a, c, d) and the right column of panels (b, d, f) show the proportion of adaptive and neutral genetic variation secured (respectively). Box plots show the effectiveness of prioritizations generated using amount-based targets, amount-based and surrogate-based targets, and amount-based and genetic-based targets for each species. Letters denote significant differences ($P < 0.05$).'}
 # prepare data for plotting
 scenario.PDF <- scenario.DF %>% group_by(Prioritisation, Context, Metric) %>% 
 	mutate(
@@ -244,7 +244,7 @@ suppressWarnings({
 		geom_boxplot(position=position_dodge(0.9)) +
 		geom_text(aes(x=Prioritisation, y=letter.height, label=letter),
 			data=scenario.PDF, position=position_dodge(0.9)) +
-		geom_text(aes(x=0.6, y=1.09, label=panel.letter),
+		geom_text(aes(x=0.6, y=1.15, label=panel.letter),
 			data=scenario.PDF) +
 		scale_fill_manual(name='Prioritisation',
 			values=c('grey80','grey50','grey20')) +

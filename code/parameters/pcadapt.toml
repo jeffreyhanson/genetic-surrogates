@@ -1,11 +1,13 @@
 title = "pcadapt parameters"
 
 [debug]
-initial.K = 50
+initial.K = 40
 min.variance.explained = 0.75
 alpha.level = 0.1
+min.maf = 0.05
 
 [release]
 initial.K = 50
 min.variance.explained = 0.75
 alpha.level = 0.1
+min.maf = 0.05
