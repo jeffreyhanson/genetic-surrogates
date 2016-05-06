@@ -45,6 +45,8 @@ gg_color_hue <- function(n) {
 
 ## Figures
 
+<!--
+
 ```{r, echo=FALSE, fig.width=6, fig.height=1.5, fig.cap="Map of the study area. Squares denote planning units. Panel (a) depicts patterns of species riches. Planning units with a brighter color are inhabited by more species. Panel (b) shows the distribution of opportunity cost across the study area (computed as total population density). Note that a quantile-based color ramp is used in this panel."}
 
 # calculate species richness
@@ -262,6 +264,8 @@ suppressWarnings({
 })
 ```
 
+-->
+
 
 #### Supplementary info figures
 
@@ -278,13 +282,13 @@ curr.DF2$genetic.held <- 0.95
 suppressWarnings(
 	ggplot(aes(x=surrogate.held, y=genetic.held), data=curr.DF) +
 		theme_classic() +
-		theme(strip.background=element_rect(fill='grey20'), strip.text=element_text(color='white', face='italic', size=1)) +
+		theme(strip.background=element_rect(fill='grey20'), strip.text=element_text(color='white', face='italic', size=2.5)) +
 		xlab('Environmental variation secured (%)') +
 		ylab('Adaptive genetic variation secured (%)') +
+		geom_point(fill='transparent') +
 		stat_smooth(method='glm', method.args=list(family='binomial'), fullrange=TRUE,
 			se=FALSE, color='blue') +
-		geom_point(fill='transparent') +
-		geom_text(aes(label=R2_repr), data=curr.DF2, parse=TRUE, hjust=0, size=1, color='blue') +
+		geom_text(aes(label=R2_repr), data=curr.DF2, parse=TRUE, hjust=0, size=2.5, color='blue') +
 		facet_wrap(~ Species, ncol=4)
 )
 ```
@@ -302,13 +306,13 @@ curr.DF2$genetic.held <- 0.95
 suppressWarnings(
 	ggplot(aes(x=surrogate.held, y=genetic.held), data=curr.DF) +
 		theme_classic() +
-		theme(strip.background=element_rect(fill='grey20'), strip.text=element_text(color='white', face='italic', size=1)) +
+		theme(strip.background=element_rect(fill='grey20'), strip.text=element_text(color='white', face='italic', size=5)) +
 		xlab('Geographic variation secured (%)') +
 		ylab('Neutral genetic variation secured (%)') +
+		geom_point(fill='transparent') +
 		stat_smooth(method='glm', method.args=list(family='binomial'), fullrange=TRUE,
 			se=FALSE, color='blue') +
-		geom_point(fill='transparent') +
-		geom_text(aes(label=R2_repr), data=curr.DF2, parse=TRUE, hjust=0, size=1, color='blue') +
+		geom_text(aes(label=R2_repr), data=curr.DF2, parse=TRUE, hjust=0, size=5, color='blue') +
 		facet_wrap(~ Species, ncol=4)
 )
 ```
