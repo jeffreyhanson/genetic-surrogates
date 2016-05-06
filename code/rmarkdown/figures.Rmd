@@ -62,7 +62,7 @@ curr.DF <- env.surrogacy.DF %>% filter(!is.na(genetic.held)) %>% mutate(Species=
 curr.DF2 <- env.surrogate.spp.DF %>% filter(!is.na(r2CU)) %>% mutate(Species=gsub('_', ' ', Species))
 curr.DF2$R2_repr <- round(curr.DF2$r2CU,2)
 curr.DF2$R2_repr <- sapply(curr.DF2$R2_repr, function(x) {as.character(as.expression(substitute(~~italic(R)^2~"="~r2, list(r2=x))))})
-curr.DF2$surrogate.held <- 0.01
+curr.DF2$surrogate.held <- 0
 curr.DF2$genetic.held <- 0.9
 
 # make plot
@@ -76,7 +76,7 @@ suppressWarnings(
 		geom_point(fill='transparent') +
 		suppressWarnings(stat_smooth(method='glm', method.args=list(family='binomial'), fullrange=TRUE,
 			se=FALSE, fill='blue', alpha=0.8)) +
-		geom_text(aes(label=R2_repr), data=curr.DF2, parse=TRUE, hjust=0, size=6, color='blue') +
+		geom_text(aes(label=R2_repr), data=curr.DF2, parse=TRUE, hjust=0, size=5, color='blue') +
 		facet_wrap(~ Species, ncol=4)
 )
 ```
@@ -87,7 +87,7 @@ curr.DF <- geo.surrogacy.DF %>% filter(!is.na(genetic.held)) %>% mutate(Species=
 curr.DF2 <- geo.surrogate.spp.DF %>% filter(!is.na(r2CU)) %>% mutate(Species=gsub('_', ' ', Species))
 curr.DF2$R2_repr <- round(curr.DF2$r2CU,2)
 curr.DF2$R2_repr <- sapply(curr.DF2$R2_repr, function(x) {as.character(as.expression(substitute(~~italic(R)^2~"="~r2, list(r2=x))))})
-curr.DF2$surrogate.held <- 0.01
+curr.DF2$surrogate.held <- 0
 curr.DF2$genetic.held <- 0.9
 
 # make plot
@@ -101,7 +101,7 @@ suppressWarnings(
 		geom_point(fill='transparent') +
 		suppressWarnings(stat_smooth(method='glm', method.args=list(family='binomial'), fullrange=TRUE,
 			se=FALSE, fill='blue', alpha=0.8)) +
-		geom_text(aes(label=R2_repr), data=curr.DF2, parse=TRUE, hjust=0, size=4, color='blue') +
+		geom_text(aes(label=R2_repr), data=curr.DF2, parse=TRUE, hjust=0, size=5, color='blue') +
 		facet_wrap(~ Species, ncol=4)
 )
 ```
