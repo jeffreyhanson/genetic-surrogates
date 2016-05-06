@@ -125,8 +125,8 @@ for (i in seq_along(geo.surrogacy.LST))
 		data=filter(geo.surrogacy.DF, Species==unique(Species)[i]),
 		fullrange=TRUE, se=FALSE, colour='black')
 
-p1.hist <- ggplot(aes(R2),
-		data=filter(surrogacy.model.summary.DF, Type=='Environmental')) +
+p1.hist <- ggplot(aes(r2CU),
+		data=filter(env.surrogate.spp.DF, !is.na(r2CU))) +
 	geom_histogram(fill='grey10', bins=10) +
 	ylab('\nFrequency') + xlab(expression(atop('Effectiveness of environmental', variables~(R^2~coefficient)))) +
 	theme_classic() + theme(axis.line.x=element_line(color='black'),
@@ -135,8 +135,8 @@ p1.hist <- ggplot(aes(R2),
 		geom_text(x=0.05, y=0.95, label='(c)') +
 		coord_cartesian(xlim=c(0, 1))
 
-p2.hist <- ggplot(aes(R2),
-		data=filter(surrogacy.model.summary.DF, Type=='Geographic')) +
+p2.hist <- ggplot(aes(r2CU),
+		data=filter(geo.surrogate.spp.DF, !is.na(r2CU))) +
 	geom_histogram(fill='grey10', bins=10) +
 	ylab('\nFrequency') + xlab(expression(atop('Effectiveness of geographic', variables~(R^2~coefficient)))) +
 	theme_classic() + theme(axis.line.x=element_line(color='black'),
@@ -262,3 +262,53 @@ suppressWarnings({
 })
 ```
 
+
+#### Supplementary info figures
+
+```{r, echo=FALSE, message=FALSE, warnings=FALSE, fig.width=8, fig.height=8, fig.cap='The relationship between the proportion of adaptive genetic variation secured in a prioritizaiton and the proportion of environmental variation it also secures. Points represent values associated with randomly generated prioritizations. Black lines indicate average trends computed using generalised linear models with logit links. Each panel corresponds to different species.'}
+# format data
+curr.DF <- env.surrogacy.DF %>% filter(!is.na(genetic.held))
+curr.DF2 <- env.surrogate.spp.DF %>% filter(!is.na(r2CU))
+curr.DF2$R2_repr <- round(curr.DF2$r2CU,2)
+curr.DF2$R2_repr <- sapply(curr.DF2$R2_repr, function(x) {as.character(as.expression(substitute(~~italic(R)^2~"="~r2, list(r2=x))))})
+curr.DF2$surrogate.held <- 0.05
+curr.DF2$genetic.held <- 0.95
+
+# make plot
+suppressWarnings(
+	ggplot(aes(x=surrogate.held, y=genetic.held), data=curr.DF) +
+		theme_classic() +
+		theme(strip.background=element_rect(fill='grey20'), strip.text=element_text(color='white', face='italic', size=1)) +
+		xlab('Environmental variation secured (%)') +
+		ylab('Adaptive genetic variation secured (%)') +
+		stat_smooth(method='glm', method.args=list(family='binomial'), fullrange=TRUE,
+			se=FALSE, color='blue') +
+		geom_point(fill='transparent') +
+		geom_text(aes(label=R2_repr), data=curr.DF2, parse=TRUE, hjust=0, size=1, color='blue') +
+		facet_wrap(~ Species, ncol=4)
+)
+```
+
+```{r, echo=FALSE, message=FALSE, warnings=FALSE, fig.width=8, fig.height=8, fig.cap='The relationship between the proportion of neutral genetic variation secured in a prioritizaiton and the proportion of geographic variation it also secures. Conventions are detailed in Figure SXXX.'}
+# format data
+curr.DF <- geo.surrogacy.DF %>% filter(!is.na(genetic.held))
+curr.DF2 <- geo.surrogate.spp.DF %>% filter(!is.na(r2CU))
+curr.DF2$R2_repr <- round(curr.DF2$r2CU,2)
+curr.DF2$R2_repr <- sapply(curr.DF2$R2_repr, function(x) {as.character(as.expression(substitute(~~italic(R)^2~"="~r2, list(r2=x))))})
+curr.DF2$surrogate.held <- 0.05
+curr.DF2$genetic.held <- 0.95
+
+# make plot
+suppressWarnings(
+	ggplot(aes(x=surrogate.held, y=genetic.held), data=curr.DF) +
+		theme_classic() +
+		theme(strip.background=element_rect(fill='grey20'), strip.text=element_text(color='white', face='italic', size=1)) +
+		xlab('Geographic variation secured (%)') +
+		ylab('Neutral genetic variation secured (%)') +
+		stat_smooth(method='glm', method.args=list(family='binomial'), fullrange=TRUE,
+			se=FALSE, color='blue') +
+		geom_point(fill='transparent') +
+		geom_text(aes(label=R2_repr), data=curr.DF2, parse=TRUE, hjust=0, size=1, color='blue') +
+		facet_wrap(~ Species, ncol=4)
+)
+```

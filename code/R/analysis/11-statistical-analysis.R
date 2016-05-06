@@ -153,47 +153,53 @@ correlation.model.summary.DF <- correlation.model.summary.DF %>%
 	Geographic.corr.P=corr.pvalues[nrow(correlation.model.summary.DF)+seq_len(nrow(correlation.model.summary.DF))])
 
 ### surrogacy analyses
-## run models
+## full model analysis
+# run models
+env.surrogacy.GLM <- glm(genetic.held~surrogate.held*Species, data=env.surrogacy.DF, family='binomial')
+geo.surrogacy.GLM <- glm(genetic.held~surrogate.held*Species, data=geo.surrogacy.DF, family='binomial')
+
+# assess term significance
+env.surrogacy.AOV <- anova(env.surrogacy.GLM, test='Chisq') %>% tidy()
+geo.surrogacy.AOV <- anova(geo.surrogacy.GLM, test='Chisq') %>% tidy()
+
+## species-level analysis
+# assess slope significance for each species
+env.surrogacy.spp.slopes.DF <- tidy(summary(glht(env.surrogacy.GLM, linfct=c('surrogate.held == 0', paste0('surrogate.held + surrogate.held:Species',unique(env.surrogacy.DF$Species)[-1],' == 0'))), adjusted('bonferroni')))
+geo.surrogacy.spp.slopes.DF <- tidy(summary(glht(geo.surrogacy.GLM, linfct=c('surrogate.held == 0', paste0('surrogate.held + surrogate.held:Species',unique(geo.surrogacy.DF$Species)[-1],' == 0'))), adjusted('bonferroni')))
+
+# compute R^2 values for each species
 env.surrogacy.LST <- list()
 for (x in unique(env.surrogacy.DF$Species)) {
-	curr.model=glm(genetic.held~surrogate.held, data=filter(env.surrogacy.DF, Species==x), family='binomial')
+	curr.model <- glm(genetic.held~surrogate.held, data=filter(env.surrogacy.DF, Species==x), family='binomial')
 	env.surrogacy.LST[[x]] <- list(model=curr.model, r2=pR2(curr.model))
 }
-
 geo.surrogacy.LST <- list()
-for (x in  unique(geo.surrogacy.DF$Species)) {
-	curr.model=glm(genetic.held~surrogate.held, data=filter(geo.surrogacy.DF, Species==x), family='binomial')
+for (x in unique(geo.surrogacy.DF$Species)) {
+	curr.model <- glm(genetic.held~surrogate.held, data=filter(geo.surrogacy.DF, Species==x), family='binomial')
 	geo.surrogacy.LST[[x]] <- list(model=curr.model, r2=pR2(curr.model))
 }
 
-surrogacy.model.summary.DF <- rbind(
+env.surrogate.spp.DF <- cbind(
+	data.frame(Species=unique(env.surrogacy.DF$Species)),
+	select(env.surrogacy.spp.slopes.DF, -lhs, -rhs),
+	select(ldply(env.surrogacy.LST, function(x) x$r2['r2CU']), -.id))
+
+geo.surrogate.spp.DF <- cbind(
+	data.frame(Species=unique(geo.surrogacy.DF$Species)),
+	select(geo.surrogacy.spp.slopes.DF, -lhs, -rhs),
+	select(ldply(geo.surrogacy.LST, function(x) x$r2['r2CU']), -.id))
+
+env.surrogate.spp.DF2 <- env.surrogate.spp.DF
+names(env.surrogate.spp.DF2)[2:6] <- paste0('Environmental.', names(env.surrogate.spp.DF)[2:6])
+geo.surrogate.spp.DF2 <- geo.surrogate.spp.DF
+names(geo.surrogate.spp.DF2)[2:6] <- paste0('Geographic.', names(geo.surrogate.spp.DF)[2:6])
+
+surrogate.spp.DF <- full_join(env.surrogate.spp.DF2, geo.surrogate.spp.DF2, by='Species') %>%
+	arrange(Species) %>% 
 	mutate(
-		ldply(seq_along(env.surrogacy.LST), .fun=function(i) {
-			curr.aov <- data.frame(anova(env.surrogacy.LST[[i]]$model, test='Chisq'))
-			data.frame(
-				Species=unique(env.surrogacy.DF$Species)[i],
-				Df=curr.aov[['Resid..Df']][[2]],
-				Residual.deviance=curr.aov[['Resid..Dev']][[2]],
-				R2=env.surrogacy.LST[[i]]$r2['r2CU'],
-				raw.P=curr.aov[['Pr..Chi.']][[2]]
-			)
-		}),
-		Type='Environmental'
-	),
-	mutate(
-		ldply(seq_along(geo.surrogacy.LST), function(i) {
-			curr.aov <- data.frame(anova(geo.surrogacy.LST[[i]]$model, test='Chisq'))
-			data.frame(
-				Species=unique(geo.surrogacy.DF$Species)[i],
-				Df=curr.aov[['Resid..Df']][[2]],
-				Residual.deviance=curr.aov[['Resid..Dev']][[2]],
-				R2=geo.surrogacy.LST[[i]]$r2['r2CU'],
-				raw.P=curr.aov[['Pr..Chi.']][[2]]
-			)
-		}),
-		Type='Geographic'
+		Environmental.p.value=pvalString(Environmental.p.value),
+		Geographic.p.value=pvalString(Geographic.p.value)
 	)
-) %>% mutate(corr.P=p.adjust(raw.P, 'bonferroni'))
 
 ### scenario analyses
 ## prepare data

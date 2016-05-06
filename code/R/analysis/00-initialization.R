@@ -22,6 +22,8 @@ suppressMessages(library(qvalue))
 
 # load CRAN packages
 suppressMessages(library(stats))
+suppressMessages(library(Hmisc))
+suppressMessages(library(multcomp))
 suppressMessages(library(data.table))
 suppressMessages(library(grid))
 suppressMessages(library(gridExtra))
@@ -52,6 +54,7 @@ suppressMessages(library(knitr))
 suppressMessages(library(pscl))
 suppressMessages(library(lazyWeave))
 suppressMessages(library(pcadapt))
+suppressMessages(library(broom))
 
 ## load github packages
 # devtools::install_github('paleo13/raspr')

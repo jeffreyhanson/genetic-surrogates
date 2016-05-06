@@ -33,6 +33,7 @@ To rerun all computational analyses, run `make all`
 	+ pandoc-citeproc
 	+ LaTeX
 * R packages
+	+ broom
 	+ cluster
 	+ data.table
 	+ doParallel
@@ -41,10 +42,12 @@ To rerun all computational analyses, run `make all`
 	+ ggplot2
 	+ grid
 	+ gridExtra
+	+ Hmisc
 	+ knitr
 	+ lazyWeave
 	+ maptools
 	+ mclust
+	+ multcomp
 	+ MuMIn
 	+ optimx
 	+ pander

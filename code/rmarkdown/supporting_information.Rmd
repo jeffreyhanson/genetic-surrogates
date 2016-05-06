@@ -514,78 +514,80 @@ if (is.speciesPlottable(26)) plot.spp.nmds(26)
 if (is.speciesPlottable(27)) plot.spp.nmds(27)
 ```
 
-```{r, echo=FALSE, message=FALSE, warnings=FALSE, fig.width=8, fig.height=8, fig.cap='The relationship between the proportion of adaptive genetic variation secured in a prioritizaiton and the proportion of environmental variation it also secures. Points represent values associated with randomly generated prioritizations. Black lines indicate average trends computed using generalised linear models with logit links. Each panel corresponds to different species.'}
-# format data
-curr.DF <- env.surrogacy.DF %>% filter(!is.na(genetic.held))
+### insert figures here
 
-# extract R2 values
-curr.DF2 <- surrogacy.model.summary.DF %>% filter(Type=='Environmental', !is.na(R2))
-curr.DF2$R2_repr <- round(curr.DF2$R2,2)
-curr.DF2$R2_repr <- sapply(curr.DF2$R2_repr, function(x) {as.character(as.expression(substitute(~~italic(R)^2~"="~r2, list(r2=x))))})
-curr.DF2$surrogate.held <- 0.1
-curr.DF2$genetic.held <- 0.9
 
-# make plot
-ggplot(aes(x=surrogate.held, y=genetic.held), data=curr.DF) +
-	theme_classic() +
-	theme(strip.background=element_rect(fill='grey20'), strip.text=element_text(color='white', face='italic', size=1)) +
-	xlab('Environmental variation secured (%)') +
-	ylab('Adaptive genetic variation secured (%)') +
-	stat_smooth(method='glm', method.args=list(family='binomial'), fullrange=TRUE,
-		se=FALSE, color='black') +
-	geom_point() +
-	geom_text(aes(label=R2_repr), data=curr.DF2, parse=TRUE, hjust=0) +
-	facet_wrap(~ Species, ncol=4)
-```
-
-```{r, echo=FALSE, message=FALSE, warnings=FALSE, fig.width=8, fig.height=8, fig.cap='The relationship between the proportion of neutral genetic variation secured in a prioritizaiton and the proportion of geographic variation it also secures. Conventions are detailed in Figure SXXX.'}
-# format data
-curr.DF <- geo.surrogacy.DF %>% filter(!is.na(genetic.held))
-
-# extract R2 values
-curr.DF2 <- surrogacy.model.summary.DF %>% filter(Type=='Geographic', !is.na(R2))
-curr.DF2$R2_repr <- round(curr.DF2$R2,2)
-curr.DF2$R2_repr <- sapply(curr.DF2$R2_repr, function(x) {as.character(as.expression(substitute(~~italic(R)^2~"="~r2, list(r2=x))))})
-curr.DF2$surrogate.held <- 0.1
-curr.DF2$genetic.held <- 0.9
-
-# make plot
-ggplot(aes(x=surrogate.held, y=genetic.held), data=curr.DF) +
-	theme_classic() +
-	theme(strip.background=element_rect(fill='grey20'), strip.text=element_text(color='white', face='italic', size=1)) +
-	xlab('Geographic variation secured (%)') +
-	ylab('Neutral genetic variation secured (%)') +
-	stat_smooth(method='glm', method.args=list(family='binomial'), fullrange=TRUE,
-		se=FALSE, color='black') +
-	geom_point() +
-	geom_text(aes(label=R2_repr), data=curr.DF2, parse=TRUE, hjust=0) +
-	facet_wrap(~ Species, ncol=4)
-```
-
-```{r, echo=FALSE}
+```{r, echo=FALSE, results='asis'}
 ## make results table showing Eigen values
-knitr::kable(
-	pca.DF,
-	digits=2,
-	caption=paste0('Summary of principle components analysis (PCA) on bioclimatic variation across the study area. The first ',as.character(as.english(surrogate.params.LST[[MODE]]$number.components)),' principle components (PCs) were used for subsequent analysis.'),
-	align=c('c', 'c', 'c', 'c')
-)
+curr.file <- tempfile(fileext='.tex')
+pca.DF[['Eigen Value']] <- c(round(pca.DF[['Eigen Value']][-19],2), pvalString(pca.DF[['Eigen Value']][19], digits=2))
+pca.DF[['Variation explained (%)']] <- c(round(pca.DF[['Variation explained (%)']][1:3],2), pvalString(pca.DF[['Variation explained (%)']][-1:-3], digits=2))
+pca.DF[['Accumulative variation explained (%)']] <- as.character(round(pca.DF[['Accumulative variation explained (%)']],2))
+x <- pca.DF %>%
+	latex(file=curr.file, 
+		rowname=NULL, first.hline.double=FALSE, booktabs=TRUE, col.just=rep('c', ncol(pca.DF)), here=TRUE,
+		colheads=c("\\parbox[t]{2.5cm}{\\centering \\bfseries{Principle Component}}", "\\parbox[t]{2cm}{\\centering \\bfseries{Eigen value}}",
+			"\\parbox[t]{3cm}{\\centering \\bfseries{Variation explained (\\%)}}", "\\parbox[t]{4.5cm}{\\centering \\bfseries{Cumulative variation explained (\\%)}}"),
+		caption=paste0('Summary of principle components analysis (PCA) on bioclimatic variation across the study area. The first ',as.character(as.english(surrogate.params.LST[[MODE]]$number.components)),' principle components (PCs) were used for subsequent analysis.')
+	)
+readLines(curr.file)[-1] %>% paste0(collapse='\n') %>% 
+	gsub(pattern='toprule', replacement='toprule[1pt]', fixed=TRUE) %>%
+	gsub(pattern='bottomrule', replacement='bottomrule[1pt]', fixed=TRUE) %>%
+	cat()
 ```
 
-```{r, echo=FALSE}
-knitr::kable(
-	format.dataframe(
-		filter(spp.nmds.summary.DF,!is.na(Stress)),
-		omit=c('Loci','Converged')
-	),
-	digits=2,
-	caption='Summary of non-metric multi-dimensional scaling (MDS) analyses on genetic variation for each species. The analyses were used to identify the main gradients of variation in binary binary adaptive and neutral loci data.',
-	col.names=c('Species', 'Loci Type', 'K', 'NMDS Stress', 'Converged'),
-	align=c('c', 'c', 'c', 'c', 'c')
-)
+```{r, echo=FALSE, results='asis'}
+adaptive.spp.nmds.summary.DF <- spp.nmds.summary.DF %>% filter(Loci=='adaptive') %>% mutate(Stress=pvalString(Stress))
+neutral.spp.nmds.summary.DF <- spp.nmds.summary.DF %>% filter(Loci=='neutral') %>% mutate(Stress=pvalString(Stress))
+names(adaptive.spp.nmds.summary.DF)[2:5] <- paste0('adaptive.', names(adaptive.spp.nmds.summary.DF)[2:5])
+names(neutral.spp.nmds.summary.DF)[2:5] <- paste0('neutral.', names(neutral.spp.nmds.summary.DF)[2:5])
+spp.nmds.summary.DF2 <- full_join(adaptive.spp.nmds.summary.DF, neutral.spp.nmds.summary.DF, by='Species')
+spp.nmds.summary.DF2$adaptive.Stress[which(spp.nmds.summary.DF2$adaptive.Converged)] <- paste0('\\bfseries{', spp.nmds.summary.DF2$adaptive.Stress[which(spp.nmds.summary.DF2$adaptive.Converged)],'}')
+spp.nmds.summary.DF2$neutral.Stress[which(spp.nmds.summary.DF2$neutral.Converged)] <- paste0('\\bfseries{', spp.nmds.summary.DF2$neutral.Stress[which(spp.nmds.summary.DF2$neutral.Converged)],'}')
+spp.nmds.summary.DF2 <- spp.nmds.summary.DF2 %>%
+	mutate(blank='') %>%
+	select(Species, adaptive.k:adaptive.Stress, neutral.k:neutral.Stress)
+curr.file <- tempfile(fileext='.tex')
+x <- spp.nmds.summary.DF2 %>%
+	latex(
+		file=curr.file,
+		rowname=NULL, first.hline.double=FALSE, booktabs=TRUE, col.just=rep('c', 5),
+		cgroup=c('', 'Adaptive', 'Neutral'), n.cgroup=c(1, 2, 2),
+		colheads=c('\\bfseries{Species}', 'K', 'Stress', 'K', 'Stress'), here=TRUE,
+		caption='Summary of non-metric multi-dimensional scaling (NMDS) analyses on genetic variation for each species. The analyses were used to identify the main graondients of variation in binary adaptive and neutral loci data. Bold stress values indicate NMDS analyses that have converged.'
+	)
+readLines(curr.file)[-1] %>% paste0(collapse='\n') %>% 
+	gsub(pattern='\\cline{1-', replacement='\\cline{3-4} \\cline{6-', fixed=TRUE) %>% 
+	gsub(pattern='toprule', replacement='toprule[1pt]', fixed=TRUE) %>%
+	gsub(pattern='bottomrule', replacement='bottomrule[1pt]', fixed=TRUE) %>%
+	cat()
+```
+
+```{r, echo=FALSE, results='asis'}
+curr.file <- tempfile(fileext='.tex')
+x <- surrogate.spp.DF %>%
+	mutate(
+		Environmental.z = paste(round(Environmental.estimate,2), '$\\pm$', round(Environmental.std.error,2)),
+		Geographic.z = paste(round(Geographic.estimate,2), '$\\pm$', round(Geographic.std.error,2)),
+		Species = paste0('\\textit{', gsub('_', ' ', Species, fixed=TRUE), '}')) %>%
+	select(Species, Environmental.z, Environmental.p.value, Environmental.r2CU,
+		Geographic.z, Geographic.p.value, Geographic.r2CU) %>%
+	latex(file=curr.file, 
+		cgroup=c('', 'Environmental', 'Geographic'), n.cgroup=c(1, 3, 3), col.just=rep('c', 7),
+		digits=2, rowname=NULL, first.hline.double=FALSE, booktabs=TRUE, here=TRUE,
+		colheads=c('\\bfseries{Species}', '$\\textit{Z}$', '\\textit{P}', '$R^2$', '$\\textit{Z}$', '\\textit{P}', '$R^2$'),
+		caption='Summary of post-hoc analyses on generalized linear models. Briefly, two generalized linear models were fit to correlate the proportion of adaptive genetic variation and environmental variation secured, and the proportion of neutral genetic variation and geographic variation secured in a prioritization. These models also included a predictor variable indicating the species for which the prioritizations were generated, and an interaction term. A post-hoc analysis was conducted to determine if the slopes for each species were significantly different to zero (detailed in the \\textit{Z} and \\textit{P} columns). All tests used a single degree of freedom. Cragg and Uhler\'s pseudo-R$^2$ values were calculated to show the proportion of variation explained by the slopes for each species ($R^2$ column).'
+	)
+readLines(curr.file)[-1] %>% paste0(collapse='\n') %>% 
+	gsub(pattern='\\cline{1-', replacement='\\cline{2-5} \\cline{7-', fixed=TRUE) %>% 
+	gsub(pattern='ulticolumn{1}{c}{$R^2$}\\tabularnewline', replacement='ulticolumn{1}{c}{$R^2$}\\T\\B\\tabularnewline', fixed=TRUE) %>% 
+	gsub(pattern='toprule', replacement='toprule[1pt]', fixed=TRUE) %>%
+	gsub(pattern='bottomrule', replacement='bottomrule[1pt]', fixed=TRUE) %>%
+	cat()
 ```
 
 ```{r, echo=FALSE}
 write.table(loci_classification.DF, 'article/Table_S3.csv', sep=',', row.names=FALSE)
 ```
+
 

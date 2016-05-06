@@ -57,6 +57,7 @@ spp.pcadapt.LST <- llply(
 		}
 		file.copy(initial.file.names1, initial.file.names2, overwrite=TRUE)
 		file.remove(initial.file.names1)
+		if (file.exists('tmp.pcadapt')) file.remove('tmp.pcadapt')
 		
 		# choose apropriate K
 		prop.var.explained <- initial.run$singular.values/sum(initial.run$singular.values)
@@ -68,6 +69,7 @@ spp.pcadapt.LST <- llply(
 			clean.files=FALSE, output.filename=paste0(unique(spp.samples.DF$species)[i],'_inference'))
 		file.copy(inference.file.names1, inference.file.names2, overwrite=TRUE)
 		file.remove(inference.file.names1)
+		if (file.exists('tmp.pcadapt')) file.remove('tmp.pcadapt')
 		
 		# calculate pvalues
 		pvalues.DBL <- inference.run$pvalues

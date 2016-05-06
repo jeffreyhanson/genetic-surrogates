@@ -22,36 +22,29 @@ try(session::restore.session('data/final/results.rda'))
 
 # set options
 options(error=NULL)
-
 ```
-
 ## Tables
 
-```{r, echo=FALSE}
-curr.DF <- correlation.model.summary.DF %>%
+```{r, echo=FALSE, results='asis'}
+curr.file <- tempfile(fileext='.tex')
+x <- correlation.model.summary.DF %>%
 	select(-contains('raw')) %>%
-	mutate(Environmental.corr.P=pvalString(Environmental.corr.P),
-		Geographic.corr.P=pvalString(Geographic.corr.P), blank='', Species=gsub('\\ ', '\\n', Species)) %>%
-	select(Species:Environmental.corr.P, blank, Geographic.Marginal.R2:Geographic.corr.P) %>%
-	format.dataframe(omit=c('Environmental.corr.P', 'blank', 'Geographic.corr.P')) 
-emphasize.strong.cells(which(curr.DF$Environmental.corr.P < 0.05, arr.ind=TRUE))
-emphasize.strong.cells(which(curr.DF$Geographic.corr.P < 0.05, arr.ind=TRUE))
-curr.txt=knitr::kable(
-	curr.DF,
-	digits=2,
-	caption='Correlation between surrogate variables and genetic variation. The $R^2$ columns show the proportion of genetic variation explained by surrogates. Specifically, marginal $R^2$ represents the proportion of variation explained by the fixed effects alone. The conditional $R^2$ represents the proportion of variation explained by the fixed and random effects. All $\\chi^2$ tests were based on one degree of freedom. Significant $P$ values ($P$ < 0.05) indicate that surrogate variables correlate with genetic variation.',
-	col.names=c('\\textbf{Species}', '\\textbf{Marginal $R^2$}', '\\textbf{Conditional $R^2$}', '\\textbf{$\\chi^2$}', '\\textbf{\\textit{P}}', '', '\\textbf{Marginal $R^2$}', '\\textbf{Conditional $R^2$}', '\\textbf{$\\chi^2$}', '\\textbf{\\textit{P}}'),
-	align=rep('c', ncol(curr.DF)),
-	format='latex'
-) %>% as.character()
-
-curr.txt <- gsub('\\hline\nSpecies',
-'
-\\hline
-& \\multicolumn{4}{c}{Environmental} & & \\multicolumn{4}{c}{Geographic} \\\\ \\cmidrule{2-5} \\cmidrule{7-10}
-Species', curr.txt, fixed=TRUE)
-
-class(curr.txt) <- 'knitr_kable'
-attr(curr.txt, 'format') <- 'latex'
-curr.txt
-```
+	mutate(
+		Environmental.corr.P=pvalString(Environmental.corr.P),
+		Geographic.corr.P=pvalString(Geographic.corr.P), 
+		blank=rep('', length(Species)),
+		Species=paste0('\\textit{', gsub('\\ ', ' ', Species), '}')) %>%
+	select(Species:Environmental.corr.P, Geographic.Marginal.R2:Geographic.corr.P) %>%
+	latex(file=curr.file, 
+		cgroup=c('', 'Environmental', 'Geographic'), n.cgroup=c(1, 4, 4), col.just=rep('c', 9),
+		digits=2, rowname=NULL, first.hline.double=FALSE, booktabs=TRUE, here=TRUE,
+		colheads=c('\\bfseries{Species}', '$MR^2$', '$CR^2$', '$\\chi^2$', '\\textit{P}', '$MR^2$', '$CR^2$', '$\\chi^2$', '\\textit{P}'),
+		caption='Summary of maximum likelihood population-effects (MLPE) models. Briefly, for each species associated with adaptive loci, a model was fit to correlate dissimilarities among planning units where the species in terms of the adaptive genetic characteristics of individuals in them with dissimilarities in terms of the environmental conditions inside the planning units (denoted in the environmental column group). Similarly, for each species, a model was fit to correlate dissimilarities among the planning units in terms of the neutral genetic characteristics of indiviudals in them with dissimilarities in terms of the geographic position of the planning units (denoted in the geographic column group). Data shows the marginal $R^2$ ($MR^2$) and conditional $R^2$ ($CR^2$) for each model, and also the results from comparing the models to their corresponding null models. All $\\chi^2$ tests had 1 degree of freedom.'
+	)
+readLines(curr.file)[-1] %>% paste0(collapse='\n') %>% 
+	gsub(pattern='\\cline{1-', replacement='\\cline{2-6} \\cline{8-', fixed=TRUE) %>% 
+	gsub(pattern='{c}{\\textit{P}}\\tabularnewline', replacement='{c}{\\textit{P}}\\T\\B\\tabularnewline', fixed=TRUE) %>% 
+	gsub(pattern='toprule', replacement='toprule[1pt]', fixed=TRUE) %>%
+	gsub(pattern='bottomrule', replacement='bottomrule[1pt]', fixed=TRUE) %>%
+	cat()
+ ```
