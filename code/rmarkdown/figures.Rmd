@@ -83,7 +83,7 @@ suppressWarnings(
 	ggplot(aes(x=surrogate.held, y=genetic.held), data=curr.DF) +
 		theme_classic() +
 		theme(strip.background=element_rect(fill='grey20'), strip.text=element_text(color='white', face='italic', size=8),
-			panel.margin.x.unit=unit(1, 'lines')) +
+			panel.margin.x=unit(1, 'lines')) +
 		xlab('Geographic variation secured (%)') +
 		ylab('Neutral genetic variation secured (%)') +
 		geom_point(fill='transparent') +
