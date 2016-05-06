@@ -45,9 +45,15 @@ gg_color_hue <- function(n) {
 
 #### Supplementary info figures
 
-```{r, echo=FALSE, message=FALSE, warnings=FALSE, fig.width=8, fig.height=8, fig.cap='The relationship between the proportion of adaptive genetic variation secured in a prioritizaiton and the proportion of environmental variation it also secures. Points represent values associated with randomly generated prioritizations. Black lines indicate average trends computed using generalised linear models with logit links. Each panel corresponds to different species.'}
+```{r}
+calc.fig.height2 <- function(x) {
+	return(((x-1) %/% 4)*3)
+}
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE, fig.width=8, fig.height=calc.fig.height2(n_distinct(geo.surrogacy.DF$Species)), fig.cap='The relationship between the proportion of adaptive genetic variation secured in a prioritizaiton and the proportion of environmental variation it also secures. Points represent values associated with randomly generated prioritizations. Black lines indicate average trends computed using generalised linear models with logit links. Each panel corresponds to different species.'}
 # format data
-curr.DF <- env.surrogacy.DF %>% filter(!is.na(genetic.held))
+curr.DF <- env.surrogacy.DF %>% filter(!is.na(genetic.held)) %>% mutate(Species=gsub('_', ' ', Species))
 curr.DF2 <- env.surrogate.spp.DF %>% filter(!is.na(r2CU))
 curr.DF2$R2_repr <- round(curr.DF2$r2CU,2)
 curr.DF2$R2_repr <- sapply(curr.DF2$R2_repr, function(x) {as.character(as.expression(substitute(~~italic(R)^2~"="~r2, list(r2=x))))})
@@ -58,7 +64,7 @@ curr.DF2$genetic.held <- 0.95
 suppressWarnings(
 	ggplot(aes(x=surrogate.held, y=genetic.held), data=curr.DF) +
 		theme_classic() +
-		theme(strip.background=element_rect(fill='grey20'), strip.text=element_text(color='white', face='italic', size=6)) +
+		theme(strip.background=element_rect(fill='grey20'), strip.text=element_text(color='white', face='italic', size=10)) +
 		xlab('Environmental variation secured (%)') +
 		ylab('Adaptive genetic variation secured (%)') +
 		geom_point(fill='transparent') +
@@ -69,9 +75,9 @@ suppressWarnings(
 )
 ```
 
-```{r, echo=FALSE, message=FALSE, warnings=FALSE, fig.width=8, fig.height=8, fig.cap='The relationship between the proportion of neutral genetic variation secured in a prioritizaiton and the proportion of geographic variation it also secures. Conventions are detailed in Figure SXXX.'}
+```{r, echo=FALSE, message=FALSE, warning=FALSE, fig.width=8, fig.height=calc.fig.height2(n_distinct(geo.surrogacy.DF$Species)), fig.cap='The relationship between the proportion of neutral genetic variation secured in a prioritizaiton and the proportion of geographic variation it also secures. Conventions are detailed in Figure SXXX.'}
 # format data
-curr.DF <- geo.surrogacy.DF %>% filter(!is.na(genetic.held))
+curr.DF <- geo.surrogacy.DF %>% filter(!is.na(genetic.held)) %>% mutate(Species=gsub('_', ' ', Species))
 curr.DF2 <- geo.surrogate.spp.DF %>% filter(!is.na(r2CU))
 curr.DF2$R2_repr <- round(curr.DF2$r2CU,2)
 curr.DF2$R2_repr <- sapply(curr.DF2$R2_repr, function(x) {as.character(as.expression(substitute(~~italic(R)^2~"="~r2, list(r2=x))))})
@@ -82,7 +88,7 @@ curr.DF2$genetic.held <- 0.95
 suppressWarnings(
 	ggplot(aes(x=surrogate.held, y=genetic.held), data=curr.DF) +
 		theme_classic() +
-		theme(strip.background=element_rect(fill='grey20'), strip.text=element_text(color='white', face='italic', size=8),
+		theme(strip.background=element_rect(fill='grey20'), strip.text=element_text(color='white', face='italic', size=10),
 			panel.margin.x=unit(1, 'lines')) +
 		xlab('Geographic variation secured (%)') +
 		ylab('Neutral genetic variation secured (%)') +
