@@ -3,6 +3,7 @@
 *.so
 *.dll
 
+
 # R profile files
 *.Rproj.user
 *.Rhistory
@@ -14,6 +15,4 @@ gurobi.log
 .directory
 
 # cache
-results/.cache/*.Rout
-results/.cache/*.rda
-
+data/intermediate/*

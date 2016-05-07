@@ -621,7 +621,7 @@ x <- surrogate.spp.DF %>%
 		Geographic.z = paste(round(Geographic.estimate,2), '$\\pm$', round(Geographic.std.error,2)),
 		Species = paste0('\\textit{', gsub('_', ' ', Species, fixed=TRUE), '}')) %>%
 	mutate(
-		Environmental.z=replace(Environmental.z, grepl('NA', Environmental.z, fixed=TRUE),'')
+		Environmental.z=replace(Environmental.z, grepl('NA', Environmental.z, fixed=TRUE),''),
 		Geographic.z=replace(Geographic.z, grepl('NA', Geographic.z, fixed=TRUE),'')
 	) %>%
 	select(Species, Environmental.z, Environmental.p.value, Environmental.r2CU,

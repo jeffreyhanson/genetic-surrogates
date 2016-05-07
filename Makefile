@@ -40,6 +40,11 @@ pull_ms:
 	git fetch
 	git checkout '$(COMMIT_ID)' code/rmarkdown
 
+push_ms:
+	git add article/*
+	git commit -m "article files"
+	git push
+
 # commands for generating manuscript
 manuscript: article/article.pdf article/figures.pdf article/supporting_information.pdf article/tables.pdf
 
