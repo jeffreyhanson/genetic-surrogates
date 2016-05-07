@@ -11,7 +11,7 @@
 #' model <- MLPE(y,x,REML=FALSE)
 #' print(model)
 #' @export
-MLPE <- function(y,x,REML=TRUE) {
+MLPE <- function(y,x,REML=FALSE) {
 	# init
 	if (inherits(y, 'dist')) y <- as.matrix(y)
 	if (inherits(x, 'dist')) x <- as.matrix(x)
@@ -21,7 +21,7 @@ MLPE <- function(y,x,REML=TRUE) {
 	x <- ResistanceGA:::lower(x)
 	# prepare data
 	dat <- data.frame(ID, x = x, y = y)
-	dat <- dplyr::mutate(dat, x = (mean(x)-x)/sd(x), y = (mean(y)-y)/sd(y))
+	dat <- dplyr::mutate(dat, x = (x-mean(x))/sd(x), y = (y-mean(y))/sd(y))
 	colnames(dat) <- c("id1", "id2", "x", "y")
 	# prepare model
 	mod_list <- list('full'=lme4:::lFormula(y ~ x + (1 | id1), data = dat, REML = REML),

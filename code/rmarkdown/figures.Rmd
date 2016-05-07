@@ -127,7 +127,7 @@ for (i in seq_along(geo.surrogacy.LST))
 
 p1.hist <- ggplot(aes(r2CU),
 		data=filter(env.surrogate.spp.DF, !is.na(r2CU))) +
-	geom_histogram(fill='grey10', bins=10) +
+	geom_histogram(fill='grey10', bins=5) +
 	ylab('\nFrequency') + xlab(expression(atop('Effectiveness of environmental', variables~(R^2~coefficient)))) +
 	theme_classic() + theme(axis.line.x=element_line(color='black'),
 		axis.line.y=element_line(color='black'),
