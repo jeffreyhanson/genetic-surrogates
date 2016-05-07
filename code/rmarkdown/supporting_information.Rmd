@@ -535,6 +535,13 @@ suppressWarnings(
 )
 ```
 
+```{r, include=FALSE}
+calc.fig.height3 <- function(x) {
+	return((((x-1) %/% 4)+1)*1.5)
+}
+
+```
+
 ```{r, echo=FALSE, message=FALSE, warning=FALSE, fig.width=10, fig.height=calc.fig.height3(n_distinct(geo.surrogacy.DF$Species)), fig.cap='The relationship between the proportion of neutral genetic variation secured in a prioritizaiton and the proportion of geographic variation it also secures. Conventions are detailed in Figure S55.'}
 # format data
 curr.DF <- geo.surrogacy.DF %>% filter(!is.na(genetic.held)) %>% mutate(Species=gsub('_', ' ', Species))
