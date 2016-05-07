@@ -36,16 +36,6 @@ clean:
 	rm code/rmarkdown/tables.pdf -f
 	rm article/*.csv -f
 
-pull_ms_src:
-	git fetch
-	git checkout '$(COMMIT_ID)' code/rmarkdown
-
-push_ms_pdf:
-	scp article/* ubuntu@cloudburster.net:/mnt/users/jhans/tmp
-
-pull_ms_pdf:
-	scp ubuntu@cloudburster.net:/mnt/users/jhans/tmp/* article
-
 # commands for generating manuscript
 manuscript: article/article.pdf article/figures.pdf article/supporting_information.pdf article/tables.pdf
 
