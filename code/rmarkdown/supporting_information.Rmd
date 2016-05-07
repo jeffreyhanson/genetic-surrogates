@@ -394,7 +394,7 @@ calc.fig.height <- function(i) {
 	if (neutral.col %in% names(grid.FPLY))
 		n.plots <- n.plots + spp.nmds.LST[[i]][['neutral']]$ndim
 	# exports
-	return((((n.plots-1) %/% 4)+1) * 1)
+	return((((n.plots-1) %/% 4)+1) * 2)
 }
 
 is.speciesPlottable <- function(i) {
@@ -510,7 +510,7 @@ if (is.speciesPlottable(26)) plot.spp.nmds(26)
 if (is.speciesPlottable(27)) plot.spp.nmds(27)
 ```
 
-```{r, echo=FALSE, message=FALSE, warning=FALSE, fig.width=8, fig.height=3.5, fig.cap='The relationship between the proportion of adaptive genetic variation secured in a prioritizaiton and the proportion of environmental variation it also secures. Points represent values associated with randomly generated prioritizations. Blue lines indicate average trends computed using a generalised linear model with a logit link. Each panel shows data for a different species.'}
+```{r, echo=FALSE, message=FALSE, warning=FALSE, fig.width=10, fig.height=2.5, fig.cap='The relationship between the proportion of adaptive genetic variation secured in a prioritizaiton and the proportion of environmental variation it also secures. Points represent values associated with randomly generated prioritizations. Blue lines indicate average trends computed using a generalised linear model with a logit link. Each panel shows data for a different species.'}
 # format data
 curr.DF <- env.surrogacy.DF %>% filter(!is.na(genetic.held)) %>% mutate(Species=gsub('_', ' ', Species))
 curr.DF2 <- env.surrogate.spp.DF %>% filter(!is.na(r2CU)) %>% mutate(Species=gsub('_', ' ', Species))
@@ -587,8 +587,8 @@ readLines(curr.file)[-1] %>% paste0(collapse='\n') %>%
 ```
 
 ```{r, echo=FALSE, results='asis'}
-adaptive.spp.nmds.summary.DF <- spp.nmds.summary.DF %>% filter(Loci=='adaptive') %>% mutate(Stress=pvalString(Stress))
-neutral.spp.nmds.summary.DF <- spp.nmds.summary.DF %>% filter(Loci=='neutral') %>% mutate(Stress=pvalString(Stress))
+adaptive.spp.nmds.summary.DF <- spp.nmds.summary.DF %>% filter(Loci=='adaptive') %>% mutate(Stress=as.character(round(Stress,3))) %>% mutate(Stress=replace(Stress, Stress=='0', '< 0.001'))
+neutral.spp.nmds.summary.DF <- spp.nmds.summary.DF %>% filter(Loci=='neutral') %>% mutate(Stress=as.character(round(Stress,3))) %>% mutate(Stress=replace(Stress, Stress=='0', '< 0.001'))
 names(adaptive.spp.nmds.summary.DF)[2:5] <- paste0('adaptive.', names(adaptive.spp.nmds.summary.DF)[2:5])
 names(neutral.spp.nmds.summary.DF)[2:5] <- paste0('neutral.', names(neutral.spp.nmds.summary.DF)[2:5])
 spp.nmds.summary.DF2 <- full_join(adaptive.spp.nmds.summary.DF, neutral.spp.nmds.summary.DF, by='Species')
