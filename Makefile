@@ -41,10 +41,10 @@ pull_ms_src:
 	git checkout '$(COMMIT_ID)' code/rmarkdown
 
 push_ms_pdf:
-	scp -rf article/* ubuntu@cloudburster.net:/mnt/users/jhans/tmp
+	scp article/* ubuntu@cloudburster.net:/mnt/users/jhans/tmp
 
 pull_ms_pdf:
-	scp -rf ubuntu@cloudburster.net:/mnt/users/jhans/tmp/* article
+	scp ubuntu@cloudburster.net:/mnt/users/jhans/tmp/* article
 
 # commands for generating manuscript
 manuscript: article/article.pdf article/figures.pdf article/supporting_information.pdf article/tables.pdf
