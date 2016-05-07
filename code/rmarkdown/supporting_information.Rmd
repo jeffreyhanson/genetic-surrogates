@@ -92,7 +92,7 @@ do.call(
 					axis.ticks=element_blank(), axis.text=element_blank(), axis.line=element_blank(), plot.margin = unit(c(0, 0, 0, 0), "lines"), axis.title=element_blank(),
 					panel.border=element_rect(color='black', fill=NA, size=1),
 					strip.background = element_rect(fill='grey20'),
-					strip.text = element_text(color='white')
+					strip.text = element_text(color='white', size=5)
 				) +
 				coord_cartesian(
 					xlim=buffered.range(grid.FPLY$long, 0),
@@ -226,112 +226,108 @@ plot.spp.pop.probs <- function(i) {
 ```
 
 
-```{r, echo=FALSE, fig.width=3.5, fig.height=2.5, fig.cap=paste0('Distribution of \\textit{',gsub('_',' ',unique(spp.samples.DF$species)[1], fixed=TRUE),'} populations. Squares denote planning units. Pie charts denote quadrats where individuals were sampled, and colors denote the average probability that individuals in the quadrat belong to different populations on average.')}
+```{r, echo=FALSE, fig.width=3, fig.height=2, fig.cap=paste0('Distribution of \\textit{',gsub('_',' ',unique(spp.samples.DF$species)[1], fixed=TRUE),'} populations. Squares denote planning units. Pie charts denote quadrats where individuals were sampled, and colors denote the average probability that individuals in the quadrat belong to different populations on average.')}
 plot.spp.pop.probs(1)
 ```
 
-```{r, echo=FALSE, fig.width=3.5, fig.height=2.5, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[2],fixed=TRUE),'} populations. See Figure SX caption for conventions.')}
+```{r, echo=FALSE, fig.width=3, fig.height=2, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[2],fixed=TRUE),'} populations. See Figure S3 caption for conventions.')}
 if (2 <= general.params.LST[[MODE]]$n.spp) plot.spp.pop.probs(2)
 ```
 
-```{r, echo=FALSE, fig.width=3.5, fig.height=2.5, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[3],fixed=TRUE),'} populations. See Figure SX caption for conventions.')}
+```{r, echo=FALSE, fig.width=3, fig.height=2, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[3],fixed=TRUE),'} populations. See Figure S3 caption for conventions.')}
 if (3 <= general.params.LST[[MODE]]$n.spp) plot.spp.pop.probs(3)
 ```
 
-```{r, echo=FALSE, fig.width=3.5, fig.height=2.5, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[4],fixed=TRUE),'} populations. See Figure SX caption for conventions.')}
+```{r, echo=FALSE, fig.width=3, fig.height=2, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[4],fixed=TRUE),'} populations. See Figure S3 caption for conventions.')}
 if (4 <= general.params.LST[[MODE]]$n.spp) plot.spp.pop.probs(4)
 ```
 
-```{r, echo=FALSE, fig.width=3.5, fig.height=2.5, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[5],fixed=TRUE),'} populations. See Figure SX caption for conventions.')}
+```{r, echo=FALSE, fig.width=3, fig.height=2, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[5],fixed=TRUE),'} populations. See Figure S3 caption for conventions.')}
 if (5 <= general.params.LST[[MODE]]$n.spp) plot.spp.pop.probs(5)
 ```
 
-```{r, echo=FALSE, fig.width=3.5, fig.height=2.5, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[6],fixed=TRUE),'} populations. See Figure SX caption for conventions.')}
+```{r, echo=FALSE, fig.width=3, fig.height=2, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[6],fixed=TRUE),'} populations. See Figure S3 caption for conventions.')}
 if (6 <= general.params.LST[[MODE]]$n.spp) plot.spp.pop.probs(6)
 ```
 
-```{r, echo=FALSE, fig.width=3.5, fig.height=2.5, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[7],fixed=TRUE),'} populations. See Figure SX caption for conventions.')}
+```{r, echo=FALSE, fig.width=3, fig.height=2, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[7],fixed=TRUE),'} populations. See Figure S3 caption for conventions.')}
 if (7 <= general.params.LST[[MODE]]$n.spp) plot.spp.pop.probs(7)
 ```
 
-```{r, echo=FALSE, fig.width=3.5, fig.height=2.5, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[8],fixed=TRUE),'} populations. See Figure SX caption for conventions.')}
+```{r, echo=FALSE, fig.width=3, fig.height=2, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[8],fixed=TRUE),'} populations. See Figure S3 caption for conventions.')}
 if (8 <= general.params.LST[[MODE]]$n.spp) plot.spp.pop.probs(8)
 ```
 
-```{r, echo=FALSE, fig.width=3.5, fig.height=2.5, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[9],fixed=TRUE),'} populations. See Figure SX caption for conventions.')}
+```{r, echo=FALSE, fig.width=3, fig.height=2, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[9],fixed=TRUE),'} populations. See Figure S3 caption for conventions.')}
 if (9 <= general.params.LST[[MODE]]$n.spp) plot.spp.pop.probs(9)
 ```
 
-```{r, echo=FALSE, fig.width=3.5, fig.height=2.5, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[10],fixed=TRUE),'} populations. See Figure SX caption for conventions.')}
+```{r, echo=FALSE, fig.width=3, fig.height=2, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[10],fixed=TRUE),'} populations. See Figure S3 caption for conventions.')}
 if (10 <= general.params.LST[[MODE]]$n.spp) plot.spp.pop.probs(10)
 ```
 
-```{r, echo=FALSE, fig.width=3.5, fig.height=2.5, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[11],fixed=TRUE),'} populations. See Figure SX caption for conventions.')}
+```{r, echo=FALSE, fig.width=3, fig.height=2, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[11],fixed=TRUE),'} populations. See Figure S3 caption for conventions.')}
 if (12 <= general.params.LST[[MODE]]$n.spp) plot.spp.pop.probs(11)
 ```
 
-```{r, echo=FALSE, fig.width=3.5, fig.height=2.5, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[12],fixed=TRUE),'} populations. See Figure SX caption for conventions.')}
+```{r, echo=FALSE, fig.width=3, fig.height=2, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[12],fixed=TRUE),'} populations. See Figure S3 caption for conventions.')}
 if (12 <= general.params.LST[[MODE]]$n.spp) plot.spp.pop.probs(12)
 ```
 
-```{r, echo=FALSE, fig.width=3.5, fig.height=2.5, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[13],fixed=TRUE),'} populations. See Figure SX caption for conventions.')}
+```{r, echo=FALSE, fig.width=3, fig.height=2, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[13],fixed=TRUE),'} populations. See Figure S3 caption for conventions.')}
 if (13 <= general.params.LST[[MODE]]$n.spp) plot.spp.pop.probs(13)
 ```
 
-```{r, echo=FALSE, fig.width=3.5, fig.height=2.5, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[14],fixed=TRUE),'} populations. See Figure SX caption for conventions.')}
+```{r, echo=FALSE, fig.width=3, fig.height=2, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[14],fixed=TRUE),'} populations. See Figure S3 caption for conventions.')}
 if (14 <= general.params.LST[[MODE]]$n.spp) plot.spp.pop.probs(14)
 ```
 
-```{r, echo=FALSE, fig.width=3.5, fig.height=2.5, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[15],fixed=TRUE),'} populations. See Figure SX caption for conventions.')}
+```{r, echo=FALSE, fig.width=3, fig.height=2, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[15],fixed=TRUE),'} populations. See Figure S3 caption for conventions.')}
 if (15 <= general.params.LST[[MODE]]$n.spp) plot.spp.pop.probs(15)
 ```
 
-```{r, echo=FALSE, fig.width=3.5, fig.height=2.5, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[16],fixed=TRUE),'} populations. See Figure SX caption for conventions.')}
+```{r, echo=FALSE, fig.width=3, fig.height=2, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[16],fixed=TRUE),'} populations. See Figure S3 caption for conventions.')}
 if (16 <= general.params.LST[[MODE]]$n.spp) plot.spp.pop.probs(16)
 ```
 
-```{r, echo=FALSE, fig.width=3.5, fig.height=2.5, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[17],fixed=TRUE),'} populations. See Figure SX caption for conventions.')}
+```{r, echo=FALSE, fig.width=3, fig.height=2, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[17],fixed=TRUE),'} populations. See Figure S3 caption for conventions.')}
 if (17 <= general.params.LST[[MODE]]$n.spp) plot.spp.pop.probs(17)
 ```
 
-```{r, echo=FALSE, fig.width=3.5, fig.height=2.5, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[18],fixed=TRUE),'} populations. See Figure SX caption for conventions.')}
+```{r, echo=FALSE, fig.width=3, fig.height=2, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[18],fixed=TRUE),'} populations. See Figure S3 caption for conventions.')}
 if (18 <= general.params.LST[[MODE]]$n.spp) plot.spp.pop.probs(18)
 ```
 
-```{r, echo=FALSE, fig.width=3.5, fig.height=2.5, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[19],fixed=TRUE),'} populations. See Figure SX caption for conventions.')}
+```{r, echo=FALSE, fig.width=3, fig.height=2, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[19],fixed=TRUE),'} populations. See Figure S3 caption for conventions.')}
 if (19 <= general.params.LST[[MODE]]$n.spp) plot.spp.pop.probs(19)
 ```
 
-```{r, echo=FALSE, fig.width=3.5, fig.height=2.5, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[20],fixed=TRUE),'} populations. See Figure SX caption for conventions.')}
+```{r, echo=FALSE, fig.width=3, fig.height=2, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[20],fixed=TRUE),'} populations. See Figure S3 caption for conventions.')}
 if (20 <= general.params.LST[[MODE]]$n.spp) plot.spp.pop.probs(20)
 ```
 
-```{r, echo=FALSE, fig.width=3.5, fig.height=2.5, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[21],fixed=TRUE),'} populations. See Figure SX caption for conventions.')}
+```{r, echo=FALSE, fig.width=3, fig.height=2, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[21],fixed=TRUE),'} populations. See Figure S3 caption for conventions.')}
 if (21 <= general.params.LST[[MODE]]$n.spp) plot.spp.pop.probs(21)
 ```
 
-```{r, echo=FALSE, fig.width=3.5, fig.height=2.5, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[22],fixed=TRUE),'} populations. See Figure SX caption for conventions.')}
+```{r, echo=FALSE, fig.width=3, fig.height=2, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[22],fixed=TRUE),'} populations. See Figure S3 caption for conventions.')}
 if (22 <= general.params.LST[[MODE]]$n.spp) plot.spp.pop.probs(22)
 ```
 
-```{r, echo=FALSE, fig.width=3.5, fig.height=2.5, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[23],fixed=TRUE),'} populations. See Figure SX caption for conventions.')}
+```{r, echo=FALSE, fig.width=3, fig.height=2, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[23],fixed=TRUE),'} populations. See Figure S3 caption for conventions.')}
 if (23 <= general.params.LST[[MODE]]$n.spp) plot.spp.pop.probs(23)
 ```
 
-```{r, echo=FALSE, fig.width=3.5, fig.height=2.5, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[24],fixed=TRUE),'} populations. See Figure SX caption for conventions.')}
+```{r, echo=FALSE, fig.width=3, fig.height=2, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[24],fixed=TRUE),'} populations. See Figure S3 caption for conventions.')}
 if (24 <= general.params.LST[[MODE]]$n.spp) plot.spp.pop.probs(24)
 ```
 
-```{r, echo=FALSE, fig.width=3.5, fig.height=2.5, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[25],fixed=TRUE),'} populations. See Figure SX caption for conventions.')}
+```{r, echo=FALSE, fig.width=3, fig.height=2, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[25],fixed=TRUE),'} populations. See Figure S3 caption for conventions.')}
 if (25 <= general.params.LST[[MODE]]$n.spp) plot.spp.pop.probs(25)
 ```
 
-```{r, echo=FALSE, fig.width=3.5, fig.height=2.5, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[26],fixed=TRUE),'} populations. See Figure SX caption for conventions.')}
+```{r, echo=FALSE, fig.width=3, fig.height=2, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[26],fixed=TRUE),'} populations. See Figure S3 caption for conventions.')}
 if (26 <= general.params.LST[[MODE]]$n.spp) plot.spp.pop.probs(26)
-```
-
-```{r, echo=FALSE, fig.width=3.5, fig.height=2.5, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[27],fixed=TRUE),'} populations. See Figure SX caption for conventions.')}
-if (27 <= general.params.LST[[MODE]]$n.spp) plot.spp.pop.probs(27)
 ```
 
 ```{r, echo=FALSE}
@@ -398,7 +394,7 @@ calc.fig.height <- function(i) {
 	if (neutral.col %in% names(grid.FPLY))
 		n.plots <- n.plots + spp.nmds.LST[[i]][['neutral']]$ndim
 	# exports
-	return(((n.plots %/% 5)+1) * 3)
+	return((((n.plots-1) %/% 4)+1) * 1)
 }
 
 is.speciesPlottable <- function(i) {
@@ -514,17 +510,7 @@ if (is.speciesPlottable(26)) plot.spp.nmds(26)
 if (is.speciesPlottable(27)) plot.spp.nmds(27)
 ```
 
-```{r, include=FALSE}
-calc.fig.height2 <- function(x) {
-	return((((x-1) %/% 4)+1)*1)
-}
-
-calc.fig.height3 <- function(x) {
-	return((((x-1) %/% 4)+1)*1.5)
-}
-```
-
-```{r, echo=FALSE, message=FALSE, warning=FALSE, fig.width=10, fig.height=calc.fig.height2(n_distinct(geo.surrogacy.DF$Species)), fig.cap='The relationship between the proportion of adaptive genetic variation secured in a prioritizaiton and the proportion of environmental variation it also secures. Points represent values associated with randomly generated prioritizations. Black lines indicate average trends computed using generalised linear models with logit links. Each panel corresponds to different species.'}
+```{r, echo=FALSE, message=FALSE, warning=FALSE, fig.width=8, fig.height=3.5, fig.cap='The relationship between the proportion of adaptive genetic variation secured in a prioritizaiton and the proportion of environmental variation it also secures. Points represent values associated with randomly generated prioritizations. Blue lines indicate average trends computed using a generalised linear model with a logit link. Each panel shows data for a different species.'}
 # format data
 curr.DF <- env.surrogacy.DF %>% filter(!is.na(genetic.held)) %>% mutate(Species=gsub('_', ' ', Species))
 curr.DF2 <- env.surrogate.spp.DF %>% filter(!is.na(r2CU)) %>% mutate(Species=gsub('_', ' ', Species))
@@ -549,7 +535,7 @@ suppressWarnings(
 )
 ```
 
-```{r, echo=FALSE, message=FALSE, warning=FALSE, fig.width=10, fig.height=calc.fig.height3(n_distinct(geo.surrogacy.DF$Species)), fig.cap='The relationship between the proportion of neutral genetic variation secured in a prioritizaiton and the proportion of geographic variation it also secures. Conventions are detailed in Figure SXXX.'}
+```{r, echo=FALSE, message=FALSE, warning=FALSE, fig.width=10, fig.height=calc.fig.height3(n_distinct(geo.surrogacy.DF$Species)), fig.cap='The relationship between the proportion of neutral genetic variation secured in a prioritizaiton and the proportion of geographic variation it also secures. Conventions are detailed in Figure S55.'}
 # format data
 curr.DF <- geo.surrogacy.DF %>% filter(!is.na(genetic.held)) %>% mutate(Species=gsub('_', ' ', Species))
 curr.DF2 <- geo.surrogate.spp.DF %>% filter(!is.na(r2CU)) %>% mutate(Species=gsub('_', ' ', Species))
@@ -627,6 +613,10 @@ x <- surrogate.spp.DF %>%
 		Environmental.z = paste(round(Environmental.estimate,2), '$\\pm$', round(Environmental.std.error,2)),
 		Geographic.z = paste(round(Geographic.estimate,2), '$\\pm$', round(Geographic.std.error,2)),
 		Species = paste0('\\textit{', gsub('_', ' ', Species, fixed=TRUE), '}')) %>%
+	mutate(
+		Environmental.z=replace(Environmental.z, grepl('NA', Environmental.z, fixed=TRUE),'')
+		Geographic.z=replace(Geographic.z, grepl('NA', Geographic.z, fixed=TRUE),'')
+	) %>%
 	select(Species, Environmental.z, Environmental.p.value, Environmental.r2CU,
 		Geographic.z, Geographic.p.value, Geographic.r2CU) %>%
 	latex(file=curr.file, 
@@ -644,7 +634,7 @@ readLines(curr.file)[-1] %>% paste0(collapse='\n') %>%
 ```
 
 ```{r, echo=FALSE}
-write.table(loci_classification.DF, 'article/Table_S3.csv', sep=',', row.names=FALSE)
+write.table(loci_classification.DF, 'article/Table_S4.csv', sep=',', row.names=FALSE)
 ```
 
 
