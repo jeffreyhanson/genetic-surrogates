@@ -36,14 +36,15 @@ clean:
 	rm code/rmarkdown/tables.pdf -f
 	rm article/*.csv -f
 
-pull_ms:
+pull_ms_src:
 	git fetch
 	git checkout '$(COMMIT_ID)' code/rmarkdown
 
-push_ms:
-	git add article/*
-	git commit -m "article files"
-	git push
+push_ms_pdf:
+	scp -rf article/* ubuntu@cloudburster.net:/mnt/users/jhans/tmp
+
+pull_ms_pdf:
+	scp -rf ubuntu@cloudburster.net:/mnt/users/jhans/tmp/* article
 
 # commands for generating manuscript
 manuscript: article/article.pdf article/figures.pdf article/supporting_information.pdf article/tables.pdf
@@ -126,5 +127,6 @@ data/intermediate/01-*.rda: data/intermediate/00-*.rda code/R/analysis/01-*.R
 data/intermediate/00-*.rda: code/R/analysis/00-*.R code/parameters/general.toml
 	R CMD BATCH --no-restore --no-save '--args MODE=$(MODE)' code/R/analysis/00-*.R
 	mv *.Rout data/intermediate/
+
 
 
