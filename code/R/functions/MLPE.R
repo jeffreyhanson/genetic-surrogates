@@ -37,5 +37,4 @@ MLPE <- function(y,x,REML=FALSE) {
 	return(MODs)
 }
 
-#' Calculate R^2 model from 
 

@@ -102,7 +102,7 @@ grid.arrange(p1,p2,nrow=1)
 ```{r, echo=FALSE, message=FALSE, warning=FALSE, fig.width=6, fig.height=4.5, fig.cap='The relationship between surrogates and genetic variation secured in prioritizations. Panel (a) shows the relationship between the proportion of intra-specific adaptive genetic variation and environmental variation secured in a prioritization. Similarly, panel (b) shows the relationship between the proportion of intra-specific neutral variaiton and geograpgic variation secured in a prioritization. Panels (c) and (d) show the distribution of $R^2$ values for these models.'}
 # make figure
 p1 <- ggplot(aes(x=surrogate.held,y=genetic.held), data=env.surrogacy.DF) +
-	xlab(expression(atop('Environmental variation','secured (%)'))) + 
+	xlab('Environmental variation secured (%)') + 
 	ylab('Adaptive genetic\nvariation secured (%)') +
 	theme_classic() + theme(axis.line.x=element_line(color='black'),
 		axis.line.y=element_line(color='black')) +
@@ -114,7 +114,7 @@ for (i in seq_along(env.surrogacy.LST))
 		fullrange=TRUE, se=FALSE, colour='black')
 
 p2 <- ggplot(aes(x=surrogate.held,y=genetic.held), data=geo.surrogacy.DF) +
-	xlab(expression(atop('Geographic variation','secured (%)'))) + 
+	xlab('Geographic variation secured (%)') + 
 	ylab('Neutral genetic\nvariation secured (%)') +
 	theme_classic() + theme(axis.line.x=element_line(color='black'),
 		axis.line.y=element_line(color='black', colour='transparent')) +
@@ -128,21 +128,21 @@ for (i in seq_along(geo.surrogacy.LST))
 p1.hist <- ggplot(aes(r2CU),
 		data=filter(env.surrogate.spp.DF, !is.na(r2CU))) +
 	geom_histogram(fill='grey10', bins=5) +
-	ylab('\nFrequency') + xlab(expression(atop('Effectiveness of environmental', variables~(R^2~coefficient)))) +
+	ylab('\nFrequency') + xlab(expression(Environmental~variables~(R^2))) +
 	theme_classic() + theme(axis.line.x=element_line(color='black'),
 		axis.line.y=element_line(color='black'),
 		plot.background=element_rect(fill='transparent', colour='transparent')) +
-		geom_text(x=0.05, y=0.95, label='(c)') +
+		geom_text(x=0.05, y=6, label='(c)') +
 		coord_cartesian(xlim=c(0, 1))
 
 p2.hist <- ggplot(aes(r2CU),
 		data=filter(geo.surrogate.spp.DF, !is.na(r2CU))) +
 	geom_histogram(fill='grey10', bins=10) +
-	ylab('\nFrequency') + xlab(expression(atop('Effectiveness of geographic', variables~(R^2~coefficient)))) +
+	ylab('\nFrequency') + xlab(expression(Geographic~variables~(R^2))) +
 	theme_classic() + theme(axis.line.x=element_line(color='black'),
 		axis.line.y=element_line(color='black'), 
 		plot.background=element_rect(fill='transparent')) +
-		geom_text(x=0.05, y=0.95, label='(d)') +
+		geom_text(x=0.05, y=8, label='(d)') +
 		coord_cartesian(xlim=c(0, 1))
 
 # render figure
