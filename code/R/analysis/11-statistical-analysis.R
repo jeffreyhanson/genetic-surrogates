@@ -243,26 +243,23 @@ scenario.DF <- rbind.fill(list(single.spp.SDF, multi.spp.SDF, multi.spp.with.cos
 # remove NA values
 scenario.sub.DF <- scenario.DF[rowSums(apply(select(scenario.DF, Prioritisation, Metric, Context), 2, is.na))==0,]
 
-# prepare matrix with success vs. failures
-scenario.contingency.DF <- scenario.sub.DF %>% 
-	group_by(Prioritisation.Metric.Context) %>% 
-	filter(!is.na(genetic.held)) %>% 
-	summarize(count=sum(genetic.held>=rapr.params.LST[[MODE]]$scenario.analysis$genetic.target), total=length(genetic.held)) %>% 
-	ungroup %>% 
-	mutate(prop=count/total, secured=count, not.secured=total-count) %>%
-	select(secured, not.secured, Prioritisation.Metric.Context) %>%
-	data.frame()
+# run models
+full.model <- glmer(genetic.held~Prioritisation*Metric*Context + (1|Species), data=scenario.sub.DF, family='binomial', nAGQ=10, control=glmerControl(optimizer='bobyqa', optCtrl=list(maxfun=1e5)))
+no.interaction.model <- glmer(genetic.held~Prioritisation+Metric+Context + (1|Species), data=scenario.sub.DF, family='binomial', nAGQ=10, control=glmerControl(optimizer='bobyqa', optCtrl=list(maxfun=1e5)))
+Context.model <- glmer(genetic.held~Context+(1|Species), data=scenario.sub.DF, family='binomial', nAGQ=10, control=glmerControl(optimizer='bobyqa', optCtrl=list(maxfun=1e5)))
+Metric.model <- glmer(genetic.held~Metric+(1|Species), data=scenario.sub.DF, family='binomial', nAGQ=10, control=glmerControl(optimizer='bobyqa', optCtrl=list(maxfun=1e5)))
+Prioritisation.model <- glmer(genetic.held~Prioritisation+(1|Species), data=scenario.sub.DF, family='binomial', nAGQ=10, control=glmerControl(optimizer='bobyqa', optCtrl=list(maxfun=1e5)))
+null.model <- glmer(genetic.held~1+(1|Species), data=scenario.sub.DF, family='binomial', nAGQ=10, control=glmerControl(optimizer='bobyqa', optCtrl=list(maxfun=1e5)))
 
-scenario.MTX <- as.matrix(select(scenario.contingency.DF, secured, not.secured))
-rownames(scenario.MTX) <- scenario.contingency.DF$Prioritisation.Metric.Context
+# generate anova tables
+scenario.ANOVA.1.DF <- anova(full.model, no.interaction.model, test='Chisq') %>% tidy()
+scenario.ANOVA.2.DF <- anova(Context.model, null.model, test='Chisq') %>% tidy()
+scenario.ANOVA.3.DF <- anova(Metric.model, null.model, test='Chisq')  %>% tidy()
+scenario.ANOVA.4.DF <- anova(Prioritisation.model, null.model, test='Chisq') %>% tidy()
 
-# run global test
-# fisher test
-scenario.G.test <- G.test(scenario.MTX)
-
-# posthoc tests
-scenario.G.multcomp <- pairwise.G.test(scenario.MTX, 'bonferroni')
-scenario.G.cld <- cld.RV.multcomp(scenario.G.multcomp)
+# post-hoc analyses
+scenario.GLHT.1.DF <- glht(Context.model, mcp(Context='Tukey')) %>% summary(adjusted('bonferroni')) %>% tidy()
+scenario.GLHT.2.DF <- glht(Prioritisation.model, mcp(Prioritisation='Tukey')) %>% summary(adjusted('bonferroni')) %>% tidy()
 
 ## save .rda
 save.session('data/intermediate/11-statistical-analysis.rda', compress='xz')

@@ -229,21 +229,13 @@ scenario.PDF <- scenario.DF %>% group_by(Prioritisation, Context, Metric) %>%
 		panel.letter=c(as.character(panel.letter[1]), rep(NA_character_, length(Context)-1))
 	) %>% 
 	ungroup() %>% 
-	left_join(
-		data.frame(
-			letter=unname(scenario.G.cld$Letters),
-			Combination=as.character(names(scenario.G.cld$Letters))
-		) %>% mutate(Combination=as.character(Combination)),
-		by='Combination'
-	) %>% data.frame()
+	data.frame()
 
 # make plot
 suppressWarnings({
 	ggplot(aes(x=Prioritisation,y=genetic.held),
 		data=scenario.DF) +
 		geom_boxplot(position=position_dodge(0.9)) +
-		geom_text(aes(x=Prioritisation, y=letter.height, label=letter),
-			data=scenario.PDF, position=position_dodge(0.9)) +
 		geom_text(aes(x=0.6, y=1.15, label=panel.letter),
 			data=scenario.PDF) +
 		scale_fill_manual(name='Prioritisation',
@@ -256,8 +248,6 @@ suppressWarnings({
 			strip.text = element_text(color='white'),
 			panel.border = element_rect(color='black', fill=NA),
 			axis.text.x=element_text(angle=45, hjust=1, vjust=1)) +
-		geom_abline(intercept=rapr.params.LST[[MODE]]$scenario.analysis$genetic.target,
-			slope=0, color='red', linetype='dashed') +
 		facet_grid(Context ~ Metric)
 })
 ```
