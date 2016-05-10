@@ -54,7 +54,8 @@ spp.grid.FPLY <- ldply(unique(spp.samples.DF$species), function(x) {
 		z$species <- gsub('\\_', ' ', x)
 		return(z)
 	}
-)
+) %>% mutate(presence=factor(c('absent', 'present')[presence+1]))
+
 # plot species data
 ggplot() +
 	geom_polygon(data=countries.FPLY, aes(x=long, y=lat, group=group),
@@ -62,13 +63,13 @@ ggplot() +
 	geom_polygon(data=spp.grid.FPLY, aes(x=long, y=lat, 
 		group=group, fill=presence), alpha=0.8, color='grey10') +
 	theme_classic() +
-	guides(fill=guide_legend(title='Presence')) +
 	theme(
 		axis.ticks=element_blank(), axis.text=element_blank(), axis.line=element_blank(), plot.margin = unit(c(0, 0, 0, 0), "lines"),
 		strip.background = element_rect(fill='grey20'),
 		strip.text = element_text(color='white', face='italic'),
 		axis.title=element_blank()
 	) +
+		scale_fill_manual(name='Occupancy', values=c('absent'='#FC8D59', 'present'='#91CF60')) +
 	coord_cartesian(
 		xlim=buffered.range(grid.FPLY$long, 0),
 		ylim=buffered.range(grid.FPLY$lat, 0)
@@ -378,7 +379,7 @@ plot.spp.nmds <- function(i) {
 					border=element_line(color='black'), barheight=unit(7, 'cm'))
 			) + facet_wrap(~d)
 	})
-	do.call(grid.arrange, append(curr.GROBS, list(ncol=4)))
+	do.call(grid.arrange, append(curr.GROBS, list(ncol=3)))
 	invisible()
 }
 
@@ -394,7 +395,7 @@ calc.fig.height <- function(i) {
 	if (neutral.col %in% names(grid.FPLY))
 		n.plots <- n.plots + spp.nmds.LST[[i]][['neutral']]$ndim
 	# exports
-	return((((n.plots-1) %/% 4)+1) * 2.5)
+	return((((n.plots-1) %/% 4)+1) * 5)
 }
 
 is.speciesPlottable <- function(i) {

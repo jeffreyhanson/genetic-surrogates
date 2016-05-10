@@ -102,7 +102,7 @@ grid.arrange(p1,p2,nrow=1)
 ```{r, echo=FALSE, message=FALSE, warning=FALSE, fig.width=6, fig.height=4.5, fig.cap='The relationship between surrogates and genetic variation secured in prioritizations. Panel (a) shows the relationship between the proportion of intra-specific adaptive genetic variation and environmental variation secured in a prioritization. Similarly, panel (b) shows the relationship between the proportion of intra-specific neutral variaiton and geograpgic variation secured in a prioritization. Panels (c) and (d) show the distribution of $R^2$ values for these models.'}
 # make figure
 p1 <- ggplot(aes(x=surrogate.held,y=genetic.held), data=env.surrogacy.DF) +
-	xlab('Environmental variation secured (%)') + 
+	xlab('Environmental variation\nsecured (%)') + 
 	ylab('Adaptive genetic\nvariation secured (%)') +
 	theme_classic() + theme(axis.line.x=element_line(color='black'),
 		axis.line.y=element_line(color='black')) +
@@ -114,7 +114,7 @@ for (i in seq_along(env.surrogacy.LST))
 		fullrange=TRUE, se=FALSE, colour='black')
 
 p2 <- ggplot(aes(x=surrogate.held,y=genetic.held), data=geo.surrogacy.DF) +
-	xlab('Geographic variation secured (%)') + 
+	xlab('Geographic variation\nsecured (%)') + 
 	ylab('Neutral genetic\nvariation secured (%)') +
 	theme_classic() + theme(axis.line.x=element_line(color='black'),
 		axis.line.y=element_line(color='black', colour='transparent')) +
@@ -213,7 +213,7 @@ ggplot() +
 	)
 ```
 
-```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.width=5, fig.height=5.5, fig.cap='The effectiveness of prioritizations at securing genetic variation. The top row of panels (a--b) show the performance of single-species prioritizations generated assuming equal costs among planning costs. The middle row of panels (c--d) show the performance of multi-species prioritizations generated assuming equal costs among planning units. The bottom row of panels (e--f) show the performance of multi-species prioritizations generated using opportunity costs. The left column of panels (a, c, d) and the right column of panels (b, d, f) show the proportion of adaptive and neutral genetic variation secured (respectively). Box plots show the effectiveness of prioritizations generated using amount-based targets, amount-based and surrogate-based targets, and amount-based and genetic-based targets for each species. Letters denote significant differences ($P < 0.05$).'}
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.width=5, fig.height=5.5, fig.cap='The effectiveness of prioritizations at securing genetic variation. The top row of panels (a--b) show the performance of single-species prioritizations generated assuming equal costs among planning costs. The middle row of panels (c--d) show the performance of multi-species prioritizations generated assuming equal costs among planning units. The bottom row of panels (e--f) show the performance of multi-species prioritizations generated using opportunity costs. The left column of panels (a, c, d) and the right column of panels (b, d, f) show the proportion of adaptive and neutral genetic variation secured (respectively). Box plots show the effectiveness of prioritizations generated using amount-based targets, amount-based and surrogate-based targets, and amount-based and genetic-based targets for each species.'}
 # prepare data for plotting
 scenario.PDF <- scenario.DF %>% group_by(Prioritisation, Context, Metric) %>% 
 	mutate(
