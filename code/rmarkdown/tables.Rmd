@@ -37,7 +37,10 @@ x <- correlation.model.summary.DF %>%
 		Environmental.Marginal.R2=pvalString(Environmental.Marginal.R2),
 		Environmental.Conditional.R2=pvalString(Environmental.Conditional.R2),
 		blank=rep('', length(Species)),
-		Species=paste0('\\textit{', gsub('\\ ', ' ', Species), '}')) %>%
+		Species=paste0('\\textit{', gsub('\\ ', ' ', Species), '}'),
+		Environmental.Chisq=sapply(round(Environmental.Chisq,2), as.character),
+		Geographic.Chisq=sapply(round(Environmental.Chisq,2), as.character)
+		) %>%
 	select(Species:Environmental.corr.P, Geographic.Marginal.R2:Geographic.corr.P) %>%
 	latex(file=curr.file, 
 		cgroup=c('', 'Environmental', 'Geographic'), n.cgroup=c(1, 4, 4), col.just=rep('c', 9),

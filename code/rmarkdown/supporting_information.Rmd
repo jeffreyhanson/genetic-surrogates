@@ -395,7 +395,7 @@ calc.fig.height <- function(i) {
 	if (neutral.col %in% names(grid.FPLY))
 		n.plots <- n.plots + spp.nmds.LST[[i]][['neutral']]$ndim
 	# exports
-	return((((n.plots-1) %/% 4)+1) * 5)
+	return((((n.plots-1) %/% 3)+1) * 5)
 }
 
 is.speciesPlottable <- function(i) {

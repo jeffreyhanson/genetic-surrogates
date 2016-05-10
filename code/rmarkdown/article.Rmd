@@ -38,7 +38,6 @@ try(session::restore.session('data/final/results.rda'))
 
 # set options
 options(error=NULL)
-
 ```
 
 <!--  title page -->
