@@ -23,6 +23,7 @@ suppressMessages(library(qvalue))
 # load CRAN packages
 suppressMessages(library(stats))
 suppressMessages(library(Hmisc))
+suppressMessages(library(lme4))
 suppressMessages(library(multcomp))
 suppressMessages(library(data.table))
 suppressMessages(library(grid))

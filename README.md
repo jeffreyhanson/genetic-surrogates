@@ -45,6 +45,7 @@ To rerun all computational analyses, run `make all`
 	+ Hmisc
 	+ knitr
 	+ lazyWeave
+	+ lme4
 	+ maptools
 	+ mclust
 	+ multcomp
