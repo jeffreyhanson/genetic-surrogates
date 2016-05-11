@@ -114,4 +114,4 @@ single.spp.DF <- ldply(
 )
 
 ## save .rda
-save.session('data/intermediate/08-single-species-prioritisations.rda', compress='xz')
+save.session('data/intermediate/08-single-species-prioritisations-no-cost.rda', compress='xz')

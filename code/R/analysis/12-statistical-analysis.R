@@ -1,7 +1,8 @@
 ## load .rda
-session::restore.session('data/intermediate/10-multi-species-prioritisations-with-cost.rda')
-load('data/intermediate/09-multi-species-prioritisations-no-cost.rda')
-load('data/intermediate/08-single-species-prioritisations.rda')
+session::restore.session('data/intermediate/11-multi-species-prioritisations-with-cost.rda')
+load('data/intermediate/10-multi-species-prioritisations-no-cost.rda')
+load('data/intermediate/09-single-species-prioritisations-with-cost.rda')
+load('data/intermediate/08-single-species-prioritisations-no-cost.rda')
 load('data/intermediate/07-surrogacy-prioritizations.rda')
 
 #### Statistical analyses
@@ -203,12 +204,18 @@ surrogate.spp.DF <- full_join(env.surrogate.spp.DF2, geo.surrogate.spp.DF2, by='
 
 ### scenario analyses
 ## prepare data
-# single species prioritisations
+# single species prioritisations without cost
 single.spp.SDF <- single.spp.DF %>%
 	gather(Metric, genetic.held, amount.held:neutral.held) %>%
 	filter(Metric %in% c('adaptive.held', 'neutral.held')) %>%
 	mutate(Context='single-species (equal costs)')
-	
+
+# single species prioritisations with cost
+single.spp.with.cost.SDF <- single.spp.DF %>%
+	gather(Metric, genetic.held, amount.held:neutral.held) %>%
+	filter(Metric %in% c('adaptive.held', 'neutral.held')) %>%
+	mutate(Context='single-species (opportunity costs)')
+
 # multi-species prioritisations without cost
 multi.spp.SDF <- multi.spp.DF %>%
 	gather(Metric, genetic.held, amount.held:neutral.held) %>%
@@ -222,10 +229,11 @@ multi.spp.with.cost.SDF <- multi.spp.with.cost.DF %>%
 	mutate(Context='multi-species (opportunity costs)') 
 
 # compile data.frames
-scenario.DF <- rbind.fill(list(single.spp.SDF, multi.spp.SDF, multi.spp.with.cost.SDF)) %>%
+scenario.DF <- rbind.fill(list(single.spp.SDF, single.spp.with.cost.SDF, multi.spp.SDF, multi.spp.with.cost.SDF)) %>%
 	mutate(Metric=revalue(Metric, c('adaptive.held'='Adaptive variation', 'neutral.held'='Neutral variation'))) %>%
 	mutate(Context=revalue(Context, c(
 		'single-species (equal costs)'='Single-species\n(equal costs)',
+		'single-species (opportunity costs)'='Single-species\n(opportunity costs)',
 		'multi-species (equal costs)'='Multi-species\n(equal costs)',
 		'multi-species (opportunity costs)'='Multi-species\n(opportunity costs)'))) %>%
 	mutate(Prioritisation=revalue(Prioritisation, c(
@@ -235,7 +243,7 @@ scenario.DF <- rbind.fill(list(single.spp.SDF, multi.spp.SDF, multi.spp.with.cos
 	))) %>%
 	mutate(
 		Metric=factor(as.character(Metric), levels=c('Adaptive variation','Neutral variation')),
-		Context=factor(as.character(Context), levels=c('Single-species\n(equal costs)','Multi-species\n(equal costs)','Multi-species\n(opportunity costs)')),
+		Context=factor(as.character(Context), levels=c('Single-species\n(equal costs)','Single-species\n(opportunity costs)','Multi-species\n(equal costs)','Multi-species\n(opportunity costs)')),
 		Prioritisation=factor(as.character(Prioritisation), levels=c('Amount targets','Amount & surrogate\ntargets','Amount & genetic\ntargets'))
 	) %>%
 	mutate(Prioritisation.Metric.Context=interaction(Prioritisation,Metric,Context))

@@ -70,11 +70,15 @@ article/supporting_information.pdf: code/rmarkdown/supporting_information.Rmd co
 # commands for running analysis
 analysis: data/final/results.rda
 
-data/final/results.rda: data/intermediate/11-*.rda code/R/analysis/12-*.R
+data/final/results.rda: data/intermediate/12-*.rda code/R/analysis/13-*.R
+	R CMD BATCH --no-restore --no-save code/R/analysis/13-*.R
+	mv *.Rout data/intermediate/
+
+data/intermediate/12-*.rda: data/intermediate/07-*.rda data/intermediate/08-*.rda data/intermediate/09-*.rda data/intermediate/10-*.rda data/intermediate/11-*.rda code/R/analysis/12-*.R
 	R CMD BATCH --no-restore --no-save code/R/analysis/12-*.R
 	mv *.Rout data/intermediate/
 
-data/intermediate/11-*.rda: data/intermediate/07-*.rda data/intermediate/08-*.rda data/intermediate/09-*.rda data/intermediate/10-*.rda code/R/analysis/11-*.R
+data/intermediate/11-*.rda: data/intermediate/06-*.rda code/R/analysis/11-*.R code/parameters/rapr.toml code/parameters/gurobi.toml
 	R CMD BATCH --no-restore --no-save code/R/analysis/11-*.R
 	mv *.Rout data/intermediate/
 
@@ -89,7 +93,7 @@ data/intermediate/09-*.rda: data/intermediate/06-*.rda code/R/analysis/09-*.R co
 data/intermediate/08-*.rda: data/intermediate/06-*.rda code/R/analysis/08-*.R code/parameters/rapr.toml code/parameters/gurobi.toml
 	R CMD BATCH --no-restore --no-save code/R/analysis/08-*.R
 	mv *.Rout data/intermediate/
-
+	
 data/intermediate/07-*.rda: data/intermediate/06-*.rda code/R/analysis/07-*.R code/parameters/rapr.toml code/parameters/gurobi.toml
 	R CMD BATCH --no-restore --no-save code/R/analysis/07-*.R
 	mv *.Rout data/intermediate/

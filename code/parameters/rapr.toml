@@ -6,7 +6,7 @@ title = "rapr parameters"
 	random.replicates = 10
 
 	[debug."scenario.analysis"]
-	amount.target = 0.1
+	amount.target = 0.2
 	surrogate.target = 0.95
 	genetic.target = 0.8
 	single.species.amount.replicates = 10
@@ -18,7 +18,7 @@ title = "rapr parameters"
 	random.replicates = 10000
 
 	[release."scenario.analysis"]
-	amount.target = 0.1
+	amount.target = 0.2
 	surrogate.target = 0.95
 	genetic.target = 0.8
 	single.species.amount.replicates = 1000
