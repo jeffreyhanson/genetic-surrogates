@@ -260,6 +260,7 @@ scenario.ANOVA.4.DF <- anova(Prioritisation.model, null.model, test='Chisq') %>%
 # post-hoc analyses
 scenario.GLHT.1.DF <- glht(Context.model, mcp(Context='Tukey')) %>% summary(adjusted('bonferroni')) %>% tidy()
 scenario.GLHT.2.DF <- glht(Prioritisation.model, mcp(Prioritisation='Tukey')) %>% summary(adjusted('bonferroni')) %>% tidy()
+scenario.GLHT.3.DF <- glht(Metric.model, mcp(Metric='Tukey')) %>% summary(adjusted('bonferroni')) %>% tidy()
 
 ## save .rda
 save.session('data/intermediate/11-statistical-analysis.rda', compress='xz')
