@@ -5,22 +5,22 @@ Jeffrey O. Hanson, Jonathan R. Rhodes, Cynthia Riginos, Hugh P. Possingham, Rich
 
 Correspondance should be addressed to [jeffrey.hanson@uqconnect.edu.au](mailto:jeffrey.hanson@uqconnect.edu.au)
 
-Source code for the analysis in the manuscript entitled 'Are environmental and geographic effective surrogates for genetic variation in conservation planning?'. 
+Source code for the manuscript entitled "_Are environmental and geographic effective surrogates for genetic variation in conservation planning?_". 
 
-To rerun all computational analyses, run `make all`
+To rerun all computational analyses, run `make clean && make all`.
 
 ### Repository overview
 
 * article
-	+ files to create article
-* parameters
-	+ TOML files containing parameters used to run analysis
+	+ manuscript main text, figures and tables
 * data
-	+ raw data used for article
-* R
-	+ R scripts used for analysis 
-* results
-	+ results from analysis
+	+ _raw_: raw data used to run the analysis
+	+ _intermediate_: results generated during processing (eg. BayeScan output files)
+	+ _final_: results used in the paper
+* code
+	+ [_R_](www.r-project.org): scripts used to run the analysis 
+	+ _parameter_: files used to run analysis in [TOML format](https://github.com/toml-lang/toml)
+	+ [_rmarkdown_](wwww.rmarkdown.rstudio.com) files used to compile them manuscript
 
 ### Software required
 
