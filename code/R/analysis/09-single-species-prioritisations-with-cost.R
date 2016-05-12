@@ -27,7 +27,7 @@ single.spp.amount.prioritisations.with.cost <- llply(
 				MultipleSolutionsMethod='benders.cuts'
 			)
 		)
-	},
+	}
 )
 
 ## surrogate-based priortisations
@@ -88,7 +88,7 @@ single.spp.with.cost.DF <- ldply(
 		mutate(
 			ldply(x, extractResults),
 			Prioritisation=c(
-				rep('Amount',rapr.params.LST[[MODE]]$scenario.analysis$single.species.amount.replicates),
+				rep('Amount',rapr.params.LST[[MODE]]$scenario.analysis$other.replicates),
 				rep('Surrogate',rapr.params.LST[[MODE]]$scenario.analysis$other.replicates),
 				rep('Genetic',rapr.params.LST[[MODE]]$scenario.analysis$other.replicates)
 			)

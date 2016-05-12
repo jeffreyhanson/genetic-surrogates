@@ -149,11 +149,13 @@ p2.hist <- ggplot(aes(r2CU),
 grid.arrange(p1,p2,p1.hist,p2.hist,nrow=2)
 ```
 
-```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.width=5, fig.height=5, fig.cap='Planning unit selection frequencies. The top row of panels (a, b, c) show single-species prioritizations generated assuming equal costs. The middle row of panels (d, e, f) show multi-species prioritizations generated assuming equal costs. The bottom row of panels (g, h, i) show multi-species generated using opportunity costs. The left column of panels (a, d, g) show prioritizations generated using only amount-based targets. The middle column of panels (b, e, h) show prioritizations generated using amount- and surrogate-based targets. The right column of panels (c, f, i) show prioritizations generated using amount- and genetic-based targets.'}
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.width=5, fig.height=5, fig.cap='Planning unit selection frequencies. The first row of panels (a--c) show single-species prioritizations generated assuming equal costs. The second row of panels (d--f) show single-species prioritizations generated using opportunity costs. The third row of panels (g--i) show multi-species prioritizations generated assuming equal costs. The fourth row of panels (j--l) show multi-species generated using opportunity costs. The left column of panels (a, d, g, j) show prioritizations generated using only amount-based targets. The middle column of panels (b, e, h, k) show prioritizations generated using amount- and surrogate-based targets. The right column of panels (c, f, i, l) show prioritizations generated using amount- and genetic-based targets. The color of each planning unit indicates its selection frequency. Note that the selection frequencies for the single-species prioritizations (panels a--f) are based on their average frequency among multiple prioritizations generated for each species. The selection frequences for the multi-species prioritizations (pabels g--l) are based on the optimal pioritization (thus they are all either zero or one).'}
 # prepare data for plotting
 grid.sub.FPLY <- grid.sub.PLY
 for (i in seq_along(single.spp.prioritisations[[1]]))
 	grid.sub.FPLY@data[[paste0('Single-species (equal costs).', c('Amount', 'Surrogate', 'Genetic')[i])]] <- rowMeans(sapply(single.spp.prioritisations, function(x){colMeans(x[[i]]@results@selections)}))
+for (i in seq_along(single.spp.prioritisations.cost[[1]]))
+	grid.sub.FPLY@data[[paste0('Single-species (opportunity costs).', c('Amount', 'Surrogate', 'Genetic')[i])]] <- rowMeans(sapply(single.spp.prioritisations.with.cost, function(x){colMeans(x[[i]]@results@selections)}))
 for (i in seq_along(multi.spp.prioritisations))
 	grid.sub.FPLY@data[[paste0('Multi-species (equal costs).', c('Amount', 'Surrogate', 'Genetic')[i])]] <- colMeans(multi.spp.prioritisations[[i]]@results@selections)
 for (i in seq_along(multi.spp.prioritisations.with.cost))
@@ -171,8 +173,8 @@ grid.sub.FPLY <- grid.sub.FPLY %>% gather(
 		Prioritization=factor(as.character(Prioritization), levels=c('Amount targets', 'Amount & surrogate\ntargets', 'Amount & genetic\ntargets')),
 		Context=factor(
 			gsub(' (', '\n(', Context, fixed=TRUE),
-			levels=c("Single-species\n(equal costs)", "Multi-species\n(equal costs)", 
-			"Multi-species\n(opportunity costs)"))
+			levels=c("Single-species\n(equal costs)", "Single-species\n(opportunity costs)"
+				"Multi-species\n(equal costs)", "Multi-species\n(opportunity costs)"))
 	)
 panel.DF <- grid.sub.FPLY %>% select(Context, Prioritization, long, lat) %>% 
 	mutate(
@@ -213,7 +215,7 @@ ggplot() +
 	)
 ```
 
-```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.width=5, fig.height=5.5, fig.cap='The effectiveness of prioritizations at securing genetic variation. The top row of panels (a--b) show the performance of single-species prioritizations generated assuming equal costs among planning costs. The middle row of panels (c--d) show the performance of multi-species prioritizations generated assuming equal costs among planning units. The bottom row of panels (e--f) show the performance of multi-species prioritizations generated using opportunity costs. The left column of panels (a, c, d) and the right column of panels (b, d, f) show the proportion of adaptive and neutral genetic variation secured (respectively). Box plots show the effectiveness of prioritizations generated using amount-based targets, amount-based and surrogate-based targets, and amount-based and genetic-based targets for each species.'}
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.width=5, fig.height=7.4, fig.cap='The effectiveness of prioritizations at securing genetic variation. The top row of panels (a--b) show the performance of single-species prioritizations generated assuming equal costs among planning costs. The middle row of panels (c--d) show the performance of multi-species prioritizations generated assuming equal costs among planning units. The bottom row of panels (e--f) show the performance of multi-species prioritizations generated using opportunity costs. The left column of panels (a, c, d) and the right column of panels (b, d, f) show the proportion of adaptive and neutral genetic variation secured (respectively). Box plots show the effectiveness of prioritizations generated using amount-based targets, amount-based and surrogate-based targets, and amount-based and genetic-based targets for each species.'}
 # prepare data for plotting
 scenario.PDF <- scenario.DF %>% group_by(Prioritisation, Context, Metric) %>% 
 	mutate(
