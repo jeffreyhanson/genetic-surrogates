@@ -173,7 +173,7 @@ grid.sub.FPLY <- grid.sub.FPLY %>% gather(
 		Prioritization=factor(as.character(Prioritization), levels=c('Amount targets', 'Amount & surrogate\ntargets', 'Amount & genetic\ntargets')),
 		Context=factor(
 			gsub(' (', '\n(', Context, fixed=TRUE),
-			levels=c("Single-species\n(equal costs)", "Single-species\n(opportunity costs)"
+			levels=c("Single-species\n(equal costs)", "Single-species\n(opportunity costs)",
 				"Multi-species\n(equal costs)", "Multi-species\n(opportunity costs)"))
 	)
 panel.DF <- grid.sub.FPLY %>% select(Context, Prioritization, long, lat) %>% 
