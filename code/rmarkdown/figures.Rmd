@@ -154,7 +154,7 @@ grid.arrange(p1,p2,p1.hist,p2.hist,nrow=2)
 grid.sub.FPLY <- grid.sub.PLY
 for (i in seq_along(single.spp.prioritisations[[1]]))
 	grid.sub.FPLY@data[[paste0('Single-species (equal costs).', c('Amount', 'Surrogate', 'Genetic')[i])]] <- rowMeans(sapply(single.spp.prioritisations, function(x){colMeans(x[[i]]@results@selections)}))
-for (i in seq_along(single.spp.prioritisations.cost[[1]]))
+for (i in seq_along(single.spp.prioritisations.with.cost[[1]]))
 	grid.sub.FPLY@data[[paste0('Single-species (opportunity costs).', c('Amount', 'Surrogate', 'Genetic')[i])]] <- rowMeans(sapply(single.spp.prioritisations.with.cost, function(x){colMeans(x[[i]]@results@selections)}))
 for (i in seq_along(multi.spp.prioritisations))
 	grid.sub.FPLY@data[[paste0('Multi-species (equal costs).', c('Amount', 'Surrogate', 'Genetic')[i])]] <- colMeans(multi.spp.prioritisations[[i]]@results@selections)
