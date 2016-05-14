@@ -13,9 +13,9 @@ freq = 0.05
 [release]
 reps = 4
 fdr = 0.1
-n = 5000
+n = 10000
 thin = 10
 nbp = 20
 pilot = 50000
-burn = 50000
+burn = 100000
 freq = 0.05

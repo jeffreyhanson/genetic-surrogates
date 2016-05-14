@@ -47,7 +47,7 @@ spp.pcadapt.LST <- llply(
 		})
 
 		# run initial analysis to determine suitable K
-		curr.K <- pcadapt.params.LST[[MODE]]$initial.K
+		curr.K <- nrow(curr.spp)
 		initial.run <- try(stop(),silent=TRUE)
 		while(inherits(initial.run, 'try-error')) {
 			curr.K <- curr.K - 1

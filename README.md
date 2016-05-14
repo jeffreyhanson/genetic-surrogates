@@ -1,7 +1,7 @@
 Are environmental and geographic effective surrogates for genetic variation in conservation planning?
 ========================================================================================================
 
-Jeffrey O. Hanson, Jonathan R. Rhodes, Cynthia Riginos, Hugh P. Possingham, Richard A. Fuller
+[Jeffrey O. Hanson](wwww.jeffrey-hanson.com), Jonathan R. Rhodes, Cynthia Riginos, Hugh P. Possingham, Richard A. Fuller
 
 Correspondance should be addressed to [jeffrey.hanson@uqconnect.edu.au](mailto:jeffrey.hanson@uqconnect.edu.au)
 
@@ -19,7 +19,7 @@ To rerun all computational analyses, run `make clean && make all`.
 	+ _final_: results used in the paper
 * code
 	+ [_R_](www.r-project.org): scripts used to run the analysis 
-	+ _parameter_: files used to run analysis in [TOML format](https://github.com/toml-lang/toml)
+	+ _parameters_: files used to run analysis in [TOML format](https://github.com/toml-lang/toml)
 	+ [_rmarkdown_](wwww.rmarkdown.rstudio.com) files used to compile them manuscript
 
 ### Software required

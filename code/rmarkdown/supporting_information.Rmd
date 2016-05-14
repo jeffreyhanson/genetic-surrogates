@@ -547,7 +547,7 @@ suppressWarnings(
 		geom_point(fill='transparent') +
 		suppressWarnings(stat_smooth(method='glm', method.args=list(family='binomial'), fullrange=TRUE,
 			se=FALSE, fill='blue', alpha=0.8)) +
-		geom_text(aes(label=R2_repr), data=curr.DF2, parse=TRUE, hjust=0, size=5, color='blue') +
+		geom_text(aes(label=R2_repr), data=curr.DF2, parse=TRUE, hjust=0, size=8, color='darkred') +
 		facet_wrap(~ Species, ncol=4)
 )
 ```
@@ -579,7 +579,7 @@ suppressWarnings(
 		geom_point(fill='transparent') +
 		suppressWarnings(stat_smooth(method='glm', method.args=list(family='binomial'), fullrange=TRUE,
 			se=FALSE, fill='blue', alpha=0.8)) +
-		geom_text(aes(label=R2_repr), data=curr.DF2, parse=TRUE, hjust=0, size=5, color='blue') +
+		geom_text(aes(label=R2_repr), data=curr.DF2, parse=TRUE, hjust=0, size=8, color='darkred') +
 		facet_wrap(~ Species, ncol=4)
 )
 ```

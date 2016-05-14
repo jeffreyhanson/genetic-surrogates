@@ -149,7 +149,7 @@ p2.hist <- ggplot(aes(r2CU),
 grid.arrange(p1,p2,p1.hist,p2.hist,nrow=2)
 ```
 
-```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.width=5, fig.height=5, fig.cap='Planning unit selection frequencies. The first row of panels (a--c) show single-species prioritizations generated assuming equal costs. The second row of panels (d--f) show single-species prioritizations generated using opportunity costs. The third row of panels (g--i) show multi-species prioritizations generated assuming equal costs. The fourth row of panels (j--l) show multi-species generated using opportunity costs. The left column of panels (a, d, g, j) show prioritizations generated using only amount-based targets. The middle column of panels (b, e, h, k) show prioritizations generated using amount- and surrogate-based targets. The right column of panels (c, f, i, l) show prioritizations generated using amount- and genetic-based targets. The color of each planning unit indicates its selection frequency. Note that the selection frequencies for the single-species prioritizations (panels a--f) are based on their average frequency among multiple prioritizations generated for each species. The selection frequences for the multi-species prioritizations (pabels g--l) are based on the optimal pioritization (thus they are all either zero or one).'}
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.width=5, fig.height=6.5, fig.cap='Planning unit selection frequencies. The first row of panels (a--c) show single-species prioritizations generated assuming equal costs. The second row of panels (d--f) show single-species prioritizations generated using opportunity costs. The third row of panels (g--i) show multi-species prioritizations generated assuming equal costs. The fourth row of panels (j--l) show multi-species generated using opportunity costs. The left column of panels (a, d, g, j) show prioritizations generated using only amount-based targets. The middle column of panels (b, e, h, k) show prioritizations generated using amount- and surrogate-based targets. The right column of panels (c, f, i, l) show prioritizations generated using amount- and genetic-based targets. The color of each planning unit indicates its selection frequency. Note that the selection frequencies for the single-species prioritizations (panels a--f) are based on their average frequency among multiple prioritizations generated for each species. The selection frequences for the multi-species prioritizations (pabels g--l) are based on the optimal pioritization (thus they are all either zero or one).'}
 # prepare data for plotting
 grid.sub.FPLY <- grid.sub.PLY
 for (i in seq_along(single.spp.prioritisations[[1]]))
@@ -233,15 +233,22 @@ scenario.PDF <- scenario.DF %>% group_by(Prioritisation, Context, Metric) %>%
 	ungroup() %>% 
 	data.frame()
 
+scenario.SDF <- scenario.DF %>% 
+	group_by(Prioritisation, Context, Metric, Species) %>% 
+	summarize(genetic.held=mean(genetic.held, na.rm=TRUE)) %>%
+	data.frame()
+
 # make plot
 suppressWarnings({
 	ggplot(aes(x=Prioritisation,y=genetic.held),
-		data=scenario.DF) +
+		data=scenario.SDF) +
 		geom_boxplot(position=position_dodge(0.9)) +
 		geom_text(aes(x=0.6, y=1.15, label=panel.letter),
 			data=scenario.PDF) +
 		scale_fill_manual(name='Prioritisation',
 			values=c('grey80','grey50','grey20')) +
+		geom_abline(slope=0, color='red', linetype='dashed',
+			intercept=rapr.params.LST[[MODE]]$scenario.analysis$genetic.target) +
 		ylab('Genetic variation secured (%)') +
 		xlab('') +
 		scale_y_continuous(breaks=c(0,0.25,0.5,0.75,1), limits=c(NA, 1.2)) +

@@ -5,7 +5,7 @@
 MODE=debug
 
 # set misc parameters
-COMMIT_ID=$(shell git ls-remote https://paleo13@bitbucket.org/paleo13/genetic.surrogates.git HEAD | grep -o '^\S*')
+COMMIT_ID=$(shell git ls-remote https://github.com/paleo13/genetic-surrogates.git HEAD | grep -o '^\S*')
 
 # main operations
 all: clean analysis manuscript
@@ -36,10 +36,16 @@ clean:
 	rm code/rmarkdown/tables.pdf -f
 	rm article/*.csv -f
 
-pull_ms:
+pull_ms__gb:
 	git fetch
 	git checkout '$(COMMIT_ID)' code/rmarkdown
 
+pull_ms_cb:
+	scp ubuntu@cloudburster.net:/mnt/users/jhans/tmp/* article
+
+push_ms_cb:
+	scp article/* ubuntu@cloudburster.net:/mnt/users/jhans/tmp
+	
 # commands for generating manuscript
 manuscript: article/article.pdf article/figures.pdf article/supporting_information.pdf article/tables.pdf
 
