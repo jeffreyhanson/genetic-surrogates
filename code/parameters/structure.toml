@@ -8,6 +8,7 @@ numreps = 30
 noadmix = true
 admburnin = 10
 repeats = 1000
+updatefreq=1
 
 [release]
 probability.threshold = 0.75
@@ -17,3 +18,4 @@ numreps = 1000000
 noadmix = true
 admburnin = 5000
 repeats = 1000
+updatefreq=1000

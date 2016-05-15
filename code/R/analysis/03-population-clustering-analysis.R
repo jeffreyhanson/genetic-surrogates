@@ -20,7 +20,7 @@ spp.StructureAnalysis.LST <- llply(
 		return(
 			run.single.Structure(spp.StructureData.LST[[i]], MAXPOPS = spp.populations.DF[[2]][i], NUMRUNS = structure.params.LST[[MODE]]$numruns, 
 				BURNIN = structure.params.LST[[MODE]]$burnin, NUMREPS = structure.params.LST[[MODE]]$numreps, NOADMIX = structure.params.LST[[MODE]]$noadmix, 
-				ADMBURNIN = structure.params.LST[[MODE]]$admburnin, M = "LargeKGreedy", W = TRUE, S = FALSE, 
+				ADMBURNIN = structure.params.LST[[MODE]]$admburnin, UPDATEFREQ=structure.params.LST[[MODE]]$updatefreq, M = "LargeKGreedy", W = TRUE, S = FALSE, 
 				REPEATS = structure.params.LST[[MODE]]$repeats, dir = curr.spp.dir, clean = FALSE, verbose = FALSE, threads=structure.params.LST[[MODE]]$numruns
 			)
 		)
