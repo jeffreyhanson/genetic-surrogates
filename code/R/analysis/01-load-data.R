@@ -13,7 +13,7 @@ spp.populations.DF <- spp.populations.DF[all.spp,]
 
 # load grid cell centroids
 grid.DF <- fread(
-	'data/raw/Data_Meirmans_et_al_IntrabioDiv/ReadMe.txt',
+	'data/raw/Data_Meirmans_et_al_IntrabioDiv/README',
 	data.table=FALSE,
 	skip='cell\tLong\tLat'
 ) %>% rename(
