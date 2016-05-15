@@ -47,7 +47,7 @@ spp.pcadapt.LST <- llply(
 		})
 
 		# run initial analysis to determine suitable K
-		curr.K <- nrow(curr.spp)
+		curr.K <- apply(curr.spp, 2, paste, collapse=',') %>% n_distinct()
 		initial.run <- try(stop(),silent=TRUE)
 		while(inherits(initial.run, 'try-error')) {
 			curr.K <- curr.K - 1
