@@ -13,8 +13,8 @@ updatefreq=1
 [release]
 probability.threshold = 0.75
 numruns = 5
-burnin = 200000
-numreps = 1000000
+burnin = 500000
+numreps = 500000
 noadmix = true
 admburnin = 5000
 repeats = 1000
