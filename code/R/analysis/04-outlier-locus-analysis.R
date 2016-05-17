@@ -32,8 +32,6 @@ spp.pcadapt.LST <- llply(
 		# init
 		curr.dir <- paste0('data/intermediate/pcadapt/', unique(spp.samples.DF$species)[i]) 
 		dir.create(curr.dir, showWarnings=FALSE, recursive=TRUE)
-		initial.file.names1 <- paste0(unique(spp.samples.DF$species)[i], '_initial', c(".loadings", ".scores", ".zscores", ".maf", ".sigma"))
-		initial.file.names2 <- paste0(curr.dir, '/initial', c(".loadings", ".scores", ".zscores", ".maf", ".sigma"))
 		inference.file.names1 <- paste0(unique(spp.samples.DF$species)[i], '_inference', c(".loadings", ".scores", ".zscores", ".maf", ".sigma"))
 		inference.file.names2 <- paste0(curr.dir, '/inference', c(".loadings", ".scores", ".zscores", ".maf", ".sigma"))
 		
@@ -48,19 +46,15 @@ spp.pcadapt.LST <- llply(
 
 		# run initial analysis to determine suitable K
 		curr.K <- apply(curr.spp, 2, paste, collapse=',') %>% n_distinct()
-		initial.run <- try(stop(),silent=TRUE)
-		while(inherits(initial.run, 'try-error')) {
+		initial.pca <- try(stop(),silent=TRUE)
+		while(inherits(initial.pca, 'try-error')) {
 			curr.K <- curr.K - 1
-			initial.run <- try(pcadapt(curr.spp, K=as.numeric(curr.K), ploidy=1, transpose=TRUE,
-				method='mahalanobis', data.type='genotype', min.maf=pcadapt.params.LST[[MODE]]$min.maf,
-				clean.files=FALSE, output.filename=paste0(unique(spp.samples.DF$species)[i],'_initial')), silent=TRUE)
+			initial.pca <- try(corpca(curr.spp, curr.K), silent=TRUE)
 		}
-		file.copy(initial.file.names1, initial.file.names2, overwrite=TRUE)
-		file.remove(initial.file.names1)
 		if (file.exists('tmp.pcadapt')) file.remove('tmp.pcadapt')
 		
 		# choose apropriate K
-		prop.var.explained <- initial.run$singular.values/sum(initial.run$singular.values)
+		prop.var.explained <- initial.pca$singular.values/sum(initial.pca$singular.values)
 		curr.spp.K <- which(cumsum(prop.var.explained) > pcadapt.params.LST[[MODE]]$min.variance.explained)[1]
 		
 		# run second pica with minimum number of principle components needed to secure a acceptable level of variation
@@ -80,7 +74,7 @@ spp.pcadapt.LST <- llply(
 		return(
 			list(
 				K=curr.spp.K,
-				initial.run=initial.run,
+				initial.pca=initial.pca,
 				inference.run=inference.run,
 				pvalues=pvalues.DBL,
 				qvalues=qvalues.LST,
