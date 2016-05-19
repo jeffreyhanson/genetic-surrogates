@@ -40,9 +40,6 @@ spp.OutlierDetectionData.LST <- llply(
 		ids <- apply(probs, 1, which.max)
 		ids[which(apply(probs, 1, function(x) {max(x) < structure.params.LST[[MODE]]$probability.threshold}))] <- NA_integer_
 		validPos <- which(!is.na(ids))
-		# if only one population return null
-		if (n_distinct(ids)==1)
-			return(NULL)
 		# remove individuals below threshold
 		curr.spp <- bayescanr::BayeScanData(spp.StructureData.LST[[i]]@matrix[validPos,,drop=FALSE],
 			spp.StructureData.LST[[i]]@loci.names, as.character(ids[validPos]),

@@ -2,14 +2,8 @@
 session::restore.session('data/intermediate/00-initialization.rda')
 
 ## compile spatial grid data
-# load in species population numbers
-spp.populations.DF <- fread('data/raw/Data_Meirmans_et_al_IntrabioDiv/NumberPopulations.csv', data.table=FALSE)
-
-# subset to species that have >1 population
-all.spp <- which(spp.populations.DF[[2]] > 1)
-all.spp <- all.spp[seq_len(min(general.params.LST[[MODE]]$n.spp, length(all.spp)))]
-missing.species <- as.character(spp.populations.DF[[1]][spp.populations.DF[[2]]==1])
-spp.populations.DF <- spp.populations.DF[all.spp,]
+# subset species 
+all.spp <- seq_len(general.params.LST[[MODE]]$n.spp)
 
 # load grid cell centroids
 grid.DF <- fread(
