@@ -9,6 +9,7 @@ noadmix = true
 admburnin = 10
 repeats = 1000
 updatefreq=1
+freqscorr = false
 
 [release]
 probability.threshold = 0.75
@@ -19,3 +20,4 @@ noadmix = true
 admburnin = 5000
 repeats = 1000
 updatefreq=1000
+freqscorr = false
