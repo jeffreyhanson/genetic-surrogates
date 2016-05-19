@@ -6,10 +6,6 @@ structure.params.LST <- parseTOML('code/parameters/structure.toml')
 
 ### stucture analyses
 ## run analyses
-clust <- makeCluster(max(floor(general.params.LST[[MODE]]$threads/structure.params.LST[[MODE]]$numruns),1), type="PSOCK", outfile="")
-clusterEvalQ(clust, {library(structurer)})
-clusterExport(clust, c('spp.samples.DF','spp.StructureData.LST', 'spp.populations.DF', 'structure.params.LST', 'MODE'))
-registerDoParallel(clust)
 spp.StructureCollection.LST <- llply(
 	seq_along(spp.StructureData.LST),
 		.fun=function(i) {
@@ -25,10 +21,8 @@ spp.StructureCollection.LST <- llply(
 				dir = curr.spp.dir, clean = FALSE, verbose = FALSE, threads=structure.params.LST[[MODE]]$numruns
 			)
 		)
-	},
-	.parallel=TRUE
+	}
 )
-stopCluster(clust)
 
 ## assign populations
 spp.OutlierDetectionData.LST <- llply(
