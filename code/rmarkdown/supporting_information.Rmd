@@ -121,7 +121,7 @@ pop.probs.DF <- llply(
 		) %>% mutate(
 			Individual=seq_along(species)
 		) 	
-		curr.probs <- spp.StructureAnalysis.LST[[i]]@results@summary %>%
+		curr.probs <- structurer:::sample.membership(spp.StructureCollection.LST[[i]]) %>%
 			as.data.frame() %>%
 			mutate(
 				species=unique(spp.samples.DF$species)[i],

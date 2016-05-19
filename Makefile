@@ -11,40 +11,40 @@ COMMIT_ID=$(shell git ls-remote https://github.com/paleo13/genetic-surrogates.gi
 all: clean analysis manuscript
 
 clean:
-	rm -f *.aux *.bbl *.blg *.log *.pdf *.bak *~ *.Rout */*.Rout */*.pdf */*.aux */*.log *.rda */*.rda */*/*.rda data/intermediate/*.rda data/intermediate/*.Rout
-	rm data/intermediate/structure -rf
-	rm data/intermediate/bayescan -rf
-	rm data/intermediate/pcadapt -rf
-	rm code/rmarkdown/article_files/figure-latex/*.pdf -f
-	rm code/rmarkdown/supporting_information_files/figure-latex/*.pdf -f
-	rm code/rmarkdown/figures_files/figure-latex/*.pdf -f
-	rm code/rmarkdown/figures.tex -f
-	rm code/rmarkdown/figures.md -f
-	rm code/rmarkdown/figures.docx -f
-	rm code/rmarkdown/figures.pdf -f
-	rm code/rmarkdown/supporting_information.tex -f
-	rm code/rmarkdown/supporting_information.md -f
-	rm code/rmarkdown/supporting_information.docx -f
-	rm code/rmarkdown/supporting_information.pdf -f
-	rm code/rmarkdown/article.md -f
-	rm code/rmarkdown/article.tex -f
-	rm code/rmarkdown/article.docx -f
-	rm code/rmarkdown/article.pdf -f
-	rm code/rmarkdown/tables.md -f
-	rm code/rmarkdown/tables.tex -f
-	rm code/rmarkdown/tables.docx -f
-	rm code/rmarkdown/tables.pdf -f
-	rm article/*.csv -f
+	@rm -f *.aux *.bbl *.blg *.log *.pdf *.bak *~ *.Rout */*.Rout */*.pdf */*.aux */*.log *.rda */*.rda */*/*.rda data/intermediate/*.rda data/intermediate/*.Rout
+	@rm data/intermediate/structure -rf
+	@rm data/intermediate/bayescan -rf
+	@rm data/intermediate/pcadapt -rf
+	@rm code/rmarkdown/article_files/figure-latex/*.pdf -f
+	@rm code/rmarkdown/supporting_information_files/figure-latex/*.pdf -f
+	@rm code/rmarkdown/figures_files/figure-latex/*.pdf -f
+	@rm code/rmarkdown/figures.tex -f
+	@rm code/rmarkdown/figures.md -f
+	@rm code/rmarkdown/figures.docx -f
+	@rm code/rmarkdown/figures.pdf -f
+	@rm code/rmarkdown/supporting_information.tex -f
+	@rm code/rmarkdown/supporting_information.md -f
+	@rm code/rmarkdown/supporting_information.docx -f
+	@rm code/rmarkdown/supporting_information.pdf -f
+	@rm code/rmarkdown/article.md -f
+	@rm code/rmarkdown/article.tex -f
+	@rm code/rmarkdown/article.docx -f
+	@rm code/rmarkdown/article.pdf -f
+	@rm code/rmarkdown/tables.md -f
+	@rm code/rmarkdown/tables.tex -f
+	@rm code/rmarkdown/tables.docx -f
+	@rm code/rmarkdown/tables.pdf -f
+	@rm article/*.csv -f
 
 pull_ms__gb:
-	git fetch
-	git checkout '$(COMMIT_ID)' code/rmarkdown
+	@git fetch
+	@git checkout '$(COMMIT_ID)' code/rmarkdown
 
 pull_ms_cb:
-	scp ubuntu@cloudburster.net:/mnt/users/jhans/tmp/* article
+	@scp ubuntu@cloudburster.net:/mnt/users/jhans/tmp/* article
 
 push_ms_cb:
-	scp article/* ubuntu@cloudburster.net:/mnt/users/jhans/tmp
+	@scp article/* ubuntu@cloudburster.net:/mnt/users/jhans/tmp
 	
 # commands for generating manuscript
 manuscript: article/article.pdf article/figures.pdf article/supporting_information.pdf article/tables.pdf
