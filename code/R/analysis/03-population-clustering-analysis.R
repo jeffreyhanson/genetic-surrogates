@@ -5,12 +5,12 @@ session::restore.session('data/intermediate/02-surrogate-data.rda')
 structure.params.LST <- parseTOML('code/parameters/structure.toml')
 
 ### stucture analyses
+dir.create('data/intermediate/structure', showWarnings=FALSE, recursive=TRUE)
 spp.StructureCollection.LST <- run.Structure(spp.StructureData.LST, MAXPOPS = structure.params.LST[[MODE]]$maxpops, NUMRUNS = structure.params.LST[[MODE]]$numruns, 
 	BURNIN = structure.params.LST[[MODE]]$burnin, NUMREPS = structure.params.LST[[MODE]]$numreps, NOADMIX = structure.params.LST[[MODE]]$noadmix, 
 	FREQSCORR = structure.params.LST[[MODE]]$freqscorr, ADMBURNIN = structure.params.LST[[MODE]]$admburnin, UPDATEFREQ=structure.params.LST[[MODE]]$updatefreq,
 	M = "LargeKGreedy", W = TRUE, S = FALSE,  REPEATS = structure.params.LST[[MODE]]$repeats, 
-	dir = file.path('data/intermediate/structure',unique(spp.samples.DF$species)), clean = FALSE, verbose = FALSE, threads=general.params.LST[[MODE]]$threads
-)
+	dir = file.path('data/intermediate/structure',unique(spp.samples.DF$species)), clean = FALSE, verbose = FALSE, threads=general.params.LST[[MODE]]$threads)
 
 ## assign populations
 spp.OutlierDetectionData.LST <- llply(
