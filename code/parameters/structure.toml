@@ -10,16 +10,16 @@ admburnin = 10
 repeats = 1000
 updatefreq = 1
 freqscorr = true
-maxpops = [1, 2, 3, 4, 5]
+maxpops = [1, 2, 3, 4, 5, 6]
 
 [release]
 probability.threshold = 0.75
 numruns = 5
-burnin = 500000
-numreps = 100000
+burnin = 800000
+numreps = 200000
 noadmix = false
 admburnin = 5000
 repeats = 1000
 updatefreq = 1000
 freqscorr = true
-maxpops = [1, 2, 3, 4, 5]
+maxpops = [1, 2, 3, 4, 5, 6]

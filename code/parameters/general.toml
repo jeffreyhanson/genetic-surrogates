@@ -3,7 +3,9 @@ title = "general parameters"
 [debug]
 n.spp = 3
 threads = 1
+amazon.threads = 0
 
 [release]
 n.spp = 27
 threads = 20
+amazon.threads = 50
