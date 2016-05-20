@@ -15,8 +15,8 @@ maxpops = [1, 2, 3, 4, 5, 6]
 [release]
 probability.threshold = 0.75
 numruns = 5
-burnin = 800000
-numreps = 200000
+burnin = 500000
+numreps = 500000
 noadmix = false
 admburnin = 5000
 repeats = 1000
