@@ -6,6 +6,24 @@ bayescan.params.LST <- parseTOML('code/parameters/bayescan.toml')
 pcadapt.params.LST <- parseTOML('code/parameters/pcadapt.toml')
 nmds.params.LST <- parseTOML('code/parameters/nmds.toml')
 
+# assign populations
+spp.OutlierDetectionData.LST <- llply(
+	seq_along(spp.StructureCollection.LST),
+	.fun=function(i) {
+		# get population identities
+		probs <- structurer:::sample.membership(spp.StructureCollection.LST[[i]])
+		# identify individuals with uncertain population membership
+		ids <- apply(probs, 1, which.max)
+		ids[which(apply(probs, 1, function(x) {max(x) < structure.params.LST[[MODE]]$probability.threshold}))] <- NA_integer_
+		validPos <- which(!is.na(ids))
+		# remove individuals below threshold and use populations specified by structure
+		curr.spp <- bayescanr::BayeScanData(spp.StructureData.LST[[i]]@matrix[validPos,,drop=FALSE],
+			spp.StructureData.LST[[i]]@loci.names, as.character(ids[validPos]),
+			spp.StructureData.LST[[i]]@sample.names[validPos])
+		return(curr.spp)
+	}
+)
+
 # subset out loci with polymorphisms that have really low or really high frequency
 spp.OutlierDetectionData.LST <- llply(
 	spp.OutlierDetectionData.LST,
@@ -14,7 +32,7 @@ spp.OutlierDetectionData.LST <- llply(
 		if (is.null(x))
 			return(NULL)
 		# else remove abundant or rare loci
-		freqs <- colMeans(x@matrix, na.rm=TRUE)
+		freqs <- colMeans(x@matrix, na.rm=TRUE)	
 		valid.loci <- which(freqs <= 1-(bayescan.params.LST[[MODE]]$freq) | freqs >= bayescan.params.LST[[MODE]]$freq)
 		return(bayescanr:::loci.subset(x, valid.loci))
 	}
