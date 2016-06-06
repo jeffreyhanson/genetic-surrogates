@@ -116,7 +116,7 @@ data/intermediate/04-*.rda: data/intermediate/03-*.rda code/R/analysis/04-*.R co
 	R CMD BATCH --no-restore --no-save code/R/analysis/04-*.R
 	mv *.Rout data/intermediate/
 
-data/intermediate/03-*.rda: data/intermediate/02-*.rda code/R/analysis/03-*.R code/parameters/structure.toml
+data/intermediate/03-*.rda: data/intermediate/02-*.rda code/R/analysis/03-*.R code/parameters/structure.toml code/parameters/clumpp.toml
 	R CMD BATCH --no-restore --no-save code/R/analysis/03-*.R
 	mv *.Rout data/intermediate/
 

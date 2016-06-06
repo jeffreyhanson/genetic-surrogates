@@ -1,0 +1,14 @@
+title = "clumpp parameters"
+
+[debug]
+repeats = 10
+M = 'Greedy'
+W = true
+S = true
+
+[release]
+repeats = 1000
+M = 'Greedy'
+W = true
+S = true
+ 
