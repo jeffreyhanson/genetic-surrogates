@@ -23,7 +23,7 @@ if (length(missing.species2)>0) {
 geographic.AS <- make.surrogate.AttributeSpaces(
 	site.data=select(grid.sub.DF, starts_with('geo')),
 	species.data=grid.sub.DF[,unique(spp.samples.sub.DF$species),drop=FALSE],
-	name='geogrpahic')
+	name='geographic')
 
 environmental.AS <- make.surrogate.AttributeSpaces(
 	site.data=select(grid.sub.DF, starts_with('env')),

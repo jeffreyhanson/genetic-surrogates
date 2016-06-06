@@ -10,19 +10,18 @@
 make.genetic.AttributeSpace <- function(site.data,species.data,species) {
 	# extract ids of pus where the species is found
 	curr.ids<-which(rowSums(is.na(site.data))==0)
-	
 	# return attribute space
 	return(
 		AttributeSpace(
 			planning.unit.points=PlanningUnitPoints(
-				coords=site.data[curr.ids,,drop=FALSE]
-				ids=site.data
+				coords=as.matrix(site.data[curr.ids,,drop=FALSE]),
+				ids=curr.ids
 			),
 			demand.points=DemandPoints(
 				coords=as.matrix(species.data),
 				weights=rep(1, nrow(species.data))
 			),
-			species=species
+			species=as.integer(species)
 		)
 	)
 }

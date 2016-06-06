@@ -19,7 +19,6 @@ single.spp.amount.prioritisations <- llply(
 	seq_along(unique(spp.samples.sub.DF$species)),
 	function(x) {
 		# identify which planning units are occupied by the species
-		setMKLthreads(1)
 		curr.pu <- which(grid.sub.DF[[unique(spp.samples.sub.DF$species)[[x]]]]==1)
 		n.pu <- ceiling(length(curr.pu) * rapr.params.LST[[MODE]]$scenario.analysis$amount.target)
 		zeros <- rep(0, length=nrow(grid.sub.DF))

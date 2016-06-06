@@ -22,11 +22,11 @@ make.surrogate.AttributeSpaces <- function(site.data, species.data, name) {
 					# create as
 					AttributeSpace(
 						planning.unit.points=PlanningUnitPoints(
-							coords=site.data[,curr.ids,drop=FALSE],
+							coords=as.matrix(site.data[curr.ids,,drop=FALSE]),
 							ids=curr.ids
 						),
 						demand.points=DemandPoints(
-							coords=site.data[curr.ids,,drop=FALSE],
+							coords=as.matrix(site.data[curr.ids,,drop=FALSE]),
 							weights=rep(1, length(curr.ids))
 						),
 						species=i

@@ -15,7 +15,6 @@ spp.nmds.LST <- llply(
 	seq_along(spp.OutlierDetectionData.LST),
 	.fun=function(i) {
 		# subset loci for species
-		setMKLthreads(1)
 		cat('starting species',i,'\n')
 		if (is.null(spp.OutlierDetectionData.LST[[i]])) {
 			# only 1 population in this species
