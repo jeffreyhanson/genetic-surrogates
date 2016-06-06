@@ -1,6 +1,6 @@
-#' Make multi-species AttributeSpace object
+#' Make AttributeSpaces object using surrogate data
 #'
-#' This function generates an \code{AttributeSpace} object using 
+#' This function generates an \code{AttributeSpaces} object using 
 #' values in a \code{data.frame} and occupancy data in a second 
 #' \code{data.frame}.
 #' @param site.data \code{data.frame} with values for planning units in each attribute space.
@@ -11,17 +11,29 @@
 #' @return \code{AttributeSpace}
 #' @seealso \code{\link[rapr]{AttributeSpace}}, \code{\link[rapr]{DemandPoints}}.
 #' @export
-make.multi.species.AttributeSpace <- function(site.data, species.data, distance.metric='euclidean') {
+make.surrogate.AttributeSpaces <- function(site.data, species.data, name) {
 	return(
-		AttributeSpace(
-			pu=SimplePoints(as.matrix(site.data)),
-			demand.points=alply(species.data, 2, .fun=function(x) {
-				return(DemandPoints(
-					points=SimplePoints(as.matrix(site.data[x==1,,drop=FALSE])),
-					weights=rep(1, sum(x))
-				))
-			}),
-			distance.metric=distance.metric
+		AttributeSpaces(
+			spaces=llply(
+				seq_len(ncol(species.data)), 
+				.fun=function(i) {
+					# set ids 
+					curr.ids <- which(species.data[[i]]==1)
+					# create as
+					AttributeSpace(
+						planning.unit.points=PlanningUnitPoints(
+							coords=site.data[,curr.ids,drop=FALSE],
+							ids=curr.ids
+						),
+						demand.points=DemandPoints(
+							coords=site.data[curr.ids,,drop=FALSE],
+							weights=rep(1, length(curr.ids))
+						),
+						species=i
+					)
+				}
+			),
+			name=name
 		)
 	)
 }

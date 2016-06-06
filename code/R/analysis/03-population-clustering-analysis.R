@@ -10,7 +10,7 @@ dir.create('data/intermediate/structure', showWarnings=FALSE, recursive=TRUE)
 raw.spp.StructureCollection.LST <- run.Structure(spp.StructureData.LST, MAXPOPS = structure.params.LST[[MODE]]$maxpops, NUMRUNS = structure.params.LST[[MODE]]$numruns, 
 	BURNIN = structure.params.LST[[MODE]]$burnin, NUMREPS = structure.params.LST[[MODE]]$numreps, NOADMIX = structure.params.LST[[MODE]]$noadmix, 
 	FREQSCORR = structure.params.LST[[MODE]]$freqscorr, ADMBURNIN = structure.params.LST[[MODE]]$admburnin, UPDATEFREQ=structure.params.LST[[MODE]]$updatefreq,
-	M = "LargeKGreedy", W = TRUE, S = FALSE,  REPEATS = structure.params.LST[[MODE]]$repeats, 
+	M = "Greedy", W = TRUE, S = TRUE,  REPEATS = structure.params.LST[[MODE]]$repeats, 
 	dir = file.path('data/intermediate/structure',unique(spp.samples.DF$species)), clean = FALSE, verbose = FALSE, threads=general.params.LST[[MODE]]$threads)
 
 # check if the "truly" best K is actually 1

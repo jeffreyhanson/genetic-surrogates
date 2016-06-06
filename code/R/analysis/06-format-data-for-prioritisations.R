@@ -20,58 +20,53 @@ if (length(missing.species2)>0) {
 }
 
 # generate attribute spaces for geographic and environmental data
-surrogate.ASL <- llply(
-	list(grep('^env.*$', names(grid.sub.DF)),grep('^geo.*$', names(grid.sub.DF))),
-	.fun=function(x) {
-		make.multi.species.AttributeSpace(
-			site.data=grid.sub.DF[,x,drop=FALSE],
-			species.data=grid.sub.DF[,unique(spp.samples.sub.DF$species),drop=FALSE],
-			distance.metric='euclidean'
-		)
-	}
-)
+geographic.AS <- make.surrogate.AttributeSpaces(
+	site.data=select(grid.sub.DF, starts_with('geo')),
+	species.data=grid.sub.DF[,unique(spp.samples.sub.DF$species),drop=FALSE],
+	name='geogrpahic')
+
+environmental.AS <- make.surrogate.AttributeSpaces(
+	site.data=select(grid.sub.DF, starts_with('env')),
+	species.data=grid.sub.DF[,unique(spp.samples.sub.DF$species),drop=FALSE],
+	name='environmental')
 
 # generate attribute spaces for genetic data
-adaptive.ASL <- llply(
+adaptive.AS <- llply(
 	seq_along(unique(spp.samples.sub.DF$species)),
 	function(i) {
-		# if no adaptive space for this species then return null
+		# if no neutral space for this species then return null
 		if (ncol(select(grid.sub.DF, contains(paste0(unique(spp.samples.sub.DF$species)[i], '_adaptive'))))==0)
 			return(NULL)
 		# else return attribute space
-		make.single.species.AttributeSpace(
+		make.genetic.AttributeSpace(
 			site.data=select(grid.sub.DF, contains(paste0(unique(spp.samples.sub.DF$species)[i], '_adaptive'))),
 			species.data=na.omit(select(grid.sub.DF, contains(paste0(unique(spp.samples.sub.DF$species)[i], '_adaptive')))),
-			spp.pos=i,
-			n.species=n_distinct(spp.samples.sub.DF$species),
-			distance.metric='euclidean'
+			species=i
 		)
 	}
 )
-adaptive.ASL <- adaptive.ASL[!sapply(adaptive.ASL, is.null)]
+adaptive.AS <- AttributeSpaces(spaces=adaptive.AS[!is.null(adaptive.AS)], name='adaptive')
 
-neutral.ASL <- llply(
+neutral.AS <- llply(
 	seq_along(unique(spp.samples.sub.DF$species)),
 	function(i) {
 		# if no neutral space for this species then return null
 		if (ncol(select(grid.sub.DF, contains(paste0(unique(spp.samples.sub.DF$species)[i], '_neutral'))))==0)
 			return(NULL)
 		# else return attribute space
-		make.single.species.AttributeSpace(
+		make.genetic.AttributeSpace(
 			site.data=select(grid.sub.DF, contains(paste0(unique(spp.samples.sub.DF$species)[i], '_neutral'))),
 			species.data=na.omit(select(grid.sub.DF, contains(paste0(unique(spp.samples.sub.DF$species)[i], '_neutral')))),
-			spp.pos=i,
-			n.species=n_distinct(spp.samples.sub.DF$species),
-			distance.metric='euclidean'
+			species=i
 		)
 	}
 )
-neutral.ASL <- neutral.ASL[!sapply(neutral.ASL, is.null)]
+neutral.AS <- AttributeSpaces(spaces=neutral.AS[!is.null(neutral.AS)], name='neutral')
 
 # make table with targets
 target.DF <- make.targets(
 	species=unique(spp.samples.sub.DF$species),
-	environmental.space=surrogate.ASL[[1]], geographic.space=surrogate.ASL[[2]],
+	environmental.space=environmental.AS, geographic.space=geographic.AS,
 	adaptive.spaces=adaptive.ASL, neutral.spaces=neutral.ASL,
 	amount.target=0.2, space.target=0.2
 )
@@ -86,7 +81,7 @@ rd <- RapData(
 	),
 	species=data.frame(name=unique(spp.samples.sub.DF$species)),
 	target=target.DF,
-	attribute.spaces=append(append(surrogate.ASL, adaptive.ASL), neutral.ASL),
+	attribute.spaces=list(environmental.AS, geographic.AS, adaptive.AS, neutral.AS),
 	pu.species.probabilities=ldply(
 		seq_along(unique(spp.samples.sub.DF$species)),
 		.fun=function(i) {

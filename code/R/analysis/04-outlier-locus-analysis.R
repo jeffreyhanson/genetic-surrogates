@@ -115,6 +115,7 @@ spp.BayeScan.LST <- llply(
 		dir.create(curr.dir)
 		curr.spp <- run.BayeScan(
 			spp.OutlierDetectionData.LST[[i]],
+			reps=bayescan.params.LST[[MODE]]$reps,
 			fdr=bayescan.params.LST[[MODE]]$fdr,
 			threads=general.params.LST[[MODE]]$threads,
 			n=bayescan.params.LST[[MODE]]$n,
