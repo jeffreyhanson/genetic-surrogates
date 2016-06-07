@@ -45,7 +45,7 @@ gg_color_hue <- function(n) {
 }
 ```
 
-```{r, echo=FALSE, fig.width=9.5, fig.height=10, out.width='7.5in', out.height='8.5in', fig.cap=paste0('Species distributions. Squares represent planning units. For a given species, planning units that were found to be inhabited are denoted with bright blue. Note that \\textit{',gsub('\\_', '\\ ', missing.species),'} was omitted from analysis.')}
+```{r, echo=FALSE, fig.width=9.5, fig.height=10, out.width='7.5in', out.height='8.5in', fig.cap=paste0('Species distributions. Squares represent planning units. For a given species, planning units that were found to be inhabited are denoted with bright blue.')}
 ## plot map of species distributions
 # fortify data
 spp.grid.FPLY <- ldply(unique(spp.samples.DF$species), function(x) {
@@ -415,7 +415,9 @@ calc.fig.width <- function(i) {
 }
 
 is.speciesPlottable <- function(i) {
-	return(i <= general.params.LST[[MODE]]$n.spp & (!unique(spp.samples.DF$species)[i] %in% missing.species) & !is.na(unique(spp.samples.DF$species)[i]))
+	if (i <= general.params.LST[[MODE]]$n.spp)
+		return(FALSE)
+	return(!is.na(unique(spp.samples.DF$species)[i]))
 }
 ```
 

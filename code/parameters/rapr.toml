@@ -3,7 +3,7 @@ title = "rapr parameters"
 [debug]
 
 	[debug."surrogacy.analysis"]
-	random.replicates = 100
+	random.replicates = 300
 
 	[debug."scenario.analysis"]
 	amount.target = 0.2
