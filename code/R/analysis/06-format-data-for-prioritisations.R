@@ -45,7 +45,7 @@ adaptive.AS <- llply(
 		)
 	}
 )
-adaptive.AS <- AttributeSpaces(spaces=adaptive.AS[!is.null(adaptive.AS)], name='adaptive')
+adaptive.AS <- AttributeSpaces(spaces=adaptive.AS[!sapply(adaptive.AS, is.null)], name='adaptive')
 
 neutral.AS <- llply(
 	seq_along(unique(spp.samples.sub.DF$species)),
@@ -61,13 +61,13 @@ neutral.AS <- llply(
 		)
 	}
 )
-neutral.AS <- AttributeSpaces(spaces=neutral.AS[!is.null(neutral.AS)], name='neutral')
+neutral.AS <- AttributeSpaces(spaces=neutral.AS[!sapply(neutral.AS, is.null)], name='neutral')
 
 # make table with targets
 target.DF <- make.targets(
 	species=unique(spp.samples.sub.DF$species),
 	environmental.space=environmental.AS, geographic.space=geographic.AS,
-	adaptive.spaces=adaptive.ASL, neutral.spaces=neutral.ASL,
+	adaptive.spaces=adaptive.AS, neutral.spaces=neutral.AS,
 	amount.target=0.2, space.target=0.2
 )
 
