@@ -3,12 +3,12 @@ title = "clumpp parameters"
 [debug]
 repeats = 10
 M = 'Greedy'
-W = true
-S = true
+W = false
+S = false
 
 [release]
 repeats = 1000
 M = 'Greedy'
-W = true
-S = true
+W = false
+S = false
  
