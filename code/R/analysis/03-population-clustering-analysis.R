@@ -13,7 +13,7 @@ spp.StructureCollection.LST <- llply(
 		## init
 		curr.spp.dir <- file.path('data/intermediate/structure', unique(spp.samples.DF$species)[i])
 		curr.maxpops <- filter(spp.population.number.DF, species==unique(spp.samples.DF$species)[i])$K
-		dir.create(curr.spp.dir, showWarnings=FALSE, recursive=FALSE)
+		dir.create(curr.spp.dir, showWarnings=FALSE, recursive=TRUE)
 		## run structure analysis and return results
 		return(
 			run.single.Structure(
