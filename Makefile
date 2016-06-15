@@ -128,7 +128,7 @@ data/intermediate/01-*.rda: data/intermediate/00-*.rda code/R/analysis/01-*.R
 	R CMD BATCH --no-restore --no-save code/R/analysis/01-*.R
 	mv *.Rout data/intermediate/
 
-data/intermediate/00-*.rda: code/R/analysis/00-*.R code/parameters/general.toml
+data/intermediate/00-*.rda: code/R/analysis/00-*.R code/parameters/general.toml data/*
 	R CMD BATCH --no-restore --no-save '--args MODE=$(MODE)' code/R/analysis/00-*.R
 	mv *.Rout data/intermediate/
 

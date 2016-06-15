@@ -78,5 +78,8 @@ for (i in unique(spp.samples.DF$species))
 	)
 
 
+## load in the number populations for each species
+spp.population.number.DF <- fread('data/raw/Data_Meirmans_et_al_IntrabioDiv/NumberPopulationsPerSpecies.csv', data.table=FALSE)
+
 ## save .rda
 save.session('data/intermediate/01-load-data.rda', compress='xz')
