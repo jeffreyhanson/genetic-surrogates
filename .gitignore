@@ -19,3 +19,6 @@ data/final/results.rda
 code/rmarkdown/figures_files/*
 code/rmarkdown/supporting_information_files/*
 
+# do not ignore the following files
+!.gitkeep
+!*/
