@@ -1,7 +1,7 @@
 ---
 fontsize: 11pt
 documentclass: article
-bibliography: Endnote_lib.bib
+bibliography: references.bib
 csl: reference-style.csl
 output:
   rmarkdown::pdf_document:
