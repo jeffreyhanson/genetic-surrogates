@@ -49,7 +49,7 @@ push_ms_cb:
 # commands for generating manuscript
 manuscript: article/article.pdf article/figures.pdf article/supporting_information.pdf article/tables.pdf
 
-article/article.pdf: code/rmarkdown/article.Rmd code/rmarkdown/Endnote_lib.bib code/rmarkdown/preamble-latex.tex code/rmarkdown/reference-style.csl
+article/article.pdf: code/rmarkdown/article.Rmd code/rmarkdown/references.bib code/rmarkdown/preamble-latex.tex code/rmarkdown/reference-style.csl
 	R -e "rmarkdown::render('code/rmarkdown/article.Rmd')"
 	mv code/rmarkdown/article.pdf article/
 	rm article/article.tex -f
