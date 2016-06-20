@@ -25,7 +25,7 @@ buffered.range <- function(x, percent=0.05) {
 #' @export
 spFortify <- function(x, columns=names(x@data)) {
 	if ('id' %in% names(x))
-		x@data <- rename(x@data, id2=id)
+		x@data <- dplyr::rename(x@data, id2=id)
 	x$fid <- seq_len(nrow(x@data))
 	f <- fortify(x, region="fid")
 	f <- merge(f, x@data, by.x='id', by.y='fid')

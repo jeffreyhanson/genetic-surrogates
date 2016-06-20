@@ -47,7 +47,15 @@ push_ms_cb:
 	@scp article/* ubuntu@cloudburster.net:/mnt/users/jhans/tmp
 	
 # commands for generating manuscript
-manuscript: article/article.pdf article/figures.pdf article/supporting_information.pdf article/tables.pdf
+manuscript: article figures tables si
+
+article: article/article.pdf
+
+figures: article/figures.pdf
+
+tables: article/tables.pdf
+
+si: article/supporting_information.pdf
 
 article/article.pdf: code/rmarkdown/article.Rmd code/rmarkdown/references.bib code/rmarkdown/preamble-latex.tex code/rmarkdown/reference-style.csl
 	R -e "rmarkdown::render('code/rmarkdown/article.Rmd')"
