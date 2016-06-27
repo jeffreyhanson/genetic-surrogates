@@ -202,6 +202,35 @@ surrogate.spp.DF <- full_join(env.surrogate.spp.DF2, geo.surrogate.spp.DF2, by='
 		Geographic.p.value=pvalString(Geographic.p.value)
 	)
 
+# predict percentage of surrogate needed to secure a representative sample of genetic variation
+env.surrogate.repr.prop.DF <- ldply(
+	as.character(unique(env.surrogacy.DF$Species)),
+	function(x) {
+		curr.mod <- env.surrogacy.LST[[x]]$model
+		curr.DF <- data.frame(surrogate.held=seq(0,1,length.out=10000))
+		curr.DF$genetic.held <- predict(curr.mod, newdata=curr.DF, type='response')
+		min.prop <- min(filter(curr.DF, genetic.held >= rapr.params.LST[[MODE]]$scenario.analysis$genetic.target)$surrogate.held)
+		data.frame(Species=x, environmental.held=min.prop)
+	}
+)
+
+geo.surrogate.repr.prop.DF <- ldply(
+	as.character(unique(geo.surrogacy.DF$Species)),
+	function(x) {
+		curr.mod <- geo.surrogacy.LST[[x]]$model
+		curr.DF <- data.frame(surrogate.held=seq(0,1,length.out=10000))
+		curr.DF$genetic.held <- predict(curr.mod, newdata=curr.DF, type='response')
+		if (max(curr.DF$genetic.held) < rapr.params.LST[[MODE]]$scenario.analysis$genetic.target) {
+			min.prop <- 1
+		} else {
+			min.prop <- min(filter(curr.DF, genetic.held >= rapr.params.LST[[MODE]]$scenario.analysis$genetic.target)$surrogate.held)
+		}
+		data.frame(Species=x, geographic.held=min.prop)
+	}
+)
+
+surrogate.repr.prop.DF <- merge(geo.surrogate.repr.prop.DF, env.surrogate.repr.prop.DF, by=c('Species'), all=TRUE)
+
 ### scenario analyses
 ## prepare data
 # single species prioritisations without cost
