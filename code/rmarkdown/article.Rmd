@@ -42,8 +42,10 @@ options(error=NULL)
 
 <!--  title page -->
 Short running title: Genetic surrogates in conservation \newline
-Word count: XXXXX \newline
+Abstract word count: XXXXX \newline
+Main text word count: XXXXX \newline
 Number of references: XXXX \newline
+Number of equations: XXXX \newline
 Number of figures: XXXX \newline
 Number of tables: XXXX \newline
 Number of text boxes: XXXX \newline

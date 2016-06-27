@@ -415,7 +415,7 @@ calc.fig.width <- function(i) {
 }
 
 is.speciesPlottable <- function(i) {
-	if (i <= general.params.LST[[MODE]]$n.spp)
+	if (i > general.params.LST[[MODE]]$n.spp)
 		return(FALSE)
 	return(!is.na(unique(spp.samples.DF$species)[i]))
 }
