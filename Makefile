@@ -40,11 +40,11 @@ pull_ms__gb:
 	@git fetch
 	@git checkout '$(COMMIT_ID)' code/rmarkdown
 
-pull_ms_cb:
-	@scp ubuntu@cloudburster.net:/mnt/users/jhans/tmp/* article
+pull_ms:
+	@scp -P 443 uqjhans4@cbcs-comp01.server.science.uq.edu.au:/home/uqjhans4/GitHub/genetic-surrogates/article/* article
 
-push_ms_cb:
-	@scp article/* ubuntu@cloudburster.net:/mnt/users/jhans/tmp
+push_ms:
+	@scp -P 443 code/rmarkdown/* uqjhans4@cbcs-comp01.server.science.uq.edu.au:/home/uqjhans4/GitHub/genetic-surrogates/code/rmarkdown
 	
 # commands for generating manuscript
 manuscript: article figures tables si
