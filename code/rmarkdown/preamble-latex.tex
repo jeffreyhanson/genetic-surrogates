@@ -5,28 +5,6 @@
 \usepackage[utf8]{inputenc}
 \usepackage[doublespacing]{setspace}
 
-% format captions
-\usepackage[labelfont={small,bf}, labelsep=space, font={small}]{caption}
-
-% format headings
-\titleformat{\subsection}
-{\normalfont\Large\bfseries}{\thesubsection}{1em}{}
-\titleformat{\subsubsection}
-{\normalfont\large\bfseries}{\thesubsubsection}{1em}{}
-\titleformat{\paragraph}
-{\normalfont\normalsize\bfseries}{\theparagraph}{1em}{}
-\titleformat{\subparagraph}
-{\normalfont\normalsize\itshape}{\thesubparagraph}{1em}{}
-
-\titlespacing\paragraph{0pt}{12pt plus 4pt minus 2pt}{+0pt plus 2pt minus 2pt}
-\titlespacing{\subparagraph}{0pt}{6pt plus 4pt minus 2pt}{+0pt plus 2pt minus 2pt}
-
-% format toc
-\renewcommand\cftsubsecfont{\normalfont\normalsize\bfseries}
-% \renewcommand\cftsubsubsecfont{\normalfont\normalsize\bfseries}
-% \renewcommand\cftparafont{\normalfont\normalsize\bfseries}
-% \renewcommand\cftsubparafont{\normalfont\normalsize\itshape}
-
 % make figures static
 \let\origfigure\figure
 \let\endorigfigure\endfigure
@@ -36,11 +14,10 @@
 	\endorigfigure
 }
 
-% define struts for tables
-\newcommand\T{\rule{0pt}{2.6ex}} % top strut
-\newcommand\B{\rule[-1.2ex]{0pt}{0pt}} % bottom strut
-
-% define command to put new lines in table cells
-%\newcommand{\specialcell}[2][c]{%
-%  \begin{tabular}[#1]{@{}c@{}}#2\end{tabular}}
-  
+%% For PNAS Only:
+\contributor{Submitted to Proceedings of the National Academy of Sciences of the United States of America}
+\url{www.pnas.org/cgi/doi/10.1073/pnas.0709640104}
+\copyrightyear{2008}
+\issuedate{Issue Date}
+\volume{Volume}
+\issuenumber{Issue Number}

@@ -58,6 +58,8 @@ suppressMessages(library(pcadapt))
 suppressMessages(library(broom))
 
 ## load github packages
+# devtools::install_github('cboettig/rticles')
+suppressMessages(library(rticles))
 # devtools::install_github('paleo13/rapr')
 suppressMessages(library(rapr))
 # devtools::install_github('paleo13/bayescanr')

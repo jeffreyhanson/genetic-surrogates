@@ -278,7 +278,7 @@ scenario.DF <- rbind.fill(list(single.spp.SDF, single.spp.with.cost.SDF, multi.s
 	mutate(Prioritisation.Metric.Context=interaction(Prioritisation,Metric,Context))
 	
 # remove NA values
-scenario.sub.DF <- scenario.DF[rowSums(apply(select(scenario.DF, Prioritisation, Metric, Context), 2, is.na))==0,]
+scenario.sub.DF <- scenario.DF[rowSums(apply(select(scenario.DF, genetic.held, Prioritisation, Metric, Context), 2, is.na))==0,]
 
 # run models
 full.model <- glmer(genetic.held~Prioritisation*Metric*Context + (1|Species), data=scenario.sub.DF, family='binomial', nAGQ=10, control=glmerControl(optimizer='bobyqa', optCtrl=list(maxfun=1e5)))
