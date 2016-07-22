@@ -8,9 +8,9 @@ output:
     fig_caption: yes
     keep_tex: yes
     includes:
-      in_header: [preamble-latex.tex, preamble-latex3.tex]
+      in_header: [preamble.tex, si-preamble.tex]
 ---
-## Supporting Information
+# Supporting Information
 All data and code is stored in an online repository (\url{www.github.com/paleo13/genetic.surrogates}) to replicate analyses in this study. See the \textit{README} file for instructions.
 
 

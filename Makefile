@@ -17,11 +17,6 @@ clean:
 	@rm data/intermediate/pcadapt -rf
 	@rm code/rmarkdown/article_files/figure-latex/*.pdf -f
 	@rm code/rmarkdown/supporting_information_files/figure-latex/*.pdf -f
-	@rm code/rmarkdown/figures_files/figure-latex/*.pdf -f
-	@rm code/rmarkdown/figures.tex -f
-	@rm code/rmarkdown/figures.md -f
-	@rm code/rmarkdown/figures.docx -f
-	@rm code/rmarkdown/figures.pdf -f
 	@rm code/rmarkdown/supporting_information.tex -f
 	@rm code/rmarkdown/supporting_information.md -f
 	@rm code/rmarkdown/supporting_information.docx -f
@@ -30,10 +25,6 @@ clean:
 	@rm code/rmarkdown/article.tex -f
 	@rm code/rmarkdown/article.docx -f
 	@rm code/rmarkdown/article.pdf -f
-	@rm code/rmarkdown/tables.md -f
-	@rm code/rmarkdown/tables.tex -f
-	@rm code/rmarkdown/tables.docx -f
-	@rm code/rmarkdown/tables.pdf -f
 	@rm article/*.csv -f
 
 pull_ms__gb:
@@ -47,33 +38,27 @@ push_ms:
 	@scp -P 443 code/rmarkdown/* uqjhans4@cbcs-comp01.server.science.uq.edu.au:/home/uqjhans4/GitHub/genetic-surrogates/code/rmarkdown
 	
 # commands for generating manuscript
-manuscript: article figures tables si
+manuscript: article si
 
-article: article/article.pdf
-
-figures: article/figures.pdf
-
-tables: article/tables.pdf
+article: article/article.pdf article/article.docx
 
 si: article/supporting_information.pdf
 
-article/article.pdf: code/rmarkdown/article.Rmd code/rmarkdown/references.bib code/rmarkdown/preamble-latex.tex code/rmarkdown/reference-style.csl
-	R -e "rmarkdown::render('code/rmarkdown/article.Rmd')"
-	mv code/rmarkdown/article.pdf article/
-	rm article/article.tex -f
+article/article.docx: code/rmarkdown/article.Rmd code/rmarkdown/references.bib code/rmarkdown/preamble.tex code/rmarkdown/reference-style.csl
+	R -e "rmarkdown::render('code/rmarkdown/article.Rmd', output_file='article.docx')"
+	mv code/rmarkdown/article.docx article/
 	rm article/article.md -f
+	rm article/article.tex -f
+	rm article/article.utf8.md -f
 
-article/figures.pdf: code/rmarkdown/figures.Rmd code/rmarkdown/preamble-latex.tex code/rmarkdown/preamble-latex2.tex
-	R -e "rmarkdown::render('code/rmarkdown/figures.Rmd')"
-	mv code/rmarkdown/figures.pdf article/
-	rm article/figures.tex -f
-	rm article/figures.md -f
-
-article/tables.pdf: code/rmarkdown/tables.Rmd code/rmarkdown/preamble-latex.tex code/rmarkdown/preamble-latex2.tex
-	R -e "rmarkdown::render('code/rmarkdown/tables.Rmd')"
-	mv code/rmarkdown/tables.pdf article/
-	rm code/rmarkdown/tables.tex -f
-	rm code/rmarkdown/tables.md -f
+article/article.pdf: code/rmarkdown/article.Rmd code/rmarkdown/references.bib code/rmarkdown/preamble.tex code/rmarkdown/reference-style.csl
+	R -e "rmarkdown::render('code/rmarkdown/article.Rmd')"
+	R -e "source('code/R/functions/format_pnas.R');format_pnas('code/rmarkdown/article.tex','code/rmarkdown/article.tex')"
+	cd code/rmarkdown && pdflatex article.tex
+	mv code/rmarkdown/article.pdf article/
+	mv code/rmarkdown/article.tex article/
+	rm article/article.md -f
+	rm article/article.utf8.md -f
 
 article/supporting_information.pdf: code/rmarkdown/supporting_information.Rmd code/rmarkdown/preamble-latex.tex code/rmarkdown/preamble-latex3.tex
 	R -e "rmarkdown::render('code/rmarkdown/supporting_information.Rmd')"
@@ -92,23 +77,23 @@ data/intermediate/12-*.rda: data/intermediate/07-*.rda data/intermediate/08-*.rd
 	R CMD BATCH --no-restore --no-save code/R/analysis/12-*.R
 	mv *.Rout data/intermediate/
 
-data/intermediate/11-*.rda: data/intermediate/06-*.rda code/R/analysis/11-*.R code/parameters/rapr.toml code/parameters/gurobi.toml
+data/intermediate/11-*.rda: data/intermediate/06-*.rda code/R/analysis/11-*.R code/parameters/raptr.toml code/parameters/gurobi.toml
 	R CMD BATCH --no-restore --no-save code/R/analysis/11-*.R
 	mv *.Rout data/intermediate/
 
-data/intermediate/10-*.rda: data/intermediate/06-*.rda code/R/analysis/10-*.R code/parameters/rapr.toml code/parameters/gurobi.toml
+data/intermediate/10-*.rda: data/intermediate/06-*.rda code/R/analysis/10-*.R code/parameters/raptr.toml code/parameters/gurobi.toml
 	R CMD BATCH --no-restore --no-save code/R/analysis/10-*.R
 	mv *.Rout data/intermediate/
 
-data/intermediate/09-*.rda: data/intermediate/06-*.rda code/R/analysis/09-*.R code/parameters/rapr.toml code/parameters/gurobi.toml
+data/intermediate/09-*.rda: data/intermediate/06-*.rda code/R/analysis/09-*.R code/parameters/raptr.toml code/parameters/gurobi.toml
 	R CMD BATCH --no-restore --no-save code/R/analysis/09-*.R
 	mv *.Rout data/intermediate/
 
-data/intermediate/08-*.rda: data/intermediate/06-*.rda code/R/analysis/08-*.R code/parameters/rapr.toml code/parameters/gurobi.toml
+data/intermediate/08-*.rda: data/intermediate/06-*.rda code/R/analysis/08-*.R code/parameters/raptr.toml code/parameters/gurobi.toml
 	R CMD BATCH --no-restore --no-save code/R/analysis/08-*.R
 	mv *.Rout data/intermediate/
 	
-data/intermediate/07-*.rda: data/intermediate/06-*.rda code/R/analysis/07-*.R code/parameters/rapr.toml code/parameters/gurobi.toml
+data/intermediate/07-*.rda: data/intermediate/06-*.rda code/R/analysis/07-*.R code/parameters/raptr.toml code/parameters/gurobi.toml
 	R CMD BATCH --no-restore --no-save code/R/analysis/07-*.R
 	mv *.Rout data/intermediate/
 

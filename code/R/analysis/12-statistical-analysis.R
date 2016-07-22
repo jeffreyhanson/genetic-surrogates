@@ -209,7 +209,7 @@ env.surrogate.repr.prop.DF <- ldply(
 		curr.mod <- env.surrogacy.LST[[x]]$model
 		curr.DF <- data.frame(surrogate.held=seq(0,1,length.out=10000))
 		curr.DF$genetic.held <- predict(curr.mod, newdata=curr.DF, type='response')
-		min.prop <- min(filter(curr.DF, genetic.held >= rapr.params.LST[[MODE]]$scenario.analysis$genetic.target)$surrogate.held)
+		min.prop <- min(filter(curr.DF, genetic.held >= raptr.params.LST[[MODE]]$scenario.analysis$genetic.target)$surrogate.held)
 		data.frame(Species=x, environmental.held=min.prop)
 	}
 )
@@ -220,10 +220,10 @@ geo.surrogate.repr.prop.DF <- ldply(
 		curr.mod <- geo.surrogacy.LST[[x]]$model
 		curr.DF <- data.frame(surrogate.held=seq(0,1,length.out=10000))
 		curr.DF$genetic.held <- predict(curr.mod, newdata=curr.DF, type='response')
-		if (max(curr.DF$genetic.held) < rapr.params.LST[[MODE]]$scenario.analysis$genetic.target) {
+		if (max(curr.DF$genetic.held) < raptr.params.LST[[MODE]]$scenario.analysis$genetic.target) {
 			min.prop <- 1
 		} else {
-			min.prop <- min(filter(curr.DF, genetic.held >= rapr.params.LST[[MODE]]$scenario.analysis$genetic.target)$surrogate.held)
+			min.prop <- min(filter(curr.DF, genetic.held >= raptr.params.LST[[MODE]]$scenario.analysis$genetic.target)$surrogate.held)
 		}
 		data.frame(Species=x, geographic.held=min.prop)
 	}

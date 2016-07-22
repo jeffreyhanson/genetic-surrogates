@@ -14,10 +14,7 @@
 	\endorigfigure
 }
 
-%% For PNAS Only:
-\contributor{Submitted to Proceedings of the National Academy of Sciences of the United States of America}
-\url{www.pnas.org/cgi/doi/10.1073/pnas.0709640104}
-\copyrightyear{2008}
-\issuedate{Issue Date}
-\volume{Volume}
-\issuenumber{Issue Number}
+% insert S before figure and table caption
+\pagenumbering{gobble}
+\renewcommand{\thefigure}{S\arabic{figure}}
+\renewcommand{\thetable}{S\arabic{table}}

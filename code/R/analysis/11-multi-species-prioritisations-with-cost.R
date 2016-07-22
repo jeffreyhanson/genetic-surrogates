@@ -2,21 +2,21 @@
 session::restore.session('data/intermediate/06-format-data-for-prioritisations.rda')
 
 ## load parameters
-rapr.params.LST <- parseTOML('code/parameters/rapr.toml')
+raptr.params.LST <- parseTOML('code/parameters/raptr.toml')
 gurobi.params.LST <- parseTOML('code/parameters/gurobi.toml')
 
 ## multispecies analysis
 # make prioritisations
 multi.spp.prioritisations.with.cost <- llply(
 	list(
-		list(rapr.params.LST[[MODE]]$scenario.analysis$amount.target,NA,NA,
-			rapr.params.LST[[MODE]]$scenario.analysis$other.replicates),
-		list(rapr.params.LST[[MODE]]$scenario.analysis$amount.target,
-			rapr.params.LST[[MODE]]$scenario.analysis$surrogate.target,NA,
-			rapr.params.LST[[MODE]]$scenario.analysis$other.replicates), 
-		list(rapr.params.LST[[MODE]]$scenario.analysis$amount.target,NA,
-			rapr.params.LST[[MODE]]$scenario.analysis$genetic.target,
-			rapr.params.LST[[MODE]]$scenario.analysis$other.replicates)
+		list(raptr.params.LST[[MODE]]$scenario.analysis$amount.target,NA,NA,
+			raptr.params.LST[[MODE]]$scenario.analysis$other.replicates),
+		list(raptr.params.LST[[MODE]]$scenario.analysis$amount.target,
+			raptr.params.LST[[MODE]]$scenario.analysis$surrogate.target,NA,
+			raptr.params.LST[[MODE]]$scenario.analysis$other.replicates), 
+		list(raptr.params.LST[[MODE]]$scenario.analysis$amount.target,NA,
+			raptr.params.LST[[MODE]]$scenario.analysis$genetic.target,
+			raptr.params.LST[[MODE]]$scenario.analysis$other.replicates)
 	), 
 	function(y) {
 		species.prioritisation(

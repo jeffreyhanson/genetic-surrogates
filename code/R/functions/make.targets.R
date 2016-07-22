@@ -9,7 +9,7 @@
 #' @param adaptive.spaces \code{list} of \code{AttributeSpace} objects with adaptive space data for species with loci undergoing adaptation.
 #' @param neutral.spaces \code{list} of \code{AttributeSpace} objects with netrual space data for species with loci not undergoing adaptation. 
 #' @details The \code{AttributeSpace} objects in the arguments to \code{adaptive.spaces} and \code{neutral.spaces} are special, such that the species they are not associated with will have negative weights.
-#' @seealso \code{\link[rapr]{AttributeSpace}}.
+#' @seealso \code{\link[raptr]{AttributeSpace}}.
 #' @export
 make.targets <- function(
 	species, 

@@ -13,5 +13,5 @@ The files in this directory contain parameters used to run analyses. These files
 	+ parameters used to control the behaviour of the reserve selection optimization
 * nmds.toml
 	+ parameters used to identify the main themes of genetic variation for each species using NMDS
-* rapr.toml
+* raptr.toml
 	+ parameters specifying targets used to generate prioritizations

@@ -2,7 +2,7 @@
 session::restore.session('data/intermediate/06-format-data-for-prioritisations.rda')
 
 ## load parameters
-rapr.params.LST <- parseTOML('code/parameters/rapr.toml')
+raptr.params.LST <- parseTOML('code/parameters/raptr.toml')
 gurobi.params.LST <- parseTOML('code/parameters/gurobi.toml')
 
 #### single species analysis
@@ -10,8 +10,8 @@ gurobi.params.LST <- parseTOML('code/parameters/gurobi.toml')
 ## amount-based prioritisations
 # prepare cluster object
 clust <- makeCluster(general.params.LST[[MODE]]$threads, type='PSOCK', outfile="")
-clusterEvalQ(clust, {library(rapr)})
-clusterExport(clust, c('spp.samples.sub.DF','grid.sub.DF','rapr.params.LST',
+clusterEvalQ(clust, {library(raptr)})
+clusterExport(clust, c('spp.samples.sub.DF','grid.sub.DF','raptr.params.LST',
 	'MODE', 'species.prioritisation', 'ru'))
 registerDoParallel(clust)
 # main analysis
@@ -20,17 +20,17 @@ single.spp.amount.prioritisations <- llply(
 	function(x) {
 		# identify which planning units are occupied by the species
 		curr.pu <- which(grid.sub.DF[[unique(spp.samples.sub.DF$species)[[x]]]]==1)
-		n.pu <- ceiling(length(curr.pu) * rapr.params.LST[[MODE]]$scenario.analysis$amount.target)
+		n.pu <- ceiling(length(curr.pu) * raptr.params.LST[[MODE]]$scenario.analysis$amount.target)
 		zeros <- rep(0, length=nrow(grid.sub.DF))
 		curr.sol.MTX<-t(replicate(
-			n=rapr.params.LST[[MODE]]$scenario.analysis$single.species.amount.replicates,
+			n=raptr.params.LST[[MODE]]$scenario.analysis$single.species.amount.replicates,
 			expr={replace(zeros, sample(x=curr.pu, size=n.pu), rep(1, n.pu))}
 		))
 		# generate portfolio of random selections
 		return(
 			species.prioritisation(
 				x=spp.subset(ru, x),
-				amount.targets=rapr.params.LST[[MODE]]$scenario.analysis$amount.target,
+				amount.targets=raptr.params.LST[[MODE]]$scenario.analysis$amount.target,
 				env.surrogate.targets=NA,
 				geo.surrogate.targets=NA,
 				adaptive.genetic.targets=NA,
@@ -50,14 +50,14 @@ single.spp.surrogate.prioritisations <- llply(
 	function(x) {
 		species.prioritisation(
 				x=spp.subset(ru, x),
-				amount.targets=rapr.params.LST[[MODE]]$scenario.analysis$amount.target,
-				env.surrogate.targets=rapr.params.LST[[MODE]]$scenario.analysis$surrogate.target,
-				geo.surrogate.targets=rapr.params.LST[[MODE]]$scenario.analysis$surrogate.target,
+				amount.targets=raptr.params.LST[[MODE]]$scenario.analysis$amount.target,
+				env.surrogate.targets=raptr.params.LST[[MODE]]$scenario.analysis$surrogate.target,
+				geo.surrogate.targets=raptr.params.LST[[MODE]]$scenario.analysis$surrogate.target,
 				adaptive.genetic.targets=NA,
 				neutral.genetic.targets=NA,
 				Threads=general.params.LST[[MODE]]$threads,
 				MIPGap=gurobi.params.LST[[MODE]]$MIPGap,
-				NumberSolutions=rapr.params.LST[[MODE]]$scenario.analysis$other.replicates,
+				NumberSolutions=raptr.params.LST[[MODE]]$scenario.analysis$other.replicates,
 				MultipleSolutionsMethod='benders.cuts'
 		)
 	}
@@ -69,14 +69,14 @@ single.spp.genetic.prioritisations <- llply(
 	function(x) {
 		species.prioritisation(
 				x=spp.subset(ru, x),
-				amount.targets=rapr.params.LST[[MODE]]$scenario.analysis$amount.target,
+				amount.targets=raptr.params.LST[[MODE]]$scenario.analysis$amount.target,
 				env.surrogate.targets=NA,
 				geo.surrogate.targets=NA,
-				adaptive.genetic.targets=rapr.params.LST[[MODE]]$scenario.analysis$genetic.target,
-				neutral.genetic.targets=rapr.params.LST[[MODE]]$scenario.analysis$genetic.target,
+				adaptive.genetic.targets=raptr.params.LST[[MODE]]$scenario.analysis$genetic.target,
+				neutral.genetic.targets=raptr.params.LST[[MODE]]$scenario.analysis$genetic.target,
 				Threads=general.params.LST[[MODE]]$threads,
 				MIPGap=gurobi.params.LST[[MODE]]$MIPGap,
-				NumberSolutions=rapr.params.LST[[MODE]]$scenario.analysis$other.replicates
+				NumberSolutions=raptr.params.LST[[MODE]]$scenario.analysis$other.replicates
 		)
 	}
 )
@@ -101,9 +101,9 @@ single.spp.DF <- ldply(
 		mutate(
 			ldply(x, extractResults),
 			Prioritisation=c(
-				rep('Amount',rapr.params.LST[[MODE]]$scenario.analysis$single.species.amount.replicates),
-				rep('Surrogate',rapr.params.LST[[MODE]]$scenario.analysis$other.replicates),
-				rep('Genetic',rapr.params.LST[[MODE]]$scenario.analysis$other.replicates)
+				rep('Amount',raptr.params.LST[[MODE]]$scenario.analysis$single.species.amount.replicates),
+				rep('Surrogate',raptr.params.LST[[MODE]]$scenario.analysis$other.replicates),
+				rep('Genetic',raptr.params.LST[[MODE]]$scenario.analysis$other.replicates)
 			)
 		)
 	}

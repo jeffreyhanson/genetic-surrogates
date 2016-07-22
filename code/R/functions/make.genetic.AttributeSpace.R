@@ -5,7 +5,7 @@
 #' @param site.data \code{data.frame} with coordinates for planning units.
 #' @param species.data \code{data.frame} with coordinates of demand points for the species.
 #' @return \code{AttributeSpace}.
-#' @seealso \code{\link[rapr]{AttributeSpace}}, \code{\link[rapr]{AttributeSpace}}.
+#' @seealso \code{\link[raptr]{AttributeSpace}}.
 #' @export
 make.genetic.AttributeSpace <- function(site.data,species.data,species) {
 	# extract ids of pus where the species is found

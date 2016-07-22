@@ -2,7 +2,7 @@
 session::restore.session('data/intermediate/06-format-data-for-prioritisations.rda')
 
 ## load parameters
-rapr.params.LST <- parseTOML('code/parameters/rapr.toml')
+raptr.params.LST <- parseTOML('code/parameters/raptr.toml')
 gurobi.params.LST <- parseTOML('code/parameters/gurobi.toml')
 
 #### single species analysis
@@ -16,14 +16,14 @@ single.spp.amount.prioritisations.with.cost <- llply(
 		return(
 			species.prioritisation(
 				x=spp.subset(ru_with_cost, x),
-				amount.targets=rapr.params.LST[[MODE]]$scenario.analysis$amount.target,
+				amount.targets=raptr.params.LST[[MODE]]$scenario.analysis$amount.target,
 				env.surrogate.targets=NA,
 				geo.surrogate.targets=NA,
 				adaptive.genetic.targets=NA,
 				neutral.genetic.targets=NA,
 				Threads=general.params.LST[[MODE]]$threads,
 				MIPGap=gurobi.params.LST[[MODE]]$MIPGap,
-				NumberSolutions=rapr.params.LST[[MODE]]$scenario.analysis$other.replicates,
+				NumberSolutions=raptr.params.LST[[MODE]]$scenario.analysis$other.replicates,
 				MultipleSolutionsMethod='benders.cuts'
 			)
 		)
@@ -36,14 +36,14 @@ single.spp.surrogate.prioritisations.with.cost <- llply(
 	function(x) {
 		species.prioritisation(
 				x=spp.subset(ru_with_cost, x),
-				amount.targets=rapr.params.LST[[MODE]]$scenario.analysis$amount.target,
-				env.surrogate.targets=rapr.params.LST[[MODE]]$scenario.analysis$surrogate.target,
-				geo.surrogate.targets=rapr.params.LST[[MODE]]$scenario.analysis$surrogate.target,
+				amount.targets=raptr.params.LST[[MODE]]$scenario.analysis$amount.target,
+				env.surrogate.targets=raptr.params.LST[[MODE]]$scenario.analysis$surrogate.target,
+				geo.surrogate.targets=raptr.params.LST[[MODE]]$scenario.analysis$surrogate.target,
 				adaptive.genetic.targets=NA,
 				neutral.genetic.targets=NA,
 				Threads=general.params.LST[[MODE]]$threads,
 				MIPGap=gurobi.params.LST[[MODE]]$MIPGap,
-				NumberSolutions=rapr.params.LST[[MODE]]$scenario.analysis$other.replicates,
+				NumberSolutions=raptr.params.LST[[MODE]]$scenario.analysis$other.replicates,
 				MultipleSolutionsMethod='benders.cuts'
 		)
 	}
@@ -55,14 +55,14 @@ single.spp.genetic.prioritisations.with.cost <- llply(
 	function(x) {
 		species.prioritisation(
 				x=spp.subset(ru_with_cost, x),
-				amount.targets=rapr.params.LST[[MODE]]$scenario.analysis$amount.target,
+				amount.targets=raptr.params.LST[[MODE]]$scenario.analysis$amount.target,
 				env.surrogate.targets=NA,
 				geo.surrogate.targets=NA,
-				adaptive.genetic.targets=rapr.params.LST[[MODE]]$scenario.analysis$genetic.target,
-				neutral.genetic.targets=rapr.params.LST[[MODE]]$scenario.analysis$genetic.target,
+				adaptive.genetic.targets=raptr.params.LST[[MODE]]$scenario.analysis$genetic.target,
+				neutral.genetic.targets=raptr.params.LST[[MODE]]$scenario.analysis$genetic.target,
 				Threads=general.params.LST[[MODE]]$threads,
 				MIPGap=gurobi.params.LST[[MODE]]$MIPGap,
-				NumberSolutions=rapr.params.LST[[MODE]]$scenario.analysis$other.replicates,
+				NumberSolutions=raptr.params.LST[[MODE]]$scenario.analysis$other.replicates,
 				MultipleSolutionsMethod='benders.cuts'
 		)
 	}
@@ -88,9 +88,9 @@ single.spp.with.cost.DF <- ldply(
 		mutate(
 			ldply(x, extractResults),
 			Prioritisation=c(
-				rep('Amount',rapr.params.LST[[MODE]]$scenario.analysis$other.replicates),
-				rep('Surrogate',rapr.params.LST[[MODE]]$scenario.analysis$other.replicates),
-				rep('Genetic',rapr.params.LST[[MODE]]$scenario.analysis$other.replicates)
+				rep('Amount',raptr.params.LST[[MODE]]$scenario.analysis$other.replicates),
+				rep('Surrogate',raptr.params.LST[[MODE]]$scenario.analysis$other.replicates),
+				rep('Genetic',raptr.params.LST[[MODE]]$scenario.analysis$other.replicates)
 			)
 		)
 	}
