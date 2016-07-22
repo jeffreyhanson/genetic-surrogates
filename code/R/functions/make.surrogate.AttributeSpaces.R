@@ -9,7 +9,7 @@
 #' @details The demand points for each species are generated as the coordinates of the planning units
 #' that the species is found in.
 #' @return \code{AttributeSpace}
-#' @seealso \code{\link[rapr]{AttributeSpace}}, \code{\link[rapr]{DemandPoints}}.
+#' @seealso \code{\link[raptr]{AttributeSpace}}, \code{\link[raptr]{DemandPoints}}.
 #' @export
 make.surrogate.AttributeSpaces <- function(site.data, species.data, name) {
 	return(
