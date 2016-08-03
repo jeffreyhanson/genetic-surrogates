@@ -60,7 +60,7 @@ article/article.pdf: code/rmarkdown/article.Rmd code/rmarkdown/references.bib co
 	rm article/article.md -f
 	rm article/article.utf8.md -f
 
-article/supporting_information.pdf: code/rmarkdown/supporting_information.Rmd code/rmarkdown/preamble-latex.tex code/rmarkdown/preamble-latex3.tex
+article/supporting_information.pdf: code/rmarkdown/supporting_information.Rmd code/rmarkdown/preamble.tex code/rmarkdown/si-preamble.tex
 	R -e "rmarkdown::render('code/rmarkdown/supporting_information.Rmd')"
 	mv code/rmarkdown/supporting_information.pdf article/
 	rm code/rmarkdown/supporting_information.tex -f

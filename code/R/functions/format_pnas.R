@@ -31,6 +31,8 @@ format_pnas <- function(input_file, output_file) {
 	# parse table
 	input_file <- gsub('\\begin{tabular}{', '\\begin{tabular*}{\\hsize}{@{\\extracolsep{\\fill}}', input_file, fixed=TRUE)
 	input_file <- gsub('\\end{tabular}', '\\end{tabular*}', input_file, fixed=TRUE)
+	input_file <- gsub('\\begin{table}[H]', '\\begin{table*}', input_file, fixed=TRUE)
+	input_file <- gsub('\\end{table}', '\\end{table*}', input_file, fixed=TRUE)
 	# parse figure file paths
 	fig_pos <- grep('\\includegraphics', input_file, fixed=TRUE)
 	input_file[fig_pos] <- gsub('}', '.pdf}', input_file[fig_pos], fixed=TRUE)
