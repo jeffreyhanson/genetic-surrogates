@@ -87,8 +87,8 @@ library(rgurobi)
 
 if (!'gurobi' %in% installed.packages()[,'Package']) {
 	# find gurobi R package
-	gurobi.PTH <- dir('/opt', 'gurobi', full.names=TRUE)[1]
-	gurobi.PTH <- paste0(gurobi.PTH, '/linux64/R')
+	gurobi.PTH <- dir('/opt', 'gurobi', full.names=TRUE)
+	gurobi.PTH <- paste0(gurobi.PTH[length(gurobi.PTH)], '/linux64/R')
 	gurobi.PTH <- dir(gurobi.PTH, 'gurobi', full.names=TRUE)[1]
 	# install pkgs
 	withr::with_libpaths(.libPaths()[1], install.packages('slam'))
