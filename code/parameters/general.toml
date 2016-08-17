@@ -1,9 +1,13 @@
 title = "general parameters"
 
 [debug]
+checkpoint_date = "2016-08-03"
+checkpoint_R_version = "3.3.0"
 n.spp = 3
 threads = 1
 
 [release]
+checkpoint_date = "2016-08-03"
+checkpoint_R_version = "3.3.0"
 n.spp = 27
 threads = 20

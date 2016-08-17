@@ -1,4 +1,5 @@
 ## load .rda
+checkpoint::checkpoint(general.params.LST[[MODE]]$checkpoint_date, R.version=general.params.LST[[MODE]]$checkpoint_R_version, scanForPackages=FALSE)
 session::restore.session('data/intermediate/11-multi-species-prioritisations-with-cost.rda')
 load('data/intermediate/10-multi-species-prioritisations-no-cost.rda')
 load('data/intermediate/09-single-species-prioritisations-with-cost.rda')

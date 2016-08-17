@@ -7,12 +7,19 @@ if (length(args)>0) {
 		MODE <- strsplit(grep('MODE', args, value=TRUE), '=', fixed=TRUE)[[1]][[2]]
 }
 
+### set parameters
+if (!exists('MODE')) MODE <- 'debug'
+cat('MODE = ',MODE,'\n')
+
 #### Load packages
 # set checkpoint
 if (!'checkpoint' %in% installed.packages()[,'Package']) install.packages('checkpoint')
-library(checkpoint)
+if (!'RcppTOML' %in% installed.packages()[,'Package']) install.packages('RcppTOML')
 if (!file.exists('~/.checkpoint')) dir.create('~/.checkpoint')
-checkpoint('2016-08-03', R.version='3.3.0')
+general.params.LST <- RcppTOML::parseTOML('code/parameters/general.toml')
+checkpoint::checkpoint(general.params.LST[[MODE]]$checkpoint_date, R.version=general.params.LST[[MODE]]$checkpoint_R_version)
+if (!'checkpoint' %in% installed.packages()[,'Package']) install.packages('checkpoint')
+if (!'RcppTOML' %in% installed.packages()[,'Package']) install.packages('RcppTOML')
 
 ## load bioconductor packages
 # install packages
@@ -81,6 +88,16 @@ if (!'rgurobi' %in% installed.packages()[,'Package'])
 	withr::with_libpaths(.libPaths()[1], devtools::install_github('paleo13/rgurobi', dependencies=TRUE))
 library(rgurobi)
 
+if (!'gurobi' %in% installed.packages()[,'Package']) {
+	# find gurobi R package
+	gurobi.PTH <- dir('/opt', 'gurobi', full.names=TRUE)[1]
+	gurobi.PTH <- paste0(gurobi.PTH, '/linux64/R')
+	gurobi.PTH <- dir(gurobi.PTH, 'gurobi', full.names=TRUE)[1]
+	# install pkgs
+	withr::with_libpaths(.libPaths()[1], install.packages('slam'))
+	withr::with_libpaths(.libPaths()[1], install.packages(gurobi.PTH))
+}
+
 # manually install custom fork of ggplot2 for plotting
 devtools::install_github('paleo13/ggplot2', force=TRUE)
 library(ggplot2)
@@ -104,11 +121,6 @@ select <- dplyr::select
 
 ### Load functions
 for (x in dir(file.path('code', 'R', 'functions'), full.names=TRUE)) source(x)
-
-### set parameters
-if (!exists('MODE')) MODE <- 'debug'
-cat('MODE = ',MODE,'\n')
-general.params.LST <- parseTOML('code/parameters/general.toml')
 
 # save workspace
 save.session('data/intermediate/00-initialization.rda', compress='xz')
