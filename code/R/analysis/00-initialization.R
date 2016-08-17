@@ -7,10 +7,6 @@ if (length(args)>0) {
 		MODE <- strsplit(grep('MODE', args, value=TRUE), '=', fixed=TRUE)[[1]][[2]]
 }
 
-### set parameters
-if (!exists('MODE')) MODE <- 'debug'
-cat('MODE = ',MODE,'\n')
-
 #### Load packages
 # set checkpoint
 if (!'checkpoint' %in% installed.packages()[,'Package']) install.packages('checkpoint')
@@ -105,6 +101,11 @@ if (!'raptr' %in% installed.packages()[,'Package']) {
 	withr::with_libpaths(.libPaths()[1], devtools::install_github('paleo13/raptr', dependencies=TRUE))
 }
 library(raptr)
+
+### set parameters
+if (!exists('MODE')) MODE <- 'debug'
+cat('MODE = ',MODE,'\n')
+general.params.LST <- RcppTOML::parseTOML('code/parameters/general.toml')
 
 ## misc settings
 # set pander options
