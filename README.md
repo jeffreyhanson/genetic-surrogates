@@ -1,18 +1,20 @@
-Are environmental and geographic effective surrogates for genetic variation in conservation planning?
+Environmental and geographic variables are effective surrogates for genetic variation in conservation planning
 ========================================================================================================
+[![Status](https://img.shields.io/badge/status-in%20prep-red.svg?style=flat-square)]()
+[![License (GPL version 3)](https://img.shields.io/badge/license-GNU%20GPL%20version%203-brightgreen.svg?style=flat-square)](http://opensource.org/licenses/GPL-3.0)
 
 [Jeffrey O. Hanson](wwww.jeffrey-hanson.com), Jonathan R. Rhodes, Cynthia Riginos, Hugh P. Possingham, Richard A. Fuller
 
-Correspondance should be addressed to [jeffrey.hanson@uqconnect.edu.au](mailto:jeffrey.hanson@uqconnect.edu.au)
+Correspondence should be addressed to [jeffrey.hanson@uqconnect.edu.au](mailto:jeffrey.hanson@uqconnect.edu.au)
 
-Source code for the manuscript entitled "_Are environmental and geographic effective surrogates for genetic variation in conservation planning?_". 
+Source code for the manuscript entitled "_Environmental and geographic variables are effective surrogates for genetic variation in conservation planning_". 
 
 To rerun all computational analyses, run `make clean && make all`.
 
 ### Repository overview
 
 * article
-	+ manuscript main text, figures and tables
+	+ manuscript main text, figures, tables, and supporting information
 * data
 	+ _raw_: raw data used to run the analysis
 	+ _intermediate_: results generated during processing (eg. BayeScan output files)

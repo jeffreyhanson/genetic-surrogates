@@ -11,67 +11,91 @@ if (length(args)>0) {
 	if (grepl('MODE',args))
 		MODE <- strsplit(grep('MODE', args, value=TRUE), '=', fixed=TRUE)[[1]][[2]]
 }
-	
-	
-#### Load pacakges
+
+#### Load packages
+# set checkpoint
+library(checkpoint)
+if (!file.exists('~/.checkpoint')) dir.create('~/.checkpoint')
+checkpoint('2016-08-03', R.version='3.3.0')
+
 ## load bioconductor packages
 # install packages
-# source('http://bioconductor.org/biocLite.R')
-# biocLite('qvalue')
-suppressMessages(library(qvalue))
+if (!'qvalue' %in% install.packages()[,'Package']) {
+	source('http://bioconductor.org/biocLite.R')
+	withr::with_libpaths(.libPaths()[1], biocLite('qvalue'))
+}
+library(qvalue)
 
 # load CRAN packages
-suppressMessages(library(stats))
-suppressMessages(library(Hmisc))
-suppressMessages(library(lme4))
-suppressMessages(library(multcomp))
-suppressMessages(library(data.table))
-suppressMessages(library(grid))
-suppressMessages(library(gridExtra))
-suppressMessages(library(plotrix))
-suppressMessages(library(plyr))
-suppressMessages(library(dplyr))
-suppressMessages(library(tidyr))
-suppressMessages(library(pander))
-suppressMessages(library(vegan))
-suppressMessages(library(rgeos))
-suppressMessages(library(testthat))
-suppressMessages(library(parallel))
-suppressMessages(library(cluster))
-suppressMessages(library(rworldxtra))
-suppressMessages(library(doParallel))
-suppressMessages(library(english))
-suppressMessages(library(session))
-suppressMessages(library(maptools))
-suppressMessages(library(RcppTOML))
-suppressMessages(library(optimx))
-suppressMessages(library(RColorBrewer))
-suppressMessages(library(mclust))
-suppressMessages(library(cluster))
-suppressMessages(library(RVAideMemoire))
-suppressMessages(library(ResistanceGA))
-suppressMessages(library(MuMIn))
-suppressMessages(library(knitr))
-suppressMessages(library(pscl))
-suppressMessages(library(lazyWeave))
-suppressMessages(library(pcadapt))
-suppressMessages(library(broom))
+library(stats)
+library(withr)
+library(Hmisc)
+library(lme4)
+library(multcomp)
+library(data.table)
+library(grid)
+library(gridExtra)
+library(plotrix)
+library(plyr)
+library(dplyr)
+library(tidyr)
+library(pander)
+library(vegan)
+library(rgeos)
+library(testthat)
+library(parallel)
+library(cluster)
+library(rworldxtra)
+library(doParallel)
+library(english)
+library(session)
+library(maptools)
+library(RcppTOML)
+library(optimx)
+library(RColorBrewer)
+library(mclust)
+library(cluster)
+library(RVAideMemoire)
+library(ResistanceGA)
+library(MuMIn)
+library(knitr)
+library(pscl)
+library(lazyWeave)
+library(pcadapt)
+library(broom)
 
 ## load github packages
-# devtools::install_github('cboettig/rticles')
-suppressMessages(library(rticles))
-# devtools::install_github('paleo13/rapyr')
-suppressMessages(library(raptr))
-# devtools::install_github('paleo13/bayescanr')
-suppressMessages(library(bayescanr))
-# devtools::install_github('paleo13/structurer')
-suppressMessages(library(structurer))
-# devtools::install_github('paleo13/ggplot2')
-suppressMessages(library(ggplot2))
-# devtools::install_github('paleo13/rgurobi')
-suppressMessages(library(rgurobi))
-# devtools::install_github('wpeterman/ResistanceGA')
-suppressMessages(library(ResistanceGA))
+if (!'rticles' %in% install.packages()[,'Package'])
+	withr::with_libpaths(.libPaths()[1], devtools::install_github('cboettig/rticles', dependencies=TRUE))
+library(rticles)
+
+if (!'bayescanr' %in% install.packages()[,'Package'])
+	withr::with_libpaths(.libPaths()[1], devtools::install_github('paleo13/bayescanr', dependencies=TRUE))
+library(bayescanr)
+
+if (!'structurer' %in% install.packages()[,'Package'])
+	withr::with_libpaths(.libPaths()[1], devtools::install_github('paleo13/structurer', dependencies=TRUE))
+library(structurer)
+
+if (!'structurer' %in% install.packages()[,'Package'])
+	withr::with_libpaths(.libPaths()[1], devtools::install_github('wpeterman/structurer', dependencies=TRUE))
+library(ResistanceGA)
+
+if (!'rgurobi' %in% install.packages()[,'Package'])
+	withr::with_libpaths(.libPaths()[1], devtools::install_github('paleo13/structurer', dependencies=TRUE))
+library(rgurobi)
+
+# manually install custom fork of ggplot2 for plotting
+devtools::install_github('paleo13/ggplot2', force=TRUE)
+library(ggplot2)
+
+# install raptr
+if (!'raptr' %in% install.packages()[,'Package']) {
+	install.packages(c('adehabitatLT', 'adehabitatHS', 'deldir', 'R.utils', 'geometry', 'KernSmooth', 'misc3d', 'multicool', 'fastcluster'))
+	withr::with_libpaths(.libPaths()[1], devtools::install_github('paleo13/structurer', dependencies=TRUE))
+	devtools::install_github('paleo13/raptr')
+}
+library(raptr)
 
 # set pander options
 panderOptions('knitr.auto.asis', FALSE)
