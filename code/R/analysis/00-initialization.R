@@ -77,12 +77,12 @@ if (!'structurer' %in% install.packages()[,'Package'])
 	withr::with_libpaths(.libPaths()[1], devtools::install_github('paleo13/structurer', dependencies=TRUE))
 library(structurer)
 
-if (!'structurer' %in% install.packages()[,'Package'])
-	withr::with_libpaths(.libPaths()[1], devtools::install_github('wpeterman/structurer', dependencies=TRUE))
+if (!'ResistanceGA' %in% install.packages()[,'Package'])
+	withr::with_libpaths(.libPaths()[1], devtools::install_github('wpeterman/ResistanceGA', dependencies=TRUE))
 library(ResistanceGA)
 
 if (!'rgurobi' %in% install.packages()[,'Package'])
-	withr::with_libpaths(.libPaths()[1], devtools::install_github('paleo13/structurer', dependencies=TRUE))
+	withr::with_libpaths(.libPaths()[1], devtools::install_github('paleo13/rgurobi', dependencies=TRUE))
 library(rgurobi)
 
 # manually install custom fork of ggplot2 for plotting
@@ -92,11 +92,11 @@ library(ggplot2)
 # install raptr
 if (!'raptr' %in% install.packages()[,'Package']) {
 	install.packages(c('adehabitatLT', 'adehabitatHS', 'deldir', 'R.utils', 'geometry', 'KernSmooth', 'misc3d', 'multicool', 'fastcluster'))
-	withr::with_libpaths(.libPaths()[1], devtools::install_github('paleo13/structurer', dependencies=TRUE))
-	devtools::install_github('paleo13/raptr')
+	devtools::install_github('paleo13/raptr', dependencies=TRUE)
 }
 library(raptr)
 
+## misc settings
 # set pander options
 panderOptions('knitr.auto.asis', FALSE)
 
