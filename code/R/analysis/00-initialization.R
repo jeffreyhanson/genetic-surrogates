@@ -14,13 +14,14 @@ if (length(args)>0) {
 
 #### Load packages
 # set checkpoint
+if (!'checkpoint' %in% installed.packages()[,'Package']) install.packages('checkpoint')
 library(checkpoint)
 if (!file.exists('~/.checkpoint')) dir.create('~/.checkpoint')
 checkpoint('2016-08-03', R.version='3.3.0')
 
 ## load bioconductor packages
 # install packages
-if (!'qvalue' %in% install.packages()[,'Package']) {
+if (!'qvalue' %in% installed.packages()[,'Package']) {
 	source('http://bioconductor.org/biocLite.R')
 	withr::with_libpaths(.libPaths()[1], biocLite('qvalue'))
 }
@@ -65,23 +66,23 @@ library(pcadapt)
 library(broom)
 
 ## load github packages
-if (!'rticles' %in% install.packages()[,'Package'])
+if (!'rticles' %in% installed.packages()[,'Package'])
 	withr::with_libpaths(.libPaths()[1], devtools::install_github('cboettig/rticles', dependencies=TRUE))
 library(rticles)
 
-if (!'bayescanr' %in% install.packages()[,'Package'])
+if (!'bayescanr' %in% installed.packages()[,'Package'])
 	withr::with_libpaths(.libPaths()[1], devtools::install_github('paleo13/bayescanr', dependencies=TRUE))
 library(bayescanr)
 
-if (!'structurer' %in% install.packages()[,'Package'])
+if (!'structurer' %in% installed.packages()[,'Package'])
 	withr::with_libpaths(.libPaths()[1], devtools::install_github('paleo13/structurer', dependencies=TRUE))
 library(structurer)
 
-if (!'ResistanceGA' %in% install.packages()[,'Package'])
+if (!'ResistanceGA' %in% installed.packages()[,'Package'])
 	withr::with_libpaths(.libPaths()[1], devtools::install_github('wpeterman/ResistanceGA', dependencies=TRUE))
 library(ResistanceGA)
 
-if (!'rgurobi' %in% install.packages()[,'Package'])
+if (!'rgurobi' %in% installed.packages()[,'Package'])
 	withr::with_libpaths(.libPaths()[1], devtools::install_github('paleo13/rgurobi', dependencies=TRUE))
 library(rgurobi)
 
@@ -90,7 +91,7 @@ devtools::install_github('paleo13/ggplot2', force=TRUE)
 library(ggplot2)
 
 # install raptr
-if (!'raptr' %in% install.packages()[,'Package']) {
+if (!'raptr' %in% installed.packages()[,'Package']) {
 	install.packages(c('adehabitatLT', 'adehabitatHS', 'deldir', 'R.utils', 'geometry', 'KernSmooth', 'misc3d', 'multicool', 'fastcluster'))
 	devtools::install_github('paleo13/raptr', dependencies=TRUE)
 }
