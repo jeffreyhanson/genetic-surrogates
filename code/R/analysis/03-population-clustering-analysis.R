@@ -1,5 +1,5 @@
 ## load .rda
-checkpoint::checkpoint(general.params.LST[[MODE]]$checkpoint_date, R.version=general.params.LST[[MODE]]$checkpoint_R_version, scanForPackages=FALSE)
+checkpoint::checkpoint('2016-08-03', R.version='3.3.0', scanForPackages=FALSE)
 session::restore.session('data/intermediate/02-surrogate-data.rda')
 
 ## load parameters

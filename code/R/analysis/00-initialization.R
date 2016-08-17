@@ -14,12 +14,9 @@ cat('MODE = ',MODE,'\n')
 #### Load packages
 # set checkpoint
 if (!'checkpoint' %in% installed.packages()[,'Package']) install.packages('checkpoint')
-if (!'RcppTOML' %in% installed.packages()[,'Package']) install.packages('RcppTOML')
 if (!file.exists('~/.checkpoint')) dir.create('~/.checkpoint')
-general.params.LST <- RcppTOML::parseTOML('code/parameters/general.toml')
-checkpoint::checkpoint(general.params.LST[[MODE]]$checkpoint_date, R.version=general.params.LST[[MODE]]$checkpoint_R_version)
+checkpoint::checkpoint('2016-08-03', R.version='3.3.0')
 if (!'checkpoint' %in% installed.packages()[,'Package']) install.packages('checkpoint')
-if (!'RcppTOML' %in% installed.packages()[,'Package']) install.packages('RcppTOML')
 
 ## load bioconductor packages
 # install packages
