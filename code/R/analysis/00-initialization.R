@@ -1,9 +1,4 @@
 #### set default error message
-options(error=function() {
-  save.image(paste0('results-error-',as.character(Sys.time()),'.rda'))
-  traceback()
-})
-
 # parse args
 args <- commandArgs(TRUE)
 if (length(args)>0) {
@@ -92,8 +87,8 @@ library(ggplot2)
 
 # install raptr
 if (!'raptr' %in% installed.packages()[,'Package']) {
-	install.packages(c('adehabitatLT', 'adehabitatHS', 'deldir', 'R.utils', 'geometry', 'KernSmooth', 'misc3d', 'multicool', 'fastcluster'))
-	devtools::install_github('paleo13/raptr', dependencies=TRUE)
+	install.packages(c('adehabitatLT', 'adehabitatHS', 'deldir', 'R.utils', 'geometry', 'KernSmooth', 'misc3d', 'multicool', 'fastcluster', 'rgdal', 'raster', 'PBSmapping', 'RJSONIO', 'R.methodsS3', 'R.oo'))
+	withr::with_libpaths(.libPaths()[1], devtools::install_github('paleo13/raptr', dependencies=TRUE))
 }
 library(raptr)
 
