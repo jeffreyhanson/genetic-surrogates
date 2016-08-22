@@ -91,7 +91,7 @@ if (!'gurobi' %in% installed.packages()[,'Package']) {
 }
 
 # manually install custom fork of ggplot2 for plotting
-devtools::install_github('paleo13/ggplot2', force=TRUE)
+devtools::install_github('paleo13/ggplot2')
 library(ggplot2)
 
 # install raptr
