@@ -11,7 +11,7 @@ if (length(args)>0) {
 # set checkpoint
 if (!'checkpoint' %in% installed.packages()[,'Package']) install.packages('checkpoint')
 if (!file.exists('~/.checkpoint')) dir.create('~/.checkpoint')
-checkpoint::checkpoint('2016-08-03', R.version='3.3.0')
+checkpoint::checkpoint('2016-08-03', R.version='3.3.1')
 if (!'checkpoint' %in% installed.packages()[,'Package']) install.packages('checkpoint')
 
 ## load bioconductor packages

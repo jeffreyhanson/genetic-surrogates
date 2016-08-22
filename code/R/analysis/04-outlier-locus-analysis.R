@@ -1,5 +1,5 @@
 ## load .rda
-checkpoint::checkpoint('2016-08-03', R.version='3.3.0', scanForPackages=FALSE)
+checkpoint::checkpoint('2016-08-03', R.version='3.3.1', scanForPackages=FALSE)
 session::restore.session('data/intermediate/03-population-clustering-analysis.rda')
 
 ## load parameters
