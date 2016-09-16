@@ -1,14 +1,11 @@
 ## global variables
 # set parameters for inference 
-# MODE=release 
+MODE=release 
 # set parameters for debugging code
-MODE=debug
-
-# set misc parameters
-COMMIT_ID=$(shell git ls-remote https://github.com/paleo13/genetic-surrogates.git HEAD | grep -o '^\S*')
+# MODE=debug
 
 # main operations
-all: clean analysis manuscript
+all: analysis manuscript
 
 clean:
 	@rm -f *.aux *.bbl *.blg *.log *.pdf *.bak *~ *.Rout */*.Rout */*.pdf */*.aux */*.log *.rda */*.rda */*/*.rda data/intermediate/*.rda data/intermediate/*.Rout
