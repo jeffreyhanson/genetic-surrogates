@@ -8,7 +8,7 @@ MODE=release
 all: analysis manuscript
 
 clean:
-	@rm -f *.aux *.bbl *.blg *.log *.pdf *.bak *~ *.Rout */*.Rout */*.pdf */*.aux */*.log *.rda */*.rda */*/*.rda data/intermediate/*.rda data/intermediate/*.Rout
+	@rm -f *.aux *.bbl *.blg *.log *.pdf *.docx *.bak *~ *.Rout */*.Rout */*.pdf */*.aux */*.log *.rda */*.rda */*/*.rda data/intermediate/*.rda data/intermediate/*.Rout
 	@rm data/intermediate/structure -rf
 	@rm data/intermediate/bayescan -rf
 	@rm data/intermediate/pcadapt -rf
@@ -23,10 +23,7 @@ clean:
 	@rm code/rmarkdown/article.docx -f
 	@rm code/rmarkdown/article.pdf -f
 	@rm article/*.csv -f
-
-pull_ms__gb:
-	@git fetch
-	@git checkout '$(COMMIT_ID)' code/rmarkdown
+	@rm article/*.docx -f
 
 pull_ms:
 	@scp -P 443 uqjhans4@cbcs-comp01.server.science.uq.edu.au:/home/uqjhans4/GitHub/genetic-surrogates/article/* article
