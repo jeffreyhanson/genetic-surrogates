@@ -39,11 +39,15 @@ article: article/article.pdf article/article.docx
 si: article/supporting_information.pdf
 
 article/article.docx: code/rmarkdown/article.Rmd code/rmarkdown/references.bib code/rmarkdown/preamble.tex code/rmarkdown/reference-style.csl
-	R -e "rmarkdown::render('code/rmarkdown/article.Rmd', output_file='article.docx')"
+	R -e "rmarkdown::render('code/rmarkdown/article.Rmd', clean=FALSE)"
+	R -e "sapply(dir('code/rmarkdown/article_files/figure-latex', full.names=TRUE), function(x) {system(paste('convert -density 300 -quality 85', x, gsub('.pdf', '.png', x, fixed=TRUE)))})"
+	R -e "x <- readLines('code/rmarkdown/article.tex'); pos <- grep('\\\\includegraphics', x, fixed=TRUE); x[pos] <- gsub('}', '.png}', x[pos], fixed=TRUE); writeLines(x, 'code/rmarkdown/article.tex')"
+	cd code/rmarkdown && \
+	pandoc +RTS -K512m -RTS article.tex -o article.docx --highlight-style tango --latex-engine pdflatex --include-in-header preamble.tex --variable graphics=yes --variable 'geometry:margin=1in' --bibliography references.bib --filter /usr/bin/pandoc-citeproc && \
+	rm article.knit.md && \
+	rm article.utf8.md && \
+	cd ../..
 	mv code/rmarkdown/article.docx article/
-	rm article/article.md -f
-	rm article/article.tex -f
-	rm article/article.utf8.md -f
 
 article/article.pdf: code/rmarkdown/article.Rmd code/rmarkdown/references.bib code/rmarkdown/preamble.tex code/rmarkdown/reference-style.csl
 	R -e "rmarkdown::render('code/rmarkdown/article.Rmd')"
