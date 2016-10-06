@@ -23,7 +23,7 @@ grid.PPLY <- spTransform(grid.PLY, europeEA)
 # sample data as SpatialPoints
 spp.sample.PTS <- SpatialPointsDataFrame(
 	coords=as.matrix(spp.samples.DF[,5:6]),
-	data=spp.samples.DF,
+	data=spp.s	amples.DF,
 	proj4string=wgs1984
 )
 spp.sample.PPTS <- spTransform(spp.sample.PTS, europeEA)
@@ -57,17 +57,35 @@ grid.PPLY$id <- seq_len(nrow(grid.DF))
 
 ## extract climatic data
 # load climatic data
-bioclim.STK <- stack('data/raw/BioClim_variables/bioclim_pca.tif')
-bioclim.STK <- bioclim.STK[[seq_len(surrogate.params.LST[[MODE]]$number.components)]]
-# zscore layers --note that they already have unit sd
-bioclim.means <- cellStats(bioclim.STK, 'mean')
-bioclim.STK <- (bioclim.STK - bioclim.means)
+bioclim.STK <- stack(dir('data/raw/BioClim_variables', '^.*\\.tif$' full.names=TRUE))
 # extract mean for each cell for each principle component
 extract.DF <- grid.PPLY %>% rasterize(bioclim.STK, field='id') %>% 
 	zonal(x=bioclim.STK) %>%  as.data.frame() %>% select(-1) %>%
-	`names<-`(paste0('env_d',seq_len(nlayers(bioclim.STK))))
+	`names<-`(paste0('bio_d',seq_len(nlayers(bioclim.STK))))
 # merge with grid.DF
 grid.DF <- cbind(grid.DF, extract.DF)
+# store pca roations for each planning unit
+spp.pca.DF <- data.frame(species=character(0), percent_variation_explained=numeric(0))
+for (i in seq_along(unique(spp.samples.DF$species))) {
+	# extract bio vars for species
+	curr.sub.DF <- filter(spp.samples.DF, species==unique(spp.samples.DF$species)[i])$cell
+	curr.grids.DF <- grid.DF %>%
+		filter(cell %in% curr.sub$cell) %>%
+		select(starts_with('bio_d'))
+	# run pca
+	curr.PCA <- prcomp(~., curr.grids.DF, center=TRUE, scale=TRUE)
+	# store pca results
+	spp.pca.DF <- spp.pca.DF %>% 
+		rbind(data.frame(species=unique(spp.samples.DF$species)[i], percent_variation_explained=summary(curr.PCA)$importance[3,surrogate.params.LST[[MODE]]$number.components]))
+	# store pca rotations
+	grid.DF <- left_join(
+		curr.grids.DF,
+		curr.PCA$rotation[,seq_len(surrogate.params.LST[[MODE]]$number.components)] %>%
+			data.frame() %>%
+			`names<-`(paste0(unique(spp.samples.DF$species)[i], '_env_d',seq_len(surrogate.params.LST[[MODE]]$number.components))) %>%
+			mutate(cell=curr.grids.DF$cell)
+	)
+}
 
 ## extract population density data
 # load pop data
@@ -83,12 +101,6 @@ grid.DF <- cbind(grid.DF, extract2.DF)
 ## update @data slot in spatial objects
 grid.PLY@data <- grid.DF
 grid.PPLY@data <- grid.DF
-
-## load and save pca summary
-pca.DF <- read.table('data/raw/BioClim_variables/bioclim_pca.TXT', skip=94) %>% `names<-`(
-	c('Principle Component', 'Eigen Value', 'Variation explained (%)',
-	'Accumulative variation explained (%)')
-)
 
 ## save .rda
 save.session('data/intermediate/02-surrogate-data.rda', compress='xz')

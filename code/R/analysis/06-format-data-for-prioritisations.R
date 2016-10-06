@@ -21,15 +21,21 @@ if (length(missing.species2)>0) {
 }
 
 # generate attribute spaces for geographic and environmental data
-geographic.AS <- make.surrogate.AttributeSpaces(
+geographic.AS <- make.general.AttributeSpaces(
 	site.data=select(grid.sub.DF, starts_with('geo')),
 	species.data=grid.sub.DF[,unique(spp.samples.sub.DF$species),drop=FALSE],
 	name='geographic')
 
-environmental.AS <- make.surrogate.AttributeSpaces(
-	site.data=select(grid.sub.DF, starts_with('env')),
-	species.data=grid.sub.DF[,unique(spp.samples.sub.DF$species),drop=FALSE],
-	name='environmental')
+environmental.AS <- llply(
+	seq_along(unique(spp.samples.sub.DF$species)),
+	function(i) {
+		make.species.specific.AttributeSpace(
+			site.data=select(grid.sub.DF, contains(paste0(unique(spp.samples.sub.DF$species)[i], '_env'))),
+			species.data=na.omit(select(grid.sub.DF, contains(paste0(unique(spp.samples.sub.DF$species)[i], '_env')))),
+			species=i
+		)
+	}
+)
 
 # generate attribute spaces for genetic data
 adaptive.AS <- llply(
@@ -39,7 +45,7 @@ adaptive.AS <- llply(
 		if (ncol(select(grid.sub.DF, contains(paste0(unique(spp.samples.sub.DF$species)[i], '_adaptive'))))==0)
 			return(NULL)
 		# else return attribute space
-		make.genetic.AttributeSpace(
+		make.species.specific.AttributeSpace(
 			site.data=select(grid.sub.DF, contains(paste0(unique(spp.samples.sub.DF$species)[i], '_adaptive'))),
 			species.data=na.omit(select(grid.sub.DF, contains(paste0(unique(spp.samples.sub.DF$species)[i], '_adaptive')))),
 			species=i
@@ -55,7 +61,7 @@ neutral.AS <- llply(
 		if (ncol(select(grid.sub.DF, contains(paste0(unique(spp.samples.sub.DF$species)[i], '_neutral'))))==0)
 			return(NULL)
 		# else return attribute space
-		make.genetic.AttributeSpace(
+		make.species.specific.AttributeSpace(
 			site.data=select(grid.sub.DF, contains(paste0(unique(spp.samples.sub.DF$species)[i], '_neutral'))),
 			species.data=na.omit(select(grid.sub.DF, contains(paste0(unique(spp.samples.sub.DF$species)[i], '_neutral')))),
 			species=i
