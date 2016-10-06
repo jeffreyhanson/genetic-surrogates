@@ -36,6 +36,7 @@ environmental.AS <- llply(
 		)
 	}
 )
+environmental.AS <- AttributeSpaces(spaces=environmental.AS, name='environmental')
 
 # generate attribute spaces for genetic data
 adaptive.AS <- llply(

@@ -92,7 +92,7 @@ correlation.LST <- llply(
 		## prelim
 		curr.spp.coords.LST <- list(
 			select(grid.sub.DF, starts_with('geo_')),
-			select(grid.sub.DF, starts_with('env_')),
+			select(curr.spp.DF, contains('_env_')),
 			select(curr.spp.DF, contains('adaptive')),
 			select(curr.spp.DF, contains('neutral'))
 		)

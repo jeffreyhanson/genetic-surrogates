@@ -23,7 +23,7 @@ grid.PPLY <- spTransform(grid.PLY, europeEA)
 # sample data as SpatialPoints
 spp.sample.PTS <- SpatialPointsDataFrame(
 	coords=as.matrix(spp.samples.DF[,5:6]),
-	data=spp.s	amples.DF,
+	data=spp.samples.DF,
 	proj4string=wgs1984
 )
 spp.sample.PPTS <- spTransform(spp.sample.PTS, europeEA)
@@ -57,10 +57,17 @@ grid.PPLY$id <- seq_len(nrow(grid.DF))
 
 ## extract climatic data
 # load climatic data
-bioclim.STK <- stack(dir('data/raw/BioClim_variables', '^.*\\.tif$' full.names=TRUE))
+bioclim.STK <- stack(dir('data/raw/BioClim_variables', '^.*\\.tif$', full.names=TRUE))
+studyarea.PLY <- grid.PPLY %>%
+	extent() %>%
+	as('SpatialPolygons') %>%
+	gBuffer(width=20000, byid=FALSE)  %>%
+	`slot<-`(name='proj4string', value=grid.PPLY@proj4string) %>%
+	spTransform(bioclim.STK@crs)
+bioclim.STK <- bioclim.STK %>% crop(studyarea.PLY) %>% mask(studyarea.PLY) %>% projectRaster(crs=grid.PPLY@proj4string, res=1000)
 # extract mean for each cell for each principle component
 extract.DF <- grid.PPLY %>% rasterize(bioclim.STK, field='id') %>% 
-	zonal(x=bioclim.STK) %>%  as.data.frame() %>% select(-1) %>%
+	zonal(x=bioclim.STK, fun='mean') %>%  as.data.frame() %>% select(-1) %>%
 	`names<-`(paste0('bio_d',seq_len(nlayers(bioclim.STK))))
 # merge with grid.DF
 grid.DF <- cbind(grid.DF, extract.DF)
@@ -68,22 +75,23 @@ grid.DF <- cbind(grid.DF, extract.DF)
 spp.pca.DF <- data.frame(species=character(0), percent_variation_explained=numeric(0))
 for (i in seq_along(unique(spp.samples.DF$species))) {
 	# extract bio vars for species
-	curr.sub.DF <- filter(spp.samples.DF, species==unique(spp.samples.DF$species)[i])$cell
+	curr.sub.DF <- filter(spp.samples.DF, species==unique(spp.samples.DF$species)[i])
 	curr.grids.DF <- grid.DF %>%
-		filter(cell %in% curr.sub$cell) %>%
-		select(starts_with('bio_d'))
+		filter(cell %in% curr.sub.DF[['cell']]) %>%
+		select(cell, starts_with('bio_d'))
 	# run pca
-	curr.PCA <- prcomp(~., curr.grids.DF, center=TRUE, scale=TRUE)
+	curr.PCA <- prcomp(~ . -cell, curr.grids.DF, center=TRUE, scale=TRUE)
 	# store pca results
 	spp.pca.DF <- spp.pca.DF %>% 
 		rbind(data.frame(species=unique(spp.samples.DF$species)[i], percent_variation_explained=summary(curr.PCA)$importance[3,surrogate.params.LST[[MODE]]$number.components]))
 	# store pca rotations
 	grid.DF <- left_join(
-		curr.grids.DF,
-		curr.PCA$rotation[,seq_len(surrogate.params.LST[[MODE]]$number.components)] %>%
+		grid.DF,
+		curr.PCA$x[,seq_len(surrogate.params.LST[[MODE]]$number.components)] %>%
 			data.frame() %>%
 			`names<-`(paste0(unique(spp.samples.DF$species)[i], '_env_d',seq_len(surrogate.params.LST[[MODE]]$number.components))) %>%
-			mutate(cell=curr.grids.DF$cell)
+			mutate(cell=curr.grids.DF$cell),
+		by='cell'
 	)
 }
 

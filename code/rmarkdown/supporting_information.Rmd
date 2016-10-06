@@ -78,37 +78,8 @@ ggplot() +
 	facet_wrap(~ species, ncol=4)
 ```
 
-```{r, fig.width=15, fig.height=3, fig.cap='Climatic variation. Each panel depicts variation based on a different principle component (PC). Squares represent planning units. The color of each planning unit denotes the average PC value of pixels inside it. Planning units with more similar colors have more similar climate regimes.', echo=FALSE}
-do.call(
-	grid.arrange,
-		append(
-		llply(grep('^env\\_.*$', names(grid.DF), value=TRUE), function(x) {
-			grid.FPLY$plot_title <- paste0('PC ', substr(x, nchar(x), nchar(x)))
-			ggplot() +
-				geom_polygon(data=countries.FPLY, aes(x=long, y=lat, group=group),
-					fill='grey85', color='grey70') +
-				geom_polygon(data=grid.FPLY, aes_string(x='long', y='lat', 
-					group='group', fill=x), color='grey10') +
-				theme_classic() +
-				theme(
-					axis.ticks=element_blank(), axis.text=element_blank(), axis.line=element_blank(), plot.margin = unit(c(0, 0, 0, 0), "lines"), axis.title=element_blank(),
-					panel.border=element_rect(color='black', fill=NA, size=1),
-					strip.background = element_rect(fill='grey20'),
-					strip.text = element_text(color='white', size=11)
-				) +
-				coord_cartesian(
-					xlim=buffered.range(grid.FPLY$long, 0),
-					ylim=buffered.range(grid.FPLY$lat, 0)
-				) +
-				scale_fill_gradientn(name='',
-					colors=brewer.pal(9, 'RdYlBu'),
-					guide=guide_colorbar(ticks=element_line(color='black'), border=element_line(color='black'))
-				) +
-				facet_wrap(~ plot_title)
-		}),
-		list(ncol=4)
-	)
-)
+```{r, fig.width=15, fig.height=3, fig.cap='Climatic variation. Each panel depicts variation based on a principle component (PC) for a different species. Squares represent planning units. The color of each planning unit denotes the average PC value of pixels inside it. For a given species, the planning units with more similar colors have more similar climate regimes.', echo=FALSE}
+plot(1)
 ```
 
 ```{r, echo=FALSE}
@@ -643,19 +614,18 @@ ggplot() +
 ```
 
 ```{r, echo=FALSE, results='asis'}
-## make results table showing Eigen values
+## make table showing pca resuls
 curr.file <- tempfile(fileext='.tex')
-pca.DF[['Eigen Value']] <- c(round(pca.DF[['Eigen Value']][-19],2), pvalString(pca.DF[['Eigen Value']][19], digits=2))
-pca.DF[['Variation explained (%)']] <- c(round(pca.DF[['Variation explained (%)']][1:3],2), pvalString(pca.DF[['Variation explained (%)']][-1:-3], digits=2))
-pca.DF[['Accumulative variation explained (%)']] <- as.character(round(pca.DF[['Accumulative variation explained (%)']],2))
-x <- pca.DF %>%
-	latex(file=curr.file, 
-		rowname=NULL, first.hline.double=FALSE, booktabs=TRUE, col.just=rep('c', ncol(pca.DF)), here=TRUE,
-		colheads=c("\\parbox[t]{2.5cm}{\\centering \\bfseries{Principle Component}}", "\\parbox[t]{2cm}{\\centering \\bfseries{Eigen value}}",
-			"\\parbox[t]{3cm}{\\centering \\bfseries{Variation explained (\\%)}}", "\\parbox[t]{4.5cm}{\\centering \\bfseries{Cumulative variation explained (\\%)}}"),
-		caption=paste0('Summary of principle components analysis (PCA) on bioclimatic variation across the study area. The first ',as.character(as.english(surrogate.params.LST[[MODE]]$number.components)),' principle components (PCs) were used for subsequent analysis.')
+x <- spp.pca.DF %>%
+	mutate(species=gsub('_', ' ', species, fixed=TRUE), percent_variation_explained=percent_variation_explained*100) %>%
+	latex(
+		file=curr.file,
+		rowname=NULL, first.hline.double=FALSE, booktabs=TRUE, col.just=rep('c', 2),
+		colheads=c('\\bfseries{Species}', '\\bfseries{Variation explained (\\%)}'), here=TRUE,
+		caption=paste0('Summary of principal component analyses fit to the climatic variation in the species\' ranges. Percentages correspond to the percent of variation described by the first ',as.character(as.english(surrogate.params.LST[[MODE]]$number.components)),' principle components.')
 	)
 readLines(curr.file)[-1] %>% paste0(collapse='\n') %>% 
+	gsub(pattern='\\cline{1-', replacement='\\cline{3-4} \\cline{6-', fixed=TRUE) %>% 
 	gsub(pattern='toprule', replacement='toprule[1pt]', fixed=TRUE) %>%
 	gsub(pattern='bottomrule', replacement='bottomrule[1pt]', fixed=TRUE) %>%
 	cat()
