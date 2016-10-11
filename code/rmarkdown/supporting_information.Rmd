@@ -46,6 +46,8 @@ gg_color_hue <- function(n) {
 }
 ```
 
+# Figures 
+
 ```{r, echo=FALSE, fig.width=9.5, fig.height=10, out.width='7.5in', out.height='8.5in', fig.cap=paste0('Species distributions. Squares represent planning units. For a given species, planning units that were found to be inhabited are denoted with bright blue.')}
 ## plot map of species distributions
 # fortify data
@@ -613,22 +615,10 @@ ggplot() +
 	)
 ```
 
-```{r, echo=FALSE, results='asis'}
-## make table showing pca resuls
-curr.file <- tempfile(fileext='.tex')
-x <- spp.pca.DF %>%
-	mutate(species=gsub('_', ' ', species, fixed=TRUE), percent_variation_explained=percent_variation_explained*100) %>%
-	latex(
-		file=curr.file,
-		rowname=NULL, first.hline.double=FALSE, booktabs=TRUE, col.just=rep('c', 2),
-		colheads=c('\\bfseries{Species}', '\\bfseries{Variation explained (\\%)}'), here=TRUE,
-		caption=paste0('Summary of principal component analyses fit to the climatic variation in the species\' ranges. Percentages correspond to the percent of variation described by the first ',as.character(as.english(surrogate.params.LST[[MODE]]$number.components)),' principle components.')
-	)
-readLines(curr.file)[-1] %>% paste0(collapse='\n') %>% 
-	gsub(pattern='\\cline{1-', replacement='\\cline{3-4} \\cline{6-', fixed=TRUE) %>% 
-	gsub(pattern='toprule', replacement='toprule[1pt]', fixed=TRUE) %>%
-	gsub(pattern='bottomrule', replacement='bottomrule[1pt]', fixed=TRUE) %>%
-	cat()
+# Tables
+
+```{r, echo=FALSE}
+write.table(loci_classification.DF, 'article/Table_S1.csv', sep=',', row.names=FALSE)
 ```
 
 ```{r, echo=FALSE, results='asis'}
@@ -660,6 +650,37 @@ readLines(curr.file)[-1] %>% paste0(collapse='\n') %>%
 
 ```{r, echo=FALSE, results='asis'}
 curr.file <- tempfile(fileext='.tex')
+x <- correlation.model.summary.DF %>%
+	select(-contains('raw')) %>%
+	mutate(
+		Environmental.corr.P=pvalString(Environmental.corr.P),
+		Geographic.corr.P=pvalString(Geographic.corr.P),
+		Geographic.Marginal.R2=pvalString(Geographic.Marginal.R2),
+		Geographic.Conditional.R2=pvalString(Geographic.Conditional.R2),
+		Environmental.Marginal.R2=pvalString(Environmental.Marginal.R2),
+		Environmental.Conditional.R2=pvalString(Environmental.Conditional.R2),
+		blank=rep('', length(Species)),
+		Species=paste0('\\textit{', gsub('\\ ', ' ', Species), '}')) %>%
+	mutate(Environmental.Chisq=sapply(round(Environmental.Chisq,2), as.character)) %>%
+	mutate(Geographic.Chisq=sapply(round(Geographic.Chisq,2), as.character)) %>%
+	select(Species:Environmental.corr.P, Geographic.Marginal.R2:Geographic.corr.P) %>%
+	latex(file=curr.file, 
+		cgroup=c('', 'Environmental', 'Geographic'), n.cgroup=c(1, 4, 4), col.just=rep('c', 9),
+		digits=2, rowname=NULL, first.hline.double=FALSE, booktabs=TRUE, here=TRUE,
+		colheads=c('\\bfseries{Species}', '$MR^2$', '$CR^2$', '$\\chi^2$', '\\textit{P}', '$MR^2$', '$CR^2$', '$\\chi^2$', '\\textit{P}'),
+		caption='Summary of maximum likelihood population-effects (MLPE) models. Briefly, for each species associated with potentially adaptive loci, a model was fit to correlate dissimilarities among planning units where the species in terms of the adaptive genetic characteristics of individuals in them with dissimilarities in terms of the environmental conditions inside the planning units (denoted in the environmental column group). Similarly, for each species, a model was fit to correlate dissimilarities among the planning units in terms of the neutral genetic characteristics of indiviudals in them with dissimilarities in terms of the geographic position of the planning units (denoted in the geographic column group). Data shows the results from comparing each model to its corresponding null model using $\\mathbf{\\chi^2}$ tests (1 degree of freedom), and the $\\mathbf{R^2}$ ($\\mathbf{MR^2}$) and conditional $\\mathbf{R^2}$ ($\\mathbf{CR^2}$) for each model.'
+	)
+readLines(curr.file)[-1] %>% paste0(collapse='\n') %>% 
+	gsub(pattern='\\cline{1-', replacement='\\cline{2-6} \\cline{8-', fixed=TRUE) %>% 
+	gsub(pattern='{c}{\\textit{P}}\\tabularnewline', replacement='{c}{\\textit{P}}\\T\\B\\tabularnewline', fixed=TRUE) %>% 
+	gsub(pattern='\\toprule', replacement='', fixed=TRUE) %>%
+	gsub(pattern='\\midrule', replacement='\\midrule', fixed=TRUE) %>%
+	gsub(pattern='\\bottomrule', replacement='\\midrule', fixed=TRUE) %>%
+	cat()
+```
+
+```{r, echo=FALSE, results='asis'}
+curr.file <- tempfile(fileext='.tex')
 x <- surrogate.spp.DF %>%
 	mutate(
 		Environmental.z = paste(round(Environmental.estimate,2), '$\\pm$', round(Environmental.std.error,2)),
@@ -685,8 +706,23 @@ readLines(curr.file)[-1] %>% paste0(collapse='\n') %>%
 	cat()
 ```
 
-```{r, echo=FALSE}
-write.table(loci_classification.DF, 'article/Table_S4.csv', sep=',', row.names=FALSE)
+```{r, echo=FALSE, results='asis'}
+## make table showing pca resuls
+curr.file <- tempfile(fileext='.tex')
+x <- spp.pca.DF %>%
+	mutate(species=gsub('_', ' ', species, fixed=TRUE), percent_variation_explained=percent_variation_explained*100) %>%
+	latex(
+		file=curr.file,
+		rowname=NULL, first.hline.double=FALSE, booktabs=TRUE, col.just=rep('c', 2),
+		colheads=c('\\bfseries{Species}', '\\bfseries{Variation explained (\\%)}'), here=TRUE,
+		caption=paste0('Summary of principal component analyses fit to the climatic variation in the species\' ranges. Percentages correspond to the percent of variation described by the first ',as.character(as.english(surrogate.params.LST[[MODE]]$number.components)),' principle components.')
+	)
+readLines(curr.file)[-1] %>% paste0(collapse='\n') %>% 
+	gsub(pattern='\\cline{1-', replacement='\\cline{3-4} \\cline{6-', fixed=TRUE) %>% 
+	gsub(pattern='toprule', replacement='toprule[1pt]', fixed=TRUE) %>%
+	gsub(pattern='bottomrule', replacement='bottomrule[1pt]', fixed=TRUE) %>%
+	cat()
 ```
+
 
 
