@@ -110,8 +110,13 @@
           </group>
         </if>
         <else-if type="book" match="any">
-          <group prefix=" ">
-            <text variable="title" suffix="."/>
+          <group suffix=". " prefix=" " delimiter=" ">
+            <text macro="title"/>
+          </group>
+          <group delimiter=", " suffix=".">
+            <text variable="container-title"/>
+            <text variable="note"/>
+            <text variable="url"/>
           </group>
         </else-if>
         <else-if type="chapter paper-conference" match="any">
