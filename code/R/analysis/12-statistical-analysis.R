@@ -166,8 +166,8 @@ geo.surrogacy.AOV <- anova(geo.surrogacy.GLM, test='Chisq') %>% tidy()
 
 ## species-level analysis
 # assess slope significance for each species
-env.surrogacy.spp.slopes.DF <- tidy(summary(glht(env.surrogacy.GLM, linfct=c('surrogate.held == 0', paste0('surrogate.held + surrogate.held:Species',unique(env.surrogacy.DF$Species)[-1],' == 0'))), adjusted('bonferroni')))
-geo.surrogacy.spp.slopes.DF <- tidy(summary(glht(geo.surrogacy.GLM, linfct=c('surrogate.held == 0', paste0('surrogate.held + surrogate.held:Species',unique(geo.surrogacy.DF$Species)[-1],' == 0'))), adjusted('bonferroni')))
+env.surrogacy.spp.slopes.DF <- tidy(summary(glht(env.surrogacy.GLM, linfct=c('surrogate.held <= 0', paste0('surrogate.held + surrogate.held:Species',unique(env.surrogacy.DF$Species)[-1],' <= 0'))), adjusted('bonferroni')))
+geo.surrogacy.spp.slopes.DF <- tidy(summary(glht(geo.surrogacy.GLM, linfct=c('surrogate.held <= 0', paste0('surrogate.held + surrogate.held:Species',unique(geo.surrogacy.DF$Species)[-1],' <= 0'))), adjusted('bonferroni')))
 
 # compute R^2 values for each species
 env.surrogacy.LST <- list()
