@@ -101,7 +101,7 @@
         <date-part name="year"/>
       </date>
       <choose>
-        <if type="bill book graphic legal_case legislation motion_picture report song" match="any">
+        <if type="bill graphic legal_case legislation motion_picture report song" match="any">
           <group prefix=" ">
             <text variable="title" font-style="italic"/>
             <text macro="editor"/>
@@ -109,6 +109,11 @@
             <text macro="edition" prefix=". "/>
           </group>
         </if>
+        <else-if type="book" match="any">
+          <group prefix=" ">
+            <text variable="title" suffix="."/>
+          </group>
+        </else-if>
         <else-if type="chapter paper-conference" match="any">
           <text variable="title" prefix=" "/>
           <group prefix=". " delimiter=" ">
