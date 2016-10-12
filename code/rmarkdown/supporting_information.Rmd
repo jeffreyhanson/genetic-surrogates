@@ -11,7 +11,7 @@ output:
       in_header: [preamble.tex, si-preamble.tex]
 ---
 # Supporting Information
-All data and code is stored in an online repository (\url{www.github.com/paleo13/genetic.surrogates}) to replicate analyses in this study. See the \textit{README} file for instructions.
+All data and code is stored in an online repository (\url{www.github.com/jeffreyhanson/genetic.surrogates}) to replicate analyses in this study. See the \textit{README} file for instructions.
 
 
 ```{r, include=FALSE}
