@@ -111,7 +111,7 @@
         </if>
         <else-if type="book" match="any">
           <group suffix=". " prefix=" " delimiter=" ">
-            <text macro="title"/>
+            <text variable="title"/>
           </group>
           <group delimiter=", " suffix=".">
             <text variable="container-title"/>

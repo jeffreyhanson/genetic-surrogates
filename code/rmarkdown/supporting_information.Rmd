@@ -107,7 +107,7 @@ calc.fig.height <- function(i) {
   # init
   adapt.col <- paste0(unique(spp.samples.DF$species)[i], '_adaptive_d1')
   neutral.col <- paste0(unique(spp.samples.DF$species)[i], '_neutral_d1')
-  env.col <- grepl(paste0(unique(spp.samples.DF$species)[i], '_env_d'), names(grid.FPLY), value=TRUE, fixed=TRUE) %>%
+  env.col <- grepl(paste0(unique(spp.samples.DF$species)[i], '_env_d'), names(grid.FPLY), fixed=TRUE) %>%
     sum()
 
   n.plots <- 0 
@@ -128,7 +128,7 @@ calc.fig.width <- function(i) {
   # init
   adapt.col <- paste0(unique(spp.samples.DF$species)[i], '_adaptive_d1')
   neutral.col <- paste0(unique(spp.samples.DF$species)[i], '_neutral_d1')
-  env.col <- grepl(paste0(unique(spp.samples.DF$species)[i], '_env_d'), names(grid.FPLY), value=TRUE, fixed=TRUE) %>%
+  env.col <- grepl(paste0(unique(spp.samples.DF$species)[i], '_env_d'), names(grid.FPLY), fixed=TRUE) %>%
     sum()
   n.plots <- 0 
   # count adaptive plot
@@ -928,7 +928,7 @@ x <- surrogate.spp.DF %>%
 		cgroup=c('', 'Environmental', 'Geographic'), n.cgroup=c(1, 3, 3), col.just=rep('c', 7),
 		digits=2, rowname=NULL, first.hline.double=FALSE, booktabs=TRUE, here=TRUE,
 		colheads=c('\\bfseries{Species}', '$\\textit{Z}$', '\\textit{P}', '$R^2$', '$\\textit{Z}$', '\\textit{P}', '$R^2$'),
-		caption='Summary of post-hoc analyses on generalized linear models. Briefly, two generalized linear models were fit to correlate the proportion of adaptive genetic variation and environmental variation secured, and the proportion of neutral genetic variation and geographic variation secured in a prioritization. These models also included a predictor variable indicating the species for which the prioritisations were generated, and an interaction term. Table shows the results from one-sided _post-hoc_ analyses that were conducted to determine if the slopes for each species were positive (using the alternative hypothesis that slopes were less than or equal to zero; tests used a single degree of freedom; results reported in the \\textit{Z} and \\textit{P} columns). The table also shows Cragg and Uhler\'s pseudo-R$^2$ values that were calculated to show the proportion of variation explained by the slopes for each species ($R^2$ column).'
+		caption='Summary of post-hoc analyses on generalized linear models. Briefly, two generalized linear models were fit to correlate the proportion of adaptive genetic variation and environmental variation secured, and the proportion of neutral genetic variation and geographic variation secured in a prioritization. These models also included a predictor variable indicating the species for which the prioritisations were generated, and an interaction term. Table shows the results from one-sided _post-hoc_ analyses that were conducted to determine if the slopes for each species were positive (using the alternative hypothesis that slopes were less than or equal to zero; tests used a single degree of freedom; results reported in the \\textit{Z} and \\textit{P} columns). The table also shows Cragg and Uhler\'s pseudo-$R^2$ values that were calculated to show the proportion of variation explained by the slopes for each species ($R^2$ column).'
 	)
 readLines(curr.file)[-1] %>% paste0(collapse='\n') %>% 
 	gsub(pattern='\\cline{1-', replacement='\\cline{2-5} \\cline{7-', fixed=TRUE) %>% 
