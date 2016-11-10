@@ -642,9 +642,9 @@ digraph main {
   adaptive_as [label = 'Adaptive genetic attribute spaces']
   
   node[shape = ellipse, style = filled, color = darkslategray, fillcolor = white]
-  calc_geo_as [label = 'Processing\n(Figure SXXX)'] 
-  calc_env_as [label = 'Processing\n(Figure SXXX)']
-  calc_genetic_as [label = 'Processing\n(Figure SXXX)']
+  calc_geo_as [label = 'Processing\n(Figure S60)'] 
+  calc_env_as [label = 'Processing\n(Figure S61)']
+  calc_genetic_as [label = 'Processing\n(Figure S62)']
   
   edge [color = grey]
   meirmans_data -> {sample_aflp_data grid_data sample_location_data}
