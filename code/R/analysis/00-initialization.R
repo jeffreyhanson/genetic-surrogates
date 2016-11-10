@@ -42,6 +42,9 @@ library(tidyr)
 library(pander)
 library(vegan)
 library(rgeos)
+library(rgdal)
+library(sp)
+library(raster)
 library(testthat)
 library(parallel)
 library(cluster)
@@ -62,6 +65,7 @@ library(pscl)
 library(lazyWeave)
 library(pcadapt)
 library(broom)
+library(raptr)
 
 ## load github packages
 if (!'rticles' %in% installed.packages()[,'Package'])
@@ -98,13 +102,6 @@ if (!'gurobi' %in% installed.packages()[,'Package']) {
 devtools::install_github('paleo13/ggplot2')
 library(ggplot2)
 
-# install raptr
-if (!'raptr' %in% installed.packages()[,'Package']) {
-	install.packages(c('adehabitatLT', 'adehabitatHS', 'deldir', 'R.utils', 'geometry', 'KernSmooth', 'misc3d', 'multicool', 'fastcluster', 'rgdal', 'raster', 'PBSmapping', 'RJSONIO', 'R.methodsS3', 'R.oo'))
-	withr::with_libpaths(.libPaths()[1], devtools::install_github('paleo13/raptr', dependencies=TRUE))
-}
-library(raptr)
-
 ### set parameters
 if (!exists('MODE')) MODE <- 'debug'
 cat('MODE = ',MODE,'\n')
@@ -117,8 +114,10 @@ panderOptions('knitr.auto.asis', FALSE)
 # set seed for reproducibility
 set.seed(500)
 
-# set default select method
+# set default methods
 select <- dplyr::select
+rename<- dplyr::rename
+extract <- raster::extract
 
 ### Load functions
 for (x in dir(file.path('code', 'R', 'functions'), full.names=TRUE)) source(x)
