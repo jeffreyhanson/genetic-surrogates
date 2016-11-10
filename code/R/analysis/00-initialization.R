@@ -73,11 +73,11 @@ if (!'rticles' %in% installed.packages()[,'Package'])
 library(rticles)
 
 if (!'bayescanr' %in% installed.packages()[,'Package'])
-	withr::with_libpaths(.libPaths()[1], devtools::install_github('paleo13/bayescanr', dependencies=TRUE))
+	withr::with_libpaths(.libPaths()[1], devtools::install_github('jeffreyhanson/bayescanr', dependencies=TRUE))
 library(bayescanr)
 
 if (!'structurer' %in% installed.packages()[,'Package'])
-	withr::with_libpaths(.libPaths()[1], devtools::install_github('paleo13/structurer', dependencies=TRUE))
+	withr::with_libpaths(.libPaths()[1], devtools::install_github('jeffreyhanson/structurer', dependencies=TRUE))
 library(structurer)
 
 if (!'ResistanceGA' %in% installed.packages()[,'Package'])
@@ -85,7 +85,7 @@ if (!'ResistanceGA' %in% installed.packages()[,'Package'])
 library(ResistanceGA)
 
 if (!'rgurobi' %in% installed.packages()[,'Package'])
-	withr::with_libpaths(.libPaths()[1], devtools::install_github('paleo13/rgurobi', dependencies=TRUE))
+	withr::with_libpaths(.libPaths()[1], devtools::install_github('jeffreyhanson/rgurobi', dependencies=TRUE))
 library(rgurobi)
 
 if (!'gurobi' %in% installed.packages()[,'Package']) {
@@ -99,7 +99,7 @@ if (!'gurobi' %in% installed.packages()[,'Package']) {
 }
 
 # manually install custom fork of ggplot2 for plotting
-devtools::install_github('paleo13/ggplot2')
+devtools::install_github('jeffreyhanson/ggplot2')
 library(ggplot2)
 
 ### set parameters
