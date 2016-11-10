@@ -615,6 +615,229 @@ ggplot() +
 	)
 ```
 
+```{r, include=FALSE}
+render_gvis <- function(x) {
+  file = tempfile(fileext='.png')
+  rsvg::rsvg_png(charToRaw(DiagrammeRsvg::export_svg(x)), file)
+  grid::grid.raster(png::readPNG(file))
+}
+```
+
+```{r, echo=FALSE, results='hide', message=FALSE, fig.cap='Overall data processing workflow. The flowcharts show the methods used to generate the environmental and geographic surrogate spaces, and the adaptive and neutral genetic spaces. Squares indicate data sets. Ellipses indicate analyses. Lines show relationships between data and analysis, and their captions describe how data was processed.'}
+render_gvis(grViz("
+digraph main {
+  graph [layout = dot]
+  
+  node [shape = rectangle, style = filled, color = darkslategray, fillcolor = white]
+  
+  meirmans_data [label = <Plant data<BR></BR>(Meirmans <I>et al. </I> 2011)>]
+  bioclimatic_data [label = <Bioclimatic data<BR></BR>(Hijmans <I> et al. </I> 2005)>]
+  sample_location_data [label = 'Sample location data']
+  grid_data [label = 'Grid cell data']
+  sample_aflp_data [label = 'Sample AFLP data']
+  
+  geo_as [label = 'Geographic attribute spaces'] 
+  env_as [label = 'Environmental attribute spaces']
+  neutral_as [label = 'Neutral genetic attribute spaces']
+  adaptive_as [label = 'Adaptive genetic attribute spaces']
+  
+  node[shape = ellipse, style = filled, color = darkslategray, fillcolor = white]
+  calc_geo_as [label = 'Processing\n(Figure SXXX)'] 
+  calc_env_as [label = 'Processing\n(Figure SXXX)']
+  calc_genetic_as [label = 'Processing\n(Figure SXXX)']
+  
+  edge [color = grey]
+  meirmans_data -> {sample_aflp_data grid_data sample_location_data}
+  bioclimatic_data -> calc_env_as
+  sample_location_data -> {calc_geo_as calc_env_as calc_genetic_as}
+  grid_data -> {calc_geo_as calc_env_as calc_genetic_as}
+  sample_aflp_data -> calc_genetic_as
+  calc_genetic_as -> {neutral_as, adaptive_as}
+  calc_geo_as -> geo_as
+  calc_env_as -> env_as
+  calc_env_as -> calc_env_as [label = ' each species\nseparately']
+  calc_geo_as -> calc_geo_as [label = ' each species\nseparately']
+  calc_genetic_as -> calc_genetic_as [label = ' each species\nseparately']
+
+}
+"))
+```
+
+```{r, echo=FALSE, results='hide', message=FALSE, fig.cap='Geographic surrogate processing workflow. Conventions are detailed in Figure S59 caption.'}
+render_gvis(grViz("
+digraph geo_as {
+  graph [layout = dot]
+  
+  node [shape = rectangle, style = filled, color = darkslategray, fillcolor = white]
+    
+  # input
+  sample_location_data [label = 'Sample location data']
+  grid_data [label = 'Grid cell data']
+  species_name [label = 'Species name']
+  {rank = same; sample_location_data; grid_data; species_name}
+  
+  # intermediate
+  spp_samples [label = 'Locations of samples for species']
+  spp_grids [label = 'Grid cells occupied by species']
+  spp_proj_data [label = 'Projected grid cells']
+  spp_centriod_data [label = 'Centroids of grid cells']
+  
+  # output
+  geographic_space [label = 'Geographic attribute space']
+
+  edge [color = grey]
+  
+  species_name -> spp_samples 
+  sample_location_data -> spp_samples [label = ' subset data']
+  spp_samples -> spp_grids [label = ' overlay data']
+  grid_data -> spp_grids 
+  spp_grids -> spp_proj_data [label = ' reproject data to\nequi-distant CRS']
+  spp_proj_data -> spp_centriod_data [label = ' compute centroids']
+  spp_centriod_data -> geographic_space [label =' extract coordinates and use them\nto represent demand points and\nplanning unit coordinates']
+  
+}
+"))
+```
+
+```{r, fig.height=6, echo=FALSE, results='hide', message=FALSE, fig.cap='Environmental surrogate processing workflow. Conventions are detailed in Figure S59 caption.'}
+render_gvis(grViz("
+digraph env_as {
+  graph [layout = dot]
+  
+  node[shape = rectangle, style = filled, color = darkslategray, fillcolor = white]
+  
+  # input
+  sample_location_data [label = 'Sample location data']
+  grid_data [label = 'Grid cell data']
+  species_name [label = 'Species name']
+  bioclimatic_data [label = <Bioclimatic data<BR></BR>(Hijmans <I> et al. </I> 2005)>]
+  {rank = same; sample_location_data; grid_data; species_name; bioclimatic_data}
+  
+  # intermediate
+  spp_samples [label = 'Locations of samples for species']
+  spp_grids [label = 'Grid cells occupied by species']
+  spp_proj_data [label = 'Projected grid cells']
+
+  bioclimatic_proj_data [label = 'Projected bioclimatic data']
+  clipped_bioclimatic_data [label = 'Bioclimatic data clipped to species distribution']
+  pca_scores_data [label = 'Main axes of bioclimatic variation\nacross species distribution']
+  grid_pca_data [label = 'Environmental conditions inside each grid cell']
+  
+  # output
+  environmental_space [label = 'Environmental attribute space']
+  
+  # analyses
+  node[shape = ellipse, style = filled, color = darkslategray, fillcolor = white]  
+  pca [label = 'Principal components analysis']
+  
+  edge [color = grey]
+  species_name -> spp_samples 
+  sample_location_data -> spp_samples [label = ' subset data']
+  grid_data -> spp_grids
+  bioclimatic_data -> bioclimatic_proj_data [label = ' reproject data to\nequal-area CRS']
+  spp_samples -> spp_grids [label = ' overlay data']
+  spp_grids -> spp_proj_data [label = ' reproject data to\nequal-area CRS']
+  bioclimatic_proj_data -> clipped_bioclimatic_data [label = ' clip data']
+  spp_proj_data -> clipped_bioclimatic_data
+  clipped_bioclimatic_data -> pca
+  pca -> pca_scores_data [label = ' extract scores for\nfirst two components']
+  spp_proj_data -> grid_pca_data
+  pca_scores_data -> grid_pca_data [label = ' calculate average scores\nfor each grid cell']
+  grid_pca_data -> environmental_space [label =' extract scores and use them\nto represent demand points and\nplanning unit coordinates']
+
+}
+"))
+```
+
+```{r, fig.height=10, echo=FALSE, results='hide', message=FALSE, fig.cap='Genetic data processing workflow. Conventions are detailed in Figure S59 caption.'}
+render_gvis(grViz("
+digraph genetic_as {
+  graph [layout = dot]
+  
+  node[shape = rectangle, style = filled, color = darkslategray, fillcolor = white]
+  
+  # input
+  sample_location_data [label = 'Sample location data']
+  sample_aflp_data [label = 'Sample AFLP data']
+  grid_data [label = 'Grid cell data']
+  species_name [label = 'Species name']
+  {rank = same; sample_location_data; grid_data; species_name; sample_aflp_data}
+  
+  # intermediate
+  spp_aflp_samples [label = 'Species AFLP data']
+  spp_location_samples [label = 'Species location data']
+  spp_grids [label = 'Grid cells occupied by species']
+  
+  population_data [label = 'Samples grouped into populations']
+  subset_data [label = 'Samples with reliable population designations']
+  rare_alleles [label = 'AFLP data for\nrare alleles']
+  remainder_alleles [label = 'AFLP data for\n standard alleles']
+  bayescan_adaptive_alleles [label = ' Outlier loci']
+  pcadapt_adaptive_alleles [label = ' Outlier loci']
+  bayescan_neutral_alleles [label = ' Standard loci']
+  pcadapt_neutral_alleles [label = ' Standard loci']
+  adaptive_alleles [label = ' AFLP data\nfor adaptive loci']
+  neutral_alleles [label = ' AFLP data\nfor neutral loci']
+  adaptive_ordinations [label = ' Ordinations showing main\ngradients of variation\nin adaptive loci']
+  neutral_ordinations [label = '  Ordinations showing main\ngradients of variation\nin neutral loci']
+  grid_adaptive_ordinations [label = ' Typical adaptive genetic characteristics of individuals in grid cells']
+  grid_neutral_ordinations [label = ' Typical neutral genetic characteristics of individuals in grid cells']
+  
+  # output
+  adaptive_genetic_space [label = 'Adaptive genetic space']
+  neutral_genetic_space  [label = 'Neutral genetic space']
+  
+  # analyses
+  node[shape = ellipse, style = filled, color = darkslategray, fillcolor = white]
+  bayescan_analysis [label = 'BayeScan analysis']
+  pcadapt_analysis [label = 'PCadapt analysis']
+  structure_analysis [label = 'Structure analysis']
+  clumpp_analysis [label = 'ClumPP analysis']
+  neutral_nmds_analysis [label = 'NMDS analyses']
+  adaptive_nmds_analysis [label = 'NMDS analyses']
+  combine_results [label = 'Combine results from all analyses.\nLoci classified as adaptive in both analyses are treated as adaptive,\notherwise treated as neutral']
+  
+  edge [color = grey]
+  sample_location_data -> spp_location_samples [label = ' subset data']
+  species_name -> spp_location_samples 
+  sample_aflp_data -> spp_aflp_samples [label = ' subset data']
+  species_name -> spp_aflp_samples
+  spp_location_samples -> spp_grids
+  grid_data -> spp_grids [label = ' overlay data']
+  spp_aflp_samples -> structure_analysis
+  structure_analysis -> clumpp_analysis [label = ' post-process\nresults']
+  clumpp_analysis -> population_data
+  population_data -> subset_data [label = ' omit samples within\nuncertain memberships']
+  subset_data -> rare_alleles [label = ' extract rare alleles where\nglobal frequency of minor\nalleles < 10 %']
+  subset_data -> remainder_alleles
+  remainder_alleles -> bayescan_analysis [label = 'use population\ngroupings']
+  remainder_alleles -> pcadapt_analysis [label = 'ignore population\ngroupings']
+  bayescan_analysis -> bayescan_adaptive_alleles [label = ' extract']
+  pcadapt_analysis -> pcadapt_adaptive_alleles  [label = ' extract']
+  bayescan_analysis -> bayescan_neutral_alleles [label = ' extract']
+  pcadapt_analysis -> pcadapt_neutral_alleles [label = ' extract']
+  bayescan_adaptive_alleles -> combine_results [label = ' treat loci\nas adaptive']
+  pcadapt_adaptive_alleles -> combine_results [label = ' treat loci\nas adaptive']
+  bayescan_neutral_alleles -> combine_results [label = ' treat loci\nas neutral']
+  pcadapt_neutral_alleles -> combine_results [label = ' treat loci\nas neutral']
+  rare_alleles -> combine_results [label = ' treat loci\nas neutral']
+  combine_results -> adaptive_alleles
+  combine_results -> neutral_alleles 
+  neutral_alleles  -> neutral_nmds_analysis
+  adaptive_alleles -> adaptive_nmds_analysis
+  adaptive_nmds_analysis -> adaptive_ordinations [label = ' extract']
+  neutral_nmds_analysis  -> neutral_ordinations [label = ' extract']
+  spp_grids  -> grid_adaptive_ordinations
+  adaptive_ordinations -> grid_adaptive_ordinations [label = ' calculate average values\nin each grid cell']
+  spp_grids  -> grid_neutral_ordinations
+  neutral_ordinations -> grid_neutral_ordinations [label = ' calculate average values\nin each grid cell']
+  grid_adaptive_ordinations -> adaptive_genetic_space [label =' extract values and use them\nto represent demand points and\nplanning unit coordinates']
+  grid_neutral_ordinations -> neutral_genetic_space [label =' extract values and use them\nto represent demand points and\nplanning unit coordinates']
+
+}
+"))
+```
+
 # Tables
 
 ```{r, echo=FALSE}
