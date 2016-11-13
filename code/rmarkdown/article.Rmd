@@ -62,19 +62,19 @@ options(error=NULL)
 # download basemap
 data(countriesHigh)
 countries.FPLY <- countriesHigh[
-	countriesHigh$ADMIN %in% c(
-		'Italy', 'Switzerland', 'France', 'Austria',
-		'Germany', 'Slovenia', 'Croatia', 'Hungary',
-		'Monaco', 'Germany', 'Slovakia', 'Czech Republic'
-	)
+  countriesHigh$ADMIN %in% c(
+    'Italy', 'Switzerland', 'France', 'Austria',
+    'Germany', 'Slovenia', 'Croatia', 'Hungary',
+    'Monaco', 'Germany', 'Slovakia', 'Czech Republic'
+  )
 ,] %>% spFortify
 grid.FPLY <- spFortify(grid.PLY)
 grid.sub.FPLY <- spFortify(grid.sub.PLY)
 
 # define ggplot2 color wheel function
 gg_color_hue <- function(n) {
-	hues <- seq(15, 375, length=n+1)
-	hcl(h=hues, l=65, c=100)[1:n]
+  hues <- seq(15, 375, length=n+1)
+  hcl(h=hues, l=65, c=100)[1:n]
 }
 ```
 
@@ -102,54 +102,54 @@ For each species, we generated a suite of `r  format(raptr.params.LST[[MODE]]$su
 ```{r, echo=FALSE, message=FALSE, warning=FALSE, fig.align='center', fig.width=6, fig.height=4.5, out.width='3.42in', out.height='2.5in', fig.cap='Adaptive (a) and neutral (b) genetic variation represented in a suite of randomly generated prioritisations as a function of the environmental and geographic surrogates they also secured (respectively). Panels (c) and (d) show the distribution of $R^2$ values for models using each surrogate to explain genetic variation.'}
 # make figure
 p1 <- ggplot(aes(x=surrogate.held,y=genetic.held), data=env.surrogacy.DF) +
-	xlab('Environmental variation\nsecured (%)') + 
-	ylab('Adaptive genetic\nvariation secured (%)') +
-	theme_classic() + theme(axis.line.x=element_line(color='black'),
-		axis.line.y=element_line(color='black')) +
-	coord_cartesian(xlim=c(0, 1)) +
-	scale_x_continuous(limits=c(0,1), labels=function(x) {x*100}) +
-	scale_y_continuous(limits=c(0,1), labels=function(x) {x*100})
+  xlab('Environmental variation\nsecured (%)') + 
+  ylab('Adaptive genetic\nvariation secured (%)') +
+  theme_classic() + theme(axis.line.x=element_line(color='black'),
+    axis.line.y=element_line(color='black')) +
+  coord_cartesian(xlim=c(0, 1)) +
+  scale_x_continuous(limits=c(0,1), labels=function(x) {x*100}) +
+  scale_y_continuous(limits=c(0,1), labels=function(x) {x*100})
 for (i in seq_along(env.surrogacy.LST))
-	p1 <- p1 + stat_smooth(method='glm', method.args=list(family='binomial'),
-		data=filter(env.surrogacy.DF, Species==unique(Species)[i]),
-		fullrange=TRUE, se=FALSE, colour='black')
+  p1 <- p1 + stat_smooth(method='glm', method.args=list(family='binomial'),
+    data=filter(env.surrogacy.DF, Species==unique(Species)[i]),
+    fullrange=TRUE, se=FALSE, colour='black')
 p1 <- p1 + geom_text(x=-Inf, y=Inf, hjust=-0.25, vjust=1.5, label='(a)')
 
 p2 <- ggplot(aes(x=surrogate.held,y=genetic.held), data=geo.surrogacy.DF) +
-	xlab('Geographic variation\nsecured (%)') + 
-	ylab('Neutral genetic\nvariation secured (%)') +
-	theme_classic() + theme(axis.line.x=element_line(color='black'),
-		axis.line.y=element_line(color='black', colour='transparent')) +
-	coord_cartesian(xlim=c(0, 1)) +
-	scale_x_continuous(limits=c(0,1), labels=function(x) {x*100}) +
-	scale_y_continuous(limits=c(0,1), labels=function(x) {x*100})
+  xlab('Geographic variation\nsecured (%)') + 
+  ylab('Neutral genetic\nvariation secured (%)') +
+  theme_classic() + theme(axis.line.x=element_line(color='black'),
+    axis.line.y=element_line(color='black', colour='transparent')) +
+  coord_cartesian(xlim=c(0, 1)) +
+  scale_x_continuous(limits=c(0,1), labels=function(x) {x*100}) +
+  scale_y_continuous(limits=c(0,1), labels=function(x) {x*100})
 for (i in seq_along(geo.surrogacy.LST))
-	p2 <- p2 + stat_smooth(method='glm', method.args=list(family='binomial'),
-		data=filter(geo.surrogacy.DF, Species==unique(Species)[i]),
-		fullrange=TRUE, se=FALSE, colour='black')
+  p2 <- p2 + stat_smooth(method='glm', method.args=list(family='binomial'),
+    data=filter(geo.surrogacy.DF, Species==unique(Species)[i]),
+    fullrange=TRUE, se=FALSE, colour='black')
 p2 <- p2 + geom_text(x=-Inf, y=Inf, hjust=-0.25, vjust=1.5, label='(b)')
 
 p1.hist <- ggplot(aes(r2CU),
-		data=filter(env.surrogate.spp.DF, !is.na(r2CU))) +
-	geom_histogram(fill='grey10', bins=5) +
-	ylab('\nFrequency') + xlab(expression(Environmental~variables~(R^2))) +
-	theme_classic() + theme(axis.line.x=element_line(color='black'),
-		axis.line.y=element_line(color='black'),
-		plot.background=element_rect(fill='transparent', colour='transparent')) +
-	geom_text(x=-Inf, y=Inf, hjust=-0.25, vjust=1.5, label='(c)') +
-	scale_y_continuous(labels=function(x) {formatC(x, digits=2, format='f')}) +
-	scale_x_continuous(limits=c(0, 1), labels=function(x) {formatC(x, digits=2, format='f')})
+    data=filter(env.surrogate.spp.DF, !is.na(r2CU))) +
+  geom_histogram(fill='grey10', bins=5) +
+  ylab('\nFrequency') + xlab(expression(Environmental~variables~(R^2))) +
+  theme_classic() + theme(axis.line.x=element_line(color='black'),
+    axis.line.y=element_line(color='black'),
+    plot.background=element_rect(fill='transparent', colour='transparent')) +
+  geom_text(x=-Inf, y=Inf, hjust=-0.25, vjust=1.5, label='(c)') +
+  scale_y_continuous(labels=function(x) {formatC(x, digits=2, format='f')}) +
+  scale_x_continuous(limits=c(0, 1), labels=function(x) {formatC(x, digits=2, format='f')})
 
 p2.hist <- ggplot(aes(r2CU),
-		data=filter(geo.surrogate.spp.DF, !is.na(r2CU))) +
-	geom_histogram(fill='grey10', bins=10) +
-	ylab('\nFrequency') + xlab(expression(Geographic~variables~(R^2))) +
-	theme_classic() + theme(axis.line.x=element_line(color='black'),
-		axis.line.y=element_line(color='black'), 
-		plot.background=element_rect(fill='transparent')) +
-	geom_text(x=-Inf, y=Inf, hjust=-0.25, vjust=1.5, label='(d)') +
-	scale_y_continuous(labels=function(x) {formatC(x, digits=2, format='f')}) +
-	scale_x_continuous(limits=c(0, 1), labels=function(x) {formatC(x, digits=2, format='f')})
+    data=filter(geo.surrogate.spp.DF, !is.na(r2CU))) +
+  geom_histogram(fill='grey10', bins=10) +
+  ylab('\nFrequency') + xlab(expression(Geographic~variables~(R^2))) +
+  theme_classic() + theme(axis.line.x=element_line(color='black'),
+    axis.line.y=element_line(color='black'), 
+    plot.background=element_rect(fill='transparent')) +
+  geom_text(x=-Inf, y=Inf, hjust=-0.25, vjust=1.5, label='(d)') +
+  scale_y_continuous(labels=function(x) {formatC(x, digits=2, format='f')}) +
+  scale_x_continuous(limits=c(0, 1), labels=function(x) {formatC(x, digits=2, format='f')})
 
 # render figure
 grid.arrange(p1,p2,p1.hist,p2.hist,nrow=2)
@@ -161,29 +161,29 @@ To determine whether using environmental and geographic targets could improve th
 ```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.align='center', fig.width=(5*0.9), fig.height=(7.1*0.9), out.width='3.42in', out.height='4in', fig.cap='Box plots show the proportion of adaptive and neutral genetic variation secured for each species in solution generated from different targets and scenarios. Red lines show the target proportion of genetic variation.'}
 # prepare data for plotting
 scenario.SDF <- scenario.DF %>% 
-	group_by(Prioritisation, Context, Metric, Species) %>% 
-	summarize(genetic.held=mean(genetic.held, na.rm=TRUE)) %>%
-	data.frame()
+  group_by(Prioritisation, Context, Metric, Species) %>% 
+  summarize(genetic.held=mean(genetic.held, na.rm=TRUE)) %>%
+  data.frame()
 
 # make plot
 suppressWarnings({
-	ggplot(aes(x=Prioritisation,y=genetic.held),
-		data=scenario.SDF) +
-		geom_boxplot(position=position_dodge(0.9)) +
-		scale_fill_manual(name='Prioritisation',
-			values=c('grey80','grey50','grey20')) +
-		geom_abline(slope=0, color='red', linetype='dashed',
-			intercept=raptr.params.LST[[MODE]]$scenario.analysis$genetic.target) +
-		ylab('Genetic variation secured (%)') +
-		xlab('') +
-		scale_y_continuous(breaks=c(0,0.25,0.5,0.75,1)) +
-		theme_classic() +
-		theme(strip.background = element_rect(fill='grey20'),
-			strip.text = element_text(color='white', size=9),
-			panel.border = element_rect(color='black', fill=NA),
-			axis.text.x=element_text(angle=45, hjust=1, vjust=1, size=8),
-			axis.text.y=element_text(size=8)) +
-		facet_grid(Context ~ Metric)
+  ggplot(aes(x=Prioritisation,y=genetic.held),
+    data=scenario.SDF) +
+    geom_boxplot(position=position_dodge(0.9)) +
+    scale_fill_manual(name='Prioritisation',
+      values=c('grey80','grey50','grey20')) +
+    geom_abline(slope=0, color='red', linetype='dashed',
+      intercept=raptr.params.LST[[MODE]]$scenario.analysis$genetic.target) +
+    ylab('Genetic variation secured (%)') +
+    xlab('') +
+    scale_y_continuous(breaks=c(0,0.25,0.5,0.75,1)) +
+    theme_classic() +
+    theme(strip.background = element_rect(fill='grey20'),
+      strip.text = element_text(color='white', size=9),
+      panel.border = element_rect(color='black', fill=NA),
+      axis.text.x=element_text(angle=45, hjust=1, vjust=1, size=8),
+      axis.text.y=element_text(size=8)) +
+    facet_grid(Context ~ Metric)
 })
 ```
 
@@ -226,53 +226,53 @@ We used data for 27 alpine plant species in the European Alps collected by the I
 
 # calculate species richness
 grid.PLY$Species_richness <- grid.PLY@data %>%
-	select(5:(4+n_distinct(spp.samples.DF$species))) %>% as.matrix() %>% rowSums()
-	
+  select(5:(4+n_distinct(spp.samples.DF$species))) %>% as.matrix() %>% rowSums()
+  
 panel.DF <- grid.sub.FPLY %>% 
-	summarize(lat=min(lat)+(diff(range(lat))*0.96),
-		long=min(long)+(diff(range(long))*0.04))
-	
+  summarize(lat=min(lat)+(diff(range(lat))*0.96),
+    long=min(long)+(diff(range(long))*0.04))
+  
 # plot species richness
 p1 <- ggplot() +
-	geom_polygon(data=countries.FPLY, aes(x=long, y=lat, group=group),
-		fill='grey85', color='grey70') +
-	geom_polygon(data=spFortify(grid.PLY), aes(x=long, y=lat, 
-		group=group, fill=Species_richness), color=NA) +
-	scale_fill_gradientn(name='Richness',
-		colors=brewer.pal(5, 'YlGn'),
-		guide=guide_colorbar(ticks=element_line(color='black'), border=element_line(color='black'))
-	) +
-	theme_classic() +
-	theme(
-		axis.ticks=element_blank(), axis.text=element_blank(), axis.line=element_blank(), plot.margin = unit(c(0, 0, 0, 0), "lines"), axis.title=element_blank(),
-		panel.border=element_rect(color='black', fill=NA, size=1)
-	) +
-	coord_cartesian(
-		xlim=buffered.range(grid.FPLY$long, 0),
-		ylim=buffered.range(grid.FPLY$lat, 0)
-	) + geom_text(aes_string(x='long',y='lat'), data=panel.DF, label='(a)')
-	
+  geom_polygon(data=countries.FPLY, aes(x=long, y=lat, group=group),
+    fill='grey85', color='grey70') +
+  geom_polygon(data=spFortify(grid.PLY), aes(x=long, y=lat, 
+    group=group, fill=Species_richness), color=NA) +
+  scale_fill_gradientn(name='Richness',
+    colors=brewer.pal(5, 'YlGn'),
+    guide=guide_colorbar(ticks=element_line(color='black'), border=element_line(color='black'))
+  ) +
+  theme_classic() +
+  theme(
+    axis.ticks=element_blank(), axis.text=element_blank(), axis.line=element_blank(), plot.margin = unit(c(0, 0, 0, 0), "lines"), axis.title=element_blank(),
+    panel.border=element_rect(color='black', fill=NA, size=1)
+  ) +
+  coord_cartesian(
+    xlim=buffered.range(grid.FPLY$long, 0),
+    ylim=buffered.range(grid.FPLY$lat, 0)
+  ) + geom_text(aes_string(x='long',y='lat'), data=panel.DF, label='(a)')
+  
 qn01 <- scales::rescale(quantile(grid.PLY@data$pop.density, seq(0,1,length.out=9), na.rm=TRUE))
 p2 <- ggplot() +
-	geom_polygon(data=countries.FPLY, aes(x=long, y=lat, group=group),
-		fill='grey85', color='grey70') +
-	geom_polygon(data=spFortify(grid.PLY), aes(x=long, y=lat, 
-		group=group, fill=pop.density), color=NA) +
-	scale_fill_gradientn(name='Cost',
-		colors=brewer.pal(5,'YlOrRd'),
-		values=qn01,
-		guide=guide_colorbar(ticks=element_line(color='black'), border=element_line(color='black'))
-	) +
-	theme_classic() +
-	theme(
-		axis.ticks=element_blank(), axis.text=element_blank(), axis.line=element_blank(), plot.margin = unit(c(0, 0, 0, 0), "lines"), axis.title=element_blank(),
-		panel.border=element_rect(color='black', fill=NA, size=1)
-	) +
-	coord_cartesian(
-		xlim=buffered.range(grid.FPLY$long, 0),
-		ylim=buffered.range(grid.FPLY$lat, 0)
-	)  + geom_text(aes_string(x='long',y='lat'), data=panel.DF, label='(b)')
-	
+  geom_polygon(data=countries.FPLY, aes(x=long, y=lat, group=group),
+    fill='grey85', color='grey70') +
+  geom_polygon(data=spFortify(grid.PLY), aes(x=long, y=lat, 
+    group=group, fill=pop.density), color=NA) +
+  scale_fill_gradientn(name='Cost',
+    colors=brewer.pal(5,'YlOrRd'),
+    values=qn01,
+    guide=guide_colorbar(ticks=element_line(color='black'), border=element_line(color='black'))
+  ) +
+  theme_classic() +
+  theme(
+    axis.ticks=element_blank(), axis.text=element_blank(), axis.line=element_blank(), plot.margin = unit(c(0, 0, 0, 0), "lines"), axis.title=element_blank(),
+    panel.border=element_rect(color='black', fill=NA, size=1)
+  ) +
+  coord_cartesian(
+    xlim=buffered.range(grid.FPLY$long, 0),
+    ylim=buffered.range(grid.FPLY$lat, 0)
+  )  + geom_text(aes_string(x='long',y='lat'), data=panel.DF, label='(b)')
+  
 grid.arrange(p1,p2,nrow=1)
 ```
 
@@ -312,11 +312,10 @@ Our second aim was to determine if the environmental and geographic variables we
 
 We fit two full generalised linear models (GLM) with logit links. The first model was fit to the proportion of adaptive genetic variation secured in a prioritisation using the proportion of environmental variation also secured in the prioritisation. The second model was fit to the proportion of neutral genetic variation secured in a prioritisation using proportion of geographic variation also secured in the prioritisation. Both models also contained a variable indicating the species for which the prioritisations were generated, and an interaction term. They were subject to backwards step-wise term deletion routines to assess term significance. To assess the performance of the surrogates, we refit these models seperately for each species and computed the Cragg and Uhler's pseudo-R value (using the \texttt{pscl R} package; [@r492]).
 
-Our third aim was to determine whether surrogate-based targets improved prioritisations. As previously mentioned, we generated prioritisations using different combinations of targets and conservation planning scenarios. We used `r (raptr.params.LST[[MODE]]$scenario.analysis$amount.target*100)` % amount-based targets in all prioritisations. Based on the results from our previous aim, we used `r (raptr.params.LST[[MODE]]$scenario.analysis$surrogate.target*100)` % surrogate-based targets and `r (raptr.params.LST[[MODE]]$scenario.analysis$genetic.target*100)` % genetic-based targets. We generated a single solution for each target/scenario combination, except for the "single-species (equal costs) with amount-based targets" cominbation for which we generated `r format(raptr.params.LST[[MODE]]$scenario.analysis$single.species.amount.replicates, big.mark=',', scientific=FALSE)` replicates because it had many optimal solutions. We computed the proportion of adaptive (if present) and neutral genetic variation secured for each species in the prioritisations.
+Our third aim was to determine whether surrogate-based targets improved prioritisations. As previously mentioned, we generated prioritisations using different combinations of targets and conservation planning scenarios. We used `r (raptr.params.LST[[MODE]]$scenario.analysis$amount.target*100)` % amount-based targets in all prioritisations. Based on the results from our previous aim, we used `r (raptr.params.LST[[MODE]]$scenario.analysis$surrogate.target*100)` % surrogate-based targets and `r (raptr.params.LST[[MODE]]$scenario.analysis$genetic.target*100)` % genetic-based targets. We generated a single solution for each target/scenario combination, except for the "single-species (equal costs) with amount-based targets" combination for which we generated `r format(raptr.params.LST[[MODE]]$scenario.analysis$single.species.amount.replicates, big.mark=',', scientific=FALSE)` replicates because it had many optimal solutions. We computed the proportion of adaptive (if present) and neutral genetic variation secured for each species in the prioritisations.
 
 We investigated the benefits of using surrogate-based targets in prioritisations using generalised linear mixed-effects models fit with logit links (GLMMs; using the \texttt{lme4 R} package; [@r469]). We fit a full model to the proportion of genetic variation secured in a given prioritisation. This model contained categorical variables indicating the combination of targets (amount-only, amount and surrogate targets, or amount and genetic targets), the scenario used to generate the prioritisation (single-species, multi-species, or multi-species with cost), the type of genetic variation measured (adaptive or neutral), and all interactions between them. Prioritisations generated for the same species were accomodated using a random intercept term. We subject the full model to a backwards step-wise term deletion routine to assess term significance, and conducted a post-hoc analysis on the minimal adequate model using Tukey contrasts with a Bonferroni correction (using the \texttt{multcomp R} package; [@r470]).
 
 \showmatmethods
 \showacknow
 \pnasbreak
-
