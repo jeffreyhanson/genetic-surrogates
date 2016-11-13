@@ -11,7 +11,7 @@ output:
       in_header: [preamble.tex, si-preamble.tex]
 ---
 # Supporting Information
-All data and code is stored in an online repository (\url{www.github.com/jeffreyhanson/genetic.surrogates}) to replicate analyses in this study. See the \textit{README} file for instructions.
+All data and code is stored in an online repository (\url{www.github.com/jeffreyhanson/genetic-surrogates}) to replicate analyses in this study. See the \textit{README} file for instructions.
 
 
 ```{r, include=FALSE}
@@ -30,19 +30,19 @@ options(error=NULL)
 # download basemap
 data(countriesHigh)
 countries.FPLY <- countriesHigh[
-	countriesHigh$ADMIN %in% c(
-		'Italy', 'Switzerland', 'France', 'Austria',
-		'Germany', 'Slovenia', 'Croatia', 'Hungary',
-		'Monaco', 'Germany', 'Slovakia', 'Czech Republic'
-	)
+  countriesHigh$ADMIN %in% c(
+    'Italy', 'Switzerland', 'France', 'Austria',
+    'Germany', 'Slovenia', 'Croatia', 'Hungary',
+    'Monaco', 'Germany', 'Slovakia', 'Czech Republic'
+  )
 ,] %>% spFortify
 grid.FPLY <- spFortify(grid.PLY)
 grid.sub.FPLY <- spFortify(grid.sub.PLY)
 
 # define ggplot2 color wheel function
 gg_color_hue <- function(n) {
-	hues <- seq(15, 375, length=n+1)
-	hcl(h=hues, l=65, c=100)[1:n]
+  hues <- seq(15, 375, length=n+1)
+  hcl(h=hues, l=65, c=100)[1:n]
 }
 ```
 
@@ -65,17 +65,17 @@ plot.spp.spaces <- function(i) {
     names(grid.FPLY), value=TRUE, fixed=TRUE
   )
   # skip species if not used in analysis
-  curr.FPLY <- grid.FPLY[,
-    c(adapt.col, neutral.col, env.col,
-    'long','lat','group'),drop=FALSE]
-  curr.FPLY <- curr.FPLY[which(!is.na(curr.FPLY[[1]])),]
-  curr.FPLY <- curr.FPLY %>% gather(d, value, contains('adaptive'), contains('neutral'), contains('env')) %>%
-    mutate(
-      d=gsub(paste0(unique(spp.samples.DF$species)[i], '_'), '', d, fixed=TRUE),
-      d=gsub('_', ' ', d, fixed=TRUE))
-  for (j in seq_len(length(adapt.col)+length(neutral.col)+length(env.col)))
-    curr.FPLY[['d']] <- gsub(as.character(j), paste0('(', j, ')'), curr.FPLY[['d']], fixed=TRUE)
-  curr.FPLY <- curr.FPLY %>% mutate(d=factor(gsub(' d(', ' (', d, fixed=TRUE)))
+  curr.FPLY <- grid.FPLY %>%
+    select(one_of(adapt.col, neutral.col, env.col), group, long, lat) %>%
+    mutate_each(funs(unname), one_of(adapt.col, neutral.col, env.col)) %>%
+    filter(!is.na(.[[1]])) %>%
+    gather(d, value, contains('adaptive'), contains('neutral'), contains('env')) %>%
+    mutate(d=as.character(d)) %>%
+    mutate(d=gsub(paste0(unique(spp.samples.DF$species)[i], '_'), '', d, fixed=TRUE)) %>%
+    mutate(d=gsub('_', ' ', d, fixed=TRUE)) %>%
+    mutate(d=gsub('env', 'environmental', d, fixed=TRUE))
+  for (j in seq_len(max(length(adapt.col),length(neutral.col),length(env.col))))
+    curr.FPLY$d <- gsub(paste0('d', as.character(j)), paste0('(', j, ')'), curr.FPLY$d, fixed=TRUE)
   # make plot
   curr.GROBS <- llply(unique(curr.FPLY$d), function(x) {
     ggplot() +
@@ -96,7 +96,8 @@ plot.spp.spaces <- function(i) {
       scale_fill_gradientn(name='',
         colors=brewer.pal(9, 'RdYlBu'),
         guide=guide_colorbar(ticks=element_line(color='black'),
-          border=element_line(color='black'), barheight=unit(3.0, 'cm'))
+          border=element_line(color='black'), barheight=unit(3.0, 'cm')),
+        labels=function(x) {formatC(x, format='f', digits=2)}
       ) + facet_wrap(~d)
   })
   do.call(grid.arrange, append(curr.GROBS, list(ncol=3)))
@@ -120,6 +121,7 @@ calc.fig.height <- function(i) {
   # count env plot
   n.plots <- n.plots + env.col
   # exports
+  if (n.plots == 0) return(1)
   if (n.plots >= 3) return((((n.plots-1) %/% 3)+1) * 2)
   return(1.85)
 }
@@ -140,6 +142,7 @@ calc.fig.width <- function(i) {
   # count env plot
   n.plots <- n.plots + env.col
   # exports
+  if (n.plots == 0) return(1)
   if (n.plots >= 3) return(10)
   return(4 * n.plots)
 }
@@ -151,111 +154,111 @@ is.speciesPlottable <- function(i) {
 }
 ```
 
-```{r, echo=FALSE, fig.width=calc.fig.width(1), fig.height=calc.fig.height(1), fig.width=calc.fig.width(1), fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[1]),'}. Each panel shows a different dimension of the variation as indicated by its title. Squares represent planning units. The color of each planning unit panel corresponds to the average ordinated values associated with individuals sampled inside it. No indiviudals of this species were found inside the gray planning units.')}
+```{r, echo=FALSE, fig.width=calc.fig.width(1), fig.height=calc.fig.height(1), fig.cap=paste0('Distribution of environmental variation found across the geographic range of \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[1]),'}, and the distribution of its adaptive and neutral genetic variation in the study area. Each panel shows a different dimension of variation as indicated by its title. Squares represent planning units. Samples collected from the species were subject to NMDS to ordinate the main axes of adaptive (if detected) and neutral genetic variation. The bioclimatic data were clipped to planning units where the species was found, and subject to a principal components analysis to summarise the main gradients of environmental variation. The panels show the spatial distribution of the ordinated environmental and genetic data averaged to the planning-unit level. Planning units where individuals were not observed are shown in gray.')}
 if (is.speciesPlottable(1)) plot.spp.spaces(1)
- ```
+```
 
-```{r, echo=FALSE, fig.width=calc.fig.width(2), fig.height=calc.fig.height(2), fig.width=calc.fig.width(2), fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[2]),'}. See Figure S29 caption for conventions.')}
+```{r, echo=FALSE, fig.width=calc.fig.width(2), fig.height=calc.fig.height(2), fig.cap=paste0('Distribution of environmental variation found across the geographic range of \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[2]),'}, and the distribution of its adaptive and neutral genetic variation in the study area. See Figure S1 caption for conventions.')}
 if (is.speciesPlottable(2)) plot.spp.spaces(2)
 ```
 
-```{r, echo=FALSE, fig.width=calc.fig.width(3), fig.height=calc.fig.height(3), fig.width=calc.fig.width(3), fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[3]),'}. See Figure S29 caption for conventions.')}
+```{r, echo=FALSE, fig.width=calc.fig.width(3), fig.height=calc.fig.height(3), fig.cap=paste0('Distribution of environmental variation found across the geographic range of \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[3]),'}, and the distribution of its adaptive and neutral genetic variation in the study area. See Figure S1 caption for conventions.')}
 if (is.speciesPlottable(3)) plot.spp.spaces(3)
 ```
 
-```{r, echo=FALSE, fig.width=calc.fig.width(4), fig.height=calc.fig.height(4), fig.width=calc.fig.width(4), fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[4]),'}. See Figure S29 caption for conventions.')}
+```{r, echo=FALSE, fig.width=calc.fig.width(4), fig.height=calc.fig.height(4), fig.cap=paste0('Distribution of environmental variation found across the geographic range of \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[4]),'}, and the distribution of its adaptive and neutral genetic variation in the study area. See Figure S1 caption for conventions.')}
 if (is.speciesPlottable(4)) plot.spp.spaces(4)
 ```
 
-```{r, echo=FALSE, fig.width=calc.fig.width(5), fig.height=calc.fig.height(5), fig.width=calc.fig.width(5), fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[5]),'}. See Figure S29 caption for conventions.')}
+```{r, echo=FALSE, fig.width=calc.fig.width(5), fig.height=calc.fig.height(5), fig.cap=paste0('Distribution of environmental variation found across the geographic range of \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[5]),'}, and the distribution of its adaptive and neutral genetic variation in the study area. See Figure S1 caption for conventions.')}
 if (is.speciesPlottable(5)) plot.spp.spaces(5)
 ```
 
-```{r, echo=FALSE, fig.width=calc.fig.width(6), fig.height=calc.fig.height(6), fig.width=calc.fig.width(6), fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[6]),'}. See Figure S29 caption for conventions.')}
+```{r, echo=FALSE, fig.width=calc.fig.width(6), fig.height=calc.fig.height(6), fig.cap=paste0('Distribution of environmental variation found across the geographic range of \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[6]),'}, and the distribution of its adaptive and neutral genetic variation in the study area. See Figure S1 caption for conventions.')}
 if (is.speciesPlottable(6)) plot.spp.spaces(6)
 ```
 
-```{r, echo=FALSE, fig.width=calc.fig.width(7), fig.height=calc.fig.height(7), fig.width=calc.fig.width(7), fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[7]),'}. See Figure S29 caption for conventions.')}
+```{r, echo=FALSE, fig.width=calc.fig.width(7), fig.height=calc.fig.height(7), fig.cap=paste0('Distribution of environmental variation found across the geographic range of \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[7]),'}, and the distribution of its adaptive and neutral genetic variation in the study area. See Figure S1 caption for conventions.')}
 if (is.speciesPlottable(7)) plot.spp.spaces(7)
 ```
 
-```{r, echo=FALSE, fig.width=calc.fig.width(8), fig.height=calc.fig.height(8), fig.width=calc.fig.width(8), fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[8]),'}. See Figure S29 caption for conventions.')}
+```{r, echo=FALSE, fig.width=calc.fig.width(8), fig.height=calc.fig.height(8), fig.cap=paste0('Distribution of environmental variation found across the geographic range of \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[8]),'}, and the distribution of its adaptive and neutral genetic variation in the study area. See Figure S1 caption for conventions.')}
 if (is.speciesPlottable(8)) plot.spp.spaces(8)
 ```
 
-```{r, echo=FALSE, fig.width=calc.fig.width(9), fig.height=calc.fig.height(9), fig.width=calc.fig.width(9), fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[9]),'}. See Figure S29 caption for conventions.')}
+```{r, echo=FALSE, fig.width=calc.fig.width(9), fig.height=calc.fig.height(9), fig.cap=paste0('Distribution of environmental variation found across the geographic range of \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[9]),'}, and the distribution of its adaptive and neutral genetic variation in the study area. See Figure S1 caption for conventions.')}
 if (is.speciesPlottable(9)) plot.spp.spaces(9)
 ```
 
-```{r, echo=FALSE, fig.width=calc.fig.width(10), fig.height=calc.fig.height(10), fig.width=calc.fig.width(10), fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[10]),'}. See Figure S29 caption for conventions.')}
+```{r, echo=FALSE, fig.width=calc.fig.width(10), fig.height=calc.fig.height(10), fig.cap=paste0('Distribution of environmental variation found across the geographic range of \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[10]),'}, and the distribution of its adaptive and neutral genetic variation in the study area. See Figure S1 caption for conventions.')}
 if (is.speciesPlottable(10)) plot.spp.spaces(10)
 ```
 
-```{r, echo=FALSE, fig.width=calc.fig.width(11), fig.height=calc.fig.height(11), fig.width=calc.fig.width(11), fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[11]),'}. See Figure S29 caption for conventions.')}
+```{r, echo=FALSE, fig.width=calc.fig.width(11), fig.height=calc.fig.height(11), fig.cap=paste0('Distribution of environmental variation found across the geographic range of \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[11]),'}, and the distribution of its adaptive and neutral genetic variation in the study area. See Figure S1 caption for conventions.')}
 if (is.speciesPlottable(11)) plot.spp.spaces(11)
 ```
 
-```{r, echo=FALSE, fig.width=calc.fig.width(12), fig.height=calc.fig.height(12), fig.width=calc.fig.width(12), fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[12]),'}. See Figure S29 caption for conventions.')}
+```{r, echo=FALSE, fig.width=calc.fig.width(12), fig.height=calc.fig.height(12), fig.cap=paste0('Distribution of environmental variation found across the geographic range of \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[12]),'}, and the distribution of its adaptive and neutral genetic variation in the study area. See Figure S1 caption for conventions.')}
 if (is.speciesPlottable(12)) plot.spp.spaces(12)
 ```
 
-```{r, echo=FALSE, fig.width=calc.fig.width(13), fig.height=calc.fig.height(13), fig.width=calc.fig.width(13), fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[13]),'}. See Figure S29 caption for conventions.')}
+```{r, echo=FALSE, fig.width=calc.fig.width(13), fig.height=calc.fig.height(13), fig.cap=paste0('Distribution of environmental variation found across the geographic range of \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[13]),'}, and the distribution of its adaptive and neutral genetic variation in the study area. See Figure S1 caption for conventions.')}
 if (is.speciesPlottable(13)) plot.spp.spaces(13)
 ```
 
-```{r, echo=FALSE, fig.width=calc.fig.width(14), fig.height=calc.fig.height(14), fig.width=calc.fig.width(14), fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[14]),'}. See Figure S29 caption for conventions.')}
+```{r, echo=FALSE, fig.width=calc.fig.width(14), fig.height=calc.fig.height(14), fig.cap=paste0('Distribution of environmental variation found across the geographic range of \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[14]),'}, and the distribution of its adaptive and neutral genetic variation in the study area. See Figure S1 caption for conventions.')}
 if (is.speciesPlottable(14)) plot.spp.spaces(14)
 ```
 
-```{r, echo=FALSE, fig.width=calc.fig.width(15), fig.height=calc.fig.height(15), fig.width=calc.fig.width(15), fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[15]),'}. See Figure S29 caption for conventions.')}
+```{r, echo=FALSE, fig.width=calc.fig.width(15), fig.height=calc.fig.height(15), fig.cap=paste0('Distribution of environmental variation found across the geographic range of \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[15]),'}, and the distribution of its adaptive and neutral genetic variation in the study area. See Figure S1 caption for conventions.')}
 if (is.speciesPlottable(15)) plot.spp.spaces(15)
 ```
 
-```{r, echo=FALSE, fig.width=calc.fig.width(16), fig.height=calc.fig.height(16), fig.width=calc.fig.width(16), fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[16]),'}. See Figure S29 caption for conventions.')}
+```{r, echo=FALSE, fig.width=calc.fig.width(16), fig.height=calc.fig.height(16), fig.cap=paste0('Distribution of environmental variation found across the geographic range of \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[16]),'}, and the distribution of its adaptive and neutral genetic variation in the study area. See Figure S1 caption for conventions.')}
 if (is.speciesPlottable(16)) plot.spp.spaces(16)
 ```
 
-```{r, echo=FALSE, fig.width=calc.fig.width(17), fig.height=calc.fig.height(17), fig.width=calc.fig.width(17), fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[17]),'}. See Figure S29 caption for conventions.')}
+```{r, echo=FALSE, fig.width=calc.fig.width(17), fig.height=calc.fig.height(17), fig.cap=paste0('Distribution of environmental variation found across the geographic range of \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[17]),'}, and the distribution of its adaptive and neutral genetic variation in the study area. See Figure S1 caption for conventions.')}
 if (is.speciesPlottable(17)) plot.spp.spaces(17)
 ```
 
-```{r, echo=FALSE, fig.width=calc.fig.width(18), fig.height=calc.fig.height(18), fig.width=calc.fig.width(18), fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[18]),'}. See Figure S29 caption for conventions.')}
+```{r, echo=FALSE, fig.width=calc.fig.width(18), fig.height=calc.fig.height(18), fig.cap=paste0('Distribution of environmental variation found across the geographic range of \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[18]),'}, and the distribution of its adaptive and neutral genetic variation in the study area. See Figure S1 caption for conventions.')}
 if (is.speciesPlottable(18)) plot.spp.spaces(18)
 ```
 
-```{r, echo=FALSE, fig.width=calc.fig.width(19), fig.height=calc.fig.height(19), fig.width=calc.fig.width(19), fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[19]),'}. See Figure S29 caption for conventions.')}
+```{r, echo=FALSE, fig.width=calc.fig.width(19), fig.height=calc.fig.height(19), fig.cap=paste0('Distribution of environmental variation found across the geographic range of \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[19]),'}, and the distribution of its adaptive and neutral genetic variation in the study area. See Figure S1 caption for conventions.')}
 if (is.speciesPlottable(19)) plot.spp.spaces(19)
 ```
 
-```{r, echo=FALSE, fig.width=calc.fig.width(20), fig.height=calc.fig.height(20), fig.width=calc.fig.width(20), fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[20]),'}. See Figure S29 caption for conventions.')}
+```{r, echo=FALSE, fig.width=calc.fig.width(20), fig.height=calc.fig.height(20), fig.cap=paste0('Distribution of environmental variation found across the geographic range of \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[20]),'}, and the distribution of its adaptive and neutral genetic variation in the study area. See Figure S1 caption for conventions.')}
 if (is.speciesPlottable(20)) plot.spp.spaces(20)
 ```
 
-```{r, echo=FALSE, fig.width=calc.fig.width(21), fig.height=calc.fig.height(21), fig.width=calc.fig.width(21), fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[21]),'}. See Figure S29 caption for conventions.')}
+```{r, echo=FALSE, fig.width=calc.fig.width(21), fig.height=calc.fig.height(21), fig.cap=paste0('Distribution of environmental variation found across the geographic range of \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[21]),'}, and the distribution of its adaptive and neutral genetic variation in the study area. See Figure S1 caption for conventions.')}
 if (is.speciesPlottable(21)) plot.spp.spaces(21)
 ```
 
-```{r, echo=FALSE, fig.width=calc.fig.width(22), fig.height=calc.fig.height(22), fig.width=calc.fig.width(22), fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[22]),'}. See Figure S29 caption for conventions.')}
+```{r, echo=FALSE, fig.width=calc.fig.width(22), fig.height=calc.fig.height(22), fig.cap=paste0('Distribution of environmental variation found across the geographic range of \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[22]),'}, and the distribution of its adaptive and neutral genetic variation in the study area. See Figure S1 caption for conventions.')}
 if (is.speciesPlottable(22)) plot.spp.spaces(22)
 ```
 
-```{r, echo=FALSE, fig.width=calc.fig.width(23), fig.height=calc.fig.height(23), fig.width=calc.fig.width(23), fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[23]),'}. See Figure S29 caption for conventions.')}
+```{r, echo=FALSE, fig.width=calc.fig.width(23), fig.height=calc.fig.height(23), fig.cap=paste0('Distribution of environmental variation found across the geographic range of \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[23]),'}, and the distribution of its adaptive and neutral genetic variation in the study area. See Figure S1 caption for conventions.')}
 if (is.speciesPlottable(23)) plot.spp.spaces(23)
 ```
 
-```{r, echo=FALSE, fig.width=calc.fig.width(24), fig.height=calc.fig.height(24), fig.width=calc.fig.width(24), fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[24]),'}. See Figure S29 caption for conventions.')}
+```{r, echo=FALSE, fig.width=calc.fig.width(24), fig.height=calc.fig.height(24), fig.cap=paste0('Distribution of environmental variation found across the geographic range of \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[24]),'}, and the distribution of its adaptive and neutral genetic variation in the study area. See Figure S1 caption for conventions.')}
 if (is.speciesPlottable(24)) plot.spp.spaces(24)
 ```
 
-```{r, echo=FALSE, fig.width=calc.fig.width(25), fig.height=calc.fig.height(25), fig.width=calc.fig.width(25), fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[25]),'}. See Figure S29 caption for conventions.')}
+```{r, echo=FALSE, fig.width=calc.fig.width(25), fig.height=calc.fig.height(25), fig.cap=paste0('Distribution of environmental variation found across the geographic range of \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[25]),'}, and the distribution of its adaptive and neutral genetic variation in the study area. See Figure S1 caption for conventions.')}
 if (is.speciesPlottable(25)) plot.spp.spaces(25)
 ```
 
-```{r, echo=FALSE, fig.width=calc.fig.width(26), fig.height=calc.fig.height(26), fig.width=calc.fig.width(26), fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[26]),'}. See Figure S29 caption for conventions.')}
+```{r, echo=FALSE, fig.width=calc.fig.width(26), fig.height=calc.fig.height(26), fig.cap=paste0('Distribution of environmental variation found across the geographic range of \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[26]),'}, and the distribution of its adaptive and neutral genetic variation in the study area. See Figure S1 caption for conventions.')}
 if (is.speciesPlottable(26)) plot.spp.spaces(26)
 ```
 
-```{r, echo=FALSE, fig.width=calc.fig.width(27), fig.height=calc.fig.height(27), fig.width=calc.fig.width(27), fig.cap=paste0('Distribution of adaptive and neutral genetic variation in \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[27]),'}. See Figure S29 caption for conventions.')}
+```{r, echo=FALSE, fig.width=calc.fig.width(27), fig.height=calc.fig.height(27), fig.cap=paste0('Distribution of environmental variation found across the geographic range of \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[27]),'}, and the distribution of its adaptive and neutral genetic variation in the study area. See Figure S1 caption for conventions.')}
 if (is.speciesPlottable(27)) plot.spp.spaces(27)
 ```
 
@@ -291,7 +294,7 @@ calc.fig.height3 <- function(x) {
 
 ```
 
-```{r, echo=FALSE, message=FALSE, warning=FALSE, fig.width=10, fig.height=calc.fig.height3(n_distinct(geo.surrogacy.DF$Species)), fig.cap='The relationship between the proportion of neutral genetic variation secured in a prioritizaiton and the proportion of geographic variation it also secures. Conventions are detailed in Figure S56.'}
+```{r, echo=FALSE, message=FALSE, warning=FALSE, fig.width=10, fig.height=calc.fig.height3(n_distinct(geo.surrogacy.DF$Species)), fig.cap='The relationship between the proportion of neutral genetic variation secured in a prioritizaiton and the proportion of geographic variation it also secures. Conventions are detailed in Figure S28.'}
 # format data
 curr.DF <- geo.surrogacy.DF %>% filter(!is.na(genetic.held)) %>% mutate(Species=gsub('_', ' ', Species))
 curr.DF2 <- geo.surrogate.spp.DF %>% filter(!is.na(r2CU)) %>% mutate(Species=gsub('_', ' ', Species))
@@ -375,44 +378,44 @@ ggplot() +
 ## plot map of species distributions
 # fortify data
 spp.grid.FPLY <- ldply(unique(spp.samples.DF$species), function(x) {
-		z <- grid.FPLY[,c('long', 'lat', 'group', x),drop=FALSE]
-		names(z)[4] <- 'presence'
-		z$species <- gsub('\\_', ' ', x)
-		return(z)
-	}
+    z <- grid.FPLY[,c('long', 'lat', 'group', x),drop=FALSE]
+    names(z)[4] <- 'presence'
+    z$species <- gsub('\\_', ' ', x)
+    return(z)
+  }
 ) %>% mutate(presence=factor(c('absent', 'present')[presence+1]))
 
 # plot species data
 ggplot() +
-	geom_polygon(data=countries.FPLY, aes(x=long, y=lat, group=group),
-		fill='grey85', color='grey70') +
-	geom_polygon(data=spp.grid.FPLY, aes(x=long, y=lat, 
-		group=group, fill=presence), alpha=0.8, color='grey10') +
-	theme_classic() +
-	theme(
-		axis.ticks=element_blank(), axis.text=element_blank(), axis.line=element_blank(), plot.margin = unit(c(0, 0, 0, 0), "lines"),
-		strip.background = element_rect(fill='grey20'),
-		strip.text = element_text(color='white', face='italic'),
-		axis.title=element_blank()
-	) +
-		scale_fill_manual(name='Occupancy', values=c('absent'='#FC8D59', 'present'='#91CF60')) +
-	coord_cartesian(
-		xlim=buffered.range(grid.FPLY$long, 0),
-		ylim=buffered.range(grid.FPLY$lat, 0)
-	) +
-	facet_wrap(~ species, ncol=4)
+  geom_polygon(data=countries.FPLY, aes(x=long, y=lat, group=group),
+    fill='grey85', color='grey70') +
+  geom_polygon(data=spp.grid.FPLY, aes(x=long, y=lat, 
+    group=group, fill=presence), alpha=0.8, color='grey10') +
+  theme_classic() +
+  theme(
+    axis.ticks=element_blank(), axis.text=element_blank(), axis.line=element_blank(), plot.margin = unit(c(0, 0, 0, 0), "lines"),
+    strip.background = element_rect(fill='grey20'),
+    strip.text = element_text(color='white', face='italic'),
+    axis.title=element_blank()
+  ) +
+    scale_fill_manual(name='Occupancy', values=c('absent'='#FC8D59', 'present'='#91CF60')) +
+  coord_cartesian(
+    xlim=buffered.range(grid.FPLY$long, 0),
+    ylim=buffered.range(grid.FPLY$lat, 0)
+  ) +
+  facet_wrap(~ species, ncol=4)
 ```
 
 ```{r, include=FALSE}
 render_gvis <- function(x) {
   file = tempfile(fileext='.png')
-  rsvg::rsvg_png(charToRaw(DiagrammeRsvg::export_svg(x)), file)
+  rsvg::rsvg_png(charToRaw(DiagrammeRsvg::export_svg(DiagrammeR::grViz(x))), file)
   grid::grid.raster(png::readPNG(file))
 }
 ```
 
 ```{r, echo=FALSE, results='hide', message=FALSE, fig.cap='Overall data processing workflow. The flowcharts show the methods used to generate the environmental and geographic surrogate spaces, and the adaptive and neutral genetic spaces. Squares indicate data sets. Ellipses indicate analyses. Lines show relationships between data and analysis, and their captions describe how data was processed.'}
-render_gvis(grViz("
+render_gvis("
 digraph main {
   graph [layout = dot]
   
@@ -448,11 +451,11 @@ digraph main {
   calc_genetic_as -> calc_genetic_as [label = ' each species\nseparately']
 
 }
-"))
+")
 ```
 
-```{r, echo=FALSE, results='hide', message=FALSE, fig.cap='Geographic surrogate processing workflow. Conventions are detailed in Figure S59 caption.'}
-render_gvis(grViz("
+```{r, echo=FALSE, results='hide', message=FALSE, fig.cap='Geographic surrogate processing workflow. Conventions are detailed in Figure S32 caption.'}
+render_gvis("
 digraph geo_as {
   graph [layout = dot]
   
@@ -484,11 +487,11 @@ digraph geo_as {
   spp_centriod_data -> geographic_space [label =' extract coordinates and use them\nto represent demand points and\nplanning unit coordinates']
   
 }
-"))
+")
 ```
 
-```{r, fig.height=6, echo=FALSE, results='hide', message=FALSE, fig.cap='Environmental surrogate processing workflow. Conventions are detailed in Figure S59 caption.'}
-render_gvis(grViz("
+```{r, fig.height=6, echo=FALSE, results='hide', message=FALSE, fig.cap='Environmental surrogate processing workflow. Conventions are detailed in Figure S32 caption.'}
+render_gvis("
 digraph env_as {
   graph [layout = dot]
   
@@ -534,11 +537,11 @@ digraph env_as {
   grid_pca_data -> environmental_space [label =' extract scores and use them\nto represent demand points and\nplanning unit coordinates']
 
 }
-"))
+")
 ```
 
-```{r, fig.height=10, echo=FALSE, results='hide', message=FALSE, fig.cap='Genetic data processing workflow. Conventions are detailed in Figure S59 caption.'}
-render_gvis(grViz("
+```{r, fig.height=10, echo=FALSE, results='hide', message=FALSE, fig.cap='Genetic data processing workflow. Conventions are detailed in Figure S32 caption.'}
+render_gvis("
 digraph genetic_as {
   graph [layout = dot]
   
@@ -623,122 +626,122 @@ digraph genetic_as {
   grid_neutral_ordinations -> neutral_genetic_space [label =' extract values and use them\nto represent demand points and\nplanning unit coordinates']
 
 }
-"))
+")
 ```
 
 ```{r, echo=FALSE}
 # prepare data
 pop.probs.DF <- llply(
-	seq_along(unique(spp.samples.DF$species)),
-	function(i) {
-		curr.pts <- filter(
-			spp.sample.PTS@data,
-			species==unique(spp.samples.DF$species)[i]
-		) %>% mutate(
-			Individual=seq_along(species)
-		) 	
-		curr.probs <- structurer:::sample.membership(spp.StructureCollection.LST[[i]]) %>%
-			as.data.frame() %>%
-			mutate(
-				species=unique(spp.samples.DF$species)[i],
-				Individual=seq_along(species)) %>%
-			gather(Population,Probability,-species,-Individual) %>%
-			mutate(Population=as.numeric(gsub('V', '', Population, fixed=TRUE))) %>%
-			left_join(curr.pts, by=c('species','Individual')) %>%
-			mutate(species=gsub('_', ' ', species, fixed=TRUE)) %>%
-			arrange(species,Individual,Population)
-		return(curr.probs)
-	}
+  seq_along(unique(spp.samples.DF$species)),
+  function(i) {
+    curr.pts <- filter(
+      spp.sample.PTS@data,
+      species==unique(spp.samples.DF$species)[i]
+    ) %>% mutate(
+      Individual=seq_along(species)
+    )   
+    curr.probs <- structurer:::sample.membership(spp.StructureCollection.LST[[i]]) %>%
+      as.data.frame() %>%
+      mutate(
+        species=unique(spp.samples.DF$species)[i],
+        Individual=seq_along(species)) %>%
+      gather(Population,Probability,-species,-Individual) %>%
+      mutate(Population=as.numeric(gsub('V', '', Population, fixed=TRUE))) %>%
+      left_join(curr.pts, by=c('species','Individual')) %>%
+      mutate(species=gsub('_', ' ', species, fixed=TRUE)) %>%
+      arrange(species,Individual,Population)
+    return(curr.probs)
+  }
 ) %>% do.call(what=rbind)
 # create legend colors
 legend.CHR <- `names<-`(
-	gg_color_hue(n_distinct(pop.probs.DF$Population)),
-	as.character(unique(pop.probs.DF$Population))
+  gg_color_hue(n_distinct(pop.probs.DF$Population)),
+  as.character(unique(pop.probs.DF$Population))
 )
 # create function
 plot.spp.pop.probs <- function(i) {
-	# init spp.samples
-	prop <- 0.85
-	curr.spp.DF <- filter(pop.probs.DF, species==unique(pop.probs.DF$species)[i])
-	# create base map grob
-	curr.GROB <- ggplot(data=curr.spp.DF) +
-		geom_polygon(data=countries.FPLY, aes(x=long, y=lat, group=group),
-			fill='grey85', color='grey75') +
-		geom_polygon(data=grid.FPLY, aes_string(x='long', y='lat', 
-			group='group'), fill='grey70', color='grey10') +
-		guides(fill=guide_legend(title=''), color=guide_legend(title='')) +
-		theme_classic() +
-		theme(
-			axis.title=element_blank(), axis.text=element_blank(),
-			axis.line=element_blank(), axis.ticks=element_blank(),
-			axis.ticks.length = unit(0, "cm"),
-			legend.position = "none", panel.margin = unit(0, "lines"),
-			plot.margin = unit(c(0, 0, 0, 0), "lines"),
-			strip.background = element_rect(fill='grey20'),
-			strip.text = element_text(color='white', face='italic', size=20),
-			legend.text= element_text(size=20)
-		) + 
-		coord_cartesian(
-			xlim=buffered.range(grid.FPLY$long, 0),
-			ylim=buffered.range(grid.FPLY$lat, 0)
-		) +
-		scale_fill_manual(
-			name='',
-			values=legend.CHR[seq_len(n_distinct(curr.spp.DF$Population))]
-		)
-	# create header grob
-	curr.GROBH <- ggplot() +
-			geom_text(aes(x=0,y=0,label=species),
-				data=curr.spp.DF[1,,drop=FALSE],
-				color='white', fontface='italic', size=4) +
-		theme_classic() +
-		theme(
-			axis.title=element_blank(), axis.text=element_blank(),
-			axis.line=element_blank(), axis.ticks=element_blank(),
-			axis.ticks.length = unit(0, "cm"),
-			legend.position = "none", panel.margin = unit(0, "lines"),
-			plot.margin = unit(c(0, 0, 0, 0), "lines"),
-			panel.background=element_rect(fill='grey20')
-		) +
-		coord_cartesian(xlim=c(-1,1), ylim=c(-1,1))
-	# create bbox object
-	bbox <- c(ggplot_build(curr.GROB)$panel$ranges[[1]]$x.range,
-		ggplot_build(curr.GROB)$panel$ranges[[1]]$y.range)
-		names(bbox) <- c('ll.lon', 'ur.lon', 'll.lat', 'ur.lat')
-	# render grob
-	grid.newpage()
-	pushViewport(viewport(layout=grid.layout(2,1, heights=unit(c(1-prop, prop), "npc"))))
-	print(curr.GROBH, vp=viewport(layout.pos.row=1, layout.pos.col=1))
-	print(curr.GROB, vp=viewport(layout.pos.row=2, layout.pos.col=1))
-	# add in pies
-	for (j in unique(curr.spp.DF$cell)) {
-		# init
-		curr.cell.DF <- filter(curr.spp.DF, cell==j) %>% 
-			group_by(cell, Population) %>%
-			summarize(
-				grid.longitude=mean(grid.longitude), 
-				grid.latitude=mean(grid.latitude),
-				Probability=mean(Probability)
-			) %>% data.frame()
-		curr.lon <- (curr.cell.DF$grid.longitude[1]-bbox['ll.lon'])/abs(bbox['ur.lon']-bbox['ll.lon'])
-		curr.lat <- ((curr.cell.DF$grid.latitude[1]-bbox['ll.lat'])/abs(bbox['ur.lat']-bbox['ll.lat']))*prop
-		# create pie chart for individual
-		curr.pie <- ggplot(curr.cell.DF, aes(x="", y=Probability, fill=factor(Population))) +
-			geom_bar(width=0.75, color='grey20', stat='identity') +
-			coord_polar(theta='y') +
-			theme(
-				line = element_blank(), rect = element_blank(), 
-				text = element_blank(), axis.ticks.length = unit(0, "cm"),
-				legend.position = "none", panel.margin = unit(0, "lines"),
-				plot.margin = unit(c(0, 0, 0, 0), "lines"), complete = TRUE
-			) +
-			scale_fill_manual(
-				name='',
-				values=legend.CHR[seq_len(n_distinct(curr.spp.DF$Population))]
-			)
-		# render pie
-		print(curr.pie, vp=viewport(x=curr.lon, y=curr.lat, width=0.075, height=0.075))
-	}
+  # init spp.samples
+  prop <- 0.85
+  curr.spp.DF <- filter(pop.probs.DF, species==unique(pop.probs.DF$species)[i])
+  # create base map grob
+  curr.GROB <- ggplot(data=curr.spp.DF) +
+    geom_polygon(data=countries.FPLY, aes(x=long, y=lat, group=group),
+      fill='grey85', color='grey75') +
+    geom_polygon(data=grid.FPLY, aes_string(x='long', y='lat', 
+      group='group'), fill='grey70', color='grey10') +
+    guides(fill=guide_legend(title=''), color=guide_legend(title='')) +
+    theme_classic() +
+    theme(
+      axis.title=element_blank(), axis.text=element_blank(),
+      axis.line=element_blank(), axis.ticks=element_blank(),
+      axis.ticks.length = unit(0, "cm"),
+      legend.position = "none", panel.margin = unit(0, "lines"),
+      plot.margin = unit(c(0, 0, 0, 0), "lines"),
+      strip.background = element_rect(fill='grey20'),
+      strip.text = element_text(color='white', face='italic', size=20),
+      legend.text= element_text(size=20)
+    ) + 
+    coord_cartesian(
+      xlim=buffered.range(grid.FPLY$long, 0),
+      ylim=buffered.range(grid.FPLY$lat, 0)
+    ) +
+    scale_fill_manual(
+      name='',
+      values=legend.CHR[seq_len(n_distinct(curr.spp.DF$Population))]
+    )
+  # create header grob
+  curr.GROBH <- ggplot() +
+      geom_text(aes(x=0,y=0,label=species),
+        data=curr.spp.DF[1,,drop=FALSE],
+        color='white', fontface='italic', size=4) +
+    theme_classic() +
+    theme(
+      axis.title=element_blank(), axis.text=element_blank(),
+      axis.line=element_blank(), axis.ticks=element_blank(),
+      axis.ticks.length = unit(0, "cm"),
+      legend.position = "none", panel.margin = unit(0, "lines"),
+      plot.margin = unit(c(0, 0, 0, 0), "lines"),
+      panel.background=element_rect(fill='grey20')
+    ) +
+    coord_cartesian(xlim=c(-1,1), ylim=c(-1,1))
+  # create bbox object
+  bbox <- c(ggplot_build(curr.GROB)$panel$ranges[[1]]$x.range,
+    ggplot_build(curr.GROB)$panel$ranges[[1]]$y.range)
+    names(bbox) <- c('ll.lon', 'ur.lon', 'll.lat', 'ur.lat')
+  # render grob
+  grid.newpage()
+  pushViewport(viewport(layout=grid.layout(2,1, heights=unit(c(1-prop, prop), "npc"))))
+  print(curr.GROBH, vp=viewport(layout.pos.row=1, layout.pos.col=1))
+  print(curr.GROB, vp=viewport(layout.pos.row=2, layout.pos.col=1))
+  # add in pies
+  for (j in unique(curr.spp.DF$cell)) {
+    # init
+    curr.cell.DF <- filter(curr.spp.DF, cell==j) %>% 
+      group_by(cell, Population) %>%
+      summarize(
+        grid.longitude=mean(grid.longitude), 
+        grid.latitude=mean(grid.latitude),
+        Probability=mean(Probability)
+      ) %>% data.frame()
+    curr.lon <- (curr.cell.DF$grid.longitude[1]-bbox['ll.lon'])/abs(bbox['ur.lon']-bbox['ll.lon'])
+    curr.lat <- ((curr.cell.DF$grid.latitude[1]-bbox['ll.lat'])/abs(bbox['ur.lat']-bbox['ll.lat']))*prop
+    # create pie chart for individual
+    curr.pie <- ggplot(curr.cell.DF, aes(x="", y=Probability, fill=factor(Population))) +
+      geom_bar(width=0.75, color='grey20', stat='identity') +
+      coord_polar(theta='y') +
+      theme(
+        line = element_blank(), rect = element_blank(), 
+        text = element_blank(), axis.ticks.length = unit(0, "cm"),
+        legend.position = "none", panel.margin = unit(0, "lines"),
+        plot.margin = unit(c(0, 0, 0, 0), "lines"), complete = TRUE
+      ) +
+      scale_fill_manual(
+        name='',
+        values=legend.CHR[seq_len(n_distinct(curr.spp.DF$Population))]
+      )
+    # render pie
+    print(curr.pie, vp=viewport(x=curr.lon, y=curr.lat, width=0.075, height=0.075))
+  }
 }
 ```
 
@@ -747,104 +750,108 @@ plot.spp.pop.probs <- function(i) {
 plot.spp.pop.probs(1)
 ```
 
-```{r, echo=FALSE, fig.width=3, fig.height=2, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[2],fixed=TRUE),'} populations. See Figure S3 caption for conventions.')}
+```{r, echo=FALSE, fig.width=3, fig.height=2, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[2],fixed=TRUE),'} populations. See Figure S36 caption for conventions.')}
 if (2 <= general.params.LST[[MODE]]$n.spp) plot.spp.pop.probs(2)
 ```
 
-```{r, echo=FALSE, fig.width=3, fig.height=2, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[3],fixed=TRUE),'} populations. See Figure S3 caption for conventions.')}
+```{r, echo=FALSE, fig.width=3, fig.height=2, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[3],fixed=TRUE),'} populations. See Figure S36 caption for conventions.')}
 if (3 <= general.params.LST[[MODE]]$n.spp) plot.spp.pop.probs(3)
 ```
 
-```{r, echo=FALSE, fig.width=3, fig.height=2, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[4],fixed=TRUE),'} populations. See Figure S3 caption for conventions.')}
+```{r, echo=FALSE, fig.width=3, fig.height=2, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[4],fixed=TRUE),'} populations. See Figure S36 caption for conventions.')}
 if (4 <= general.params.LST[[MODE]]$n.spp) plot.spp.pop.probs(4)
 ```
 
-```{r, echo=FALSE, fig.width=3, fig.height=2, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[5],fixed=TRUE),'} populations. See Figure S3 caption for conventions.')}
+```{r, echo=FALSE, fig.width=3, fig.height=2, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[5],fixed=TRUE),'} populations. See Figure S36 caption for conventions.')}
 if (5 <= general.params.LST[[MODE]]$n.spp) plot.spp.pop.probs(5)
 ```
 
-```{r, echo=FALSE, fig.width=3, fig.height=2, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[6],fixed=TRUE),'} populations. See Figure S3 caption for conventions.')}
+```{r, echo=FALSE, fig.width=3, fig.height=2, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[6],fixed=TRUE),'} populations. See Figure S36 caption for conventions.')}
 if (6 <= general.params.LST[[MODE]]$n.spp) plot.spp.pop.probs(6)
 ```
 
-```{r, echo=FALSE, fig.width=3, fig.height=2, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[7],fixed=TRUE),'} populations. See Figure S3 caption for conventions.')}
+```{r, echo=FALSE, fig.width=3, fig.height=2, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[7],fixed=TRUE),'} populations. See Figure S36 caption for conventions.')}
 if (7 <= general.params.LST[[MODE]]$n.spp) plot.spp.pop.probs(7)
 ```
 
-```{r, echo=FALSE, fig.width=3, fig.height=2, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[8],fixed=TRUE),'} populations. See Figure S3 caption for conventions.')}
+```{r, echo=FALSE, fig.width=3, fig.height=2, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[8],fixed=TRUE),'} populations. See Figure S36 caption for conventions.')}
 if (8 <= general.params.LST[[MODE]]$n.spp) plot.spp.pop.probs(8)
 ```
 
-```{r, echo=FALSE, fig.width=3, fig.height=2, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[9],fixed=TRUE),'} populations. See Figure S3 caption for conventions.')}
+```{r, echo=FALSE, fig.width=3, fig.height=2, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[9],fixed=TRUE),'} populations. See Figure S36 caption for conventions.')}
 if (9 <= general.params.LST[[MODE]]$n.spp) plot.spp.pop.probs(9)
 ```
 
-```{r, echo=FALSE, fig.width=3, fig.height=2, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[10],fixed=TRUE),'} populations. See Figure S3 caption for conventions.')}
+```{r, echo=FALSE, fig.width=3, fig.height=2, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[10],fixed=TRUE),'} populations. See Figure S36 caption for conventions.')}
 if (10 <= general.params.LST[[MODE]]$n.spp) plot.spp.pop.probs(10)
 ```
 
-```{r, echo=FALSE, fig.width=3, fig.height=2, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[11],fixed=TRUE),'} populations. See Figure S3 caption for conventions.')}
+```{r, echo=FALSE, fig.width=3, fig.height=2, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[11],fixed=TRUE),'} populations. See Figure S36 caption for conventions.')}
 if (12 <= general.params.LST[[MODE]]$n.spp) plot.spp.pop.probs(11)
 ```
 
-```{r, echo=FALSE, fig.width=3, fig.height=2, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[12],fixed=TRUE),'} populations. See Figure S3 caption for conventions.')}
+```{r, echo=FALSE, fig.width=3, fig.height=2, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[12],fixed=TRUE),'} populations. See Figure S36 caption for conventions.')}
 if (12 <= general.params.LST[[MODE]]$n.spp) plot.spp.pop.probs(12)
 ```
 
-```{r, echo=FALSE, fig.width=3, fig.height=2, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[13],fixed=TRUE),'} populations. See Figure S3 caption for conventions.')}
+```{r, echo=FALSE, fig.width=3, fig.height=2, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[13],fixed=TRUE),'} populations. See Figure S36 caption for conventions.')}
 if (13 <= general.params.LST[[MODE]]$n.spp) plot.spp.pop.probs(13)
 ```
 
-```{r, echo=FALSE, fig.width=3, fig.height=2, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[14],fixed=TRUE),'} populations. See Figure S3 caption for conventions.')}
+```{r, echo=FALSE, fig.width=3, fig.height=2, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[14],fixed=TRUE),'} populations. See Figure S36 caption for conventions.')}
 if (14 <= general.params.LST[[MODE]]$n.spp) plot.spp.pop.probs(14)
 ```
 
-```{r, echo=FALSE, fig.width=3, fig.height=2, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[15],fixed=TRUE),'} populations. See Figure S3 caption for conventions.')}
+```{r, echo=FALSE, fig.width=3, fig.height=2, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[15],fixed=TRUE),'} populations. See Figure S36 caption for conventions.')}
 if (15 <= general.params.LST[[MODE]]$n.spp) plot.spp.pop.probs(15)
 ```
 
-```{r, echo=FALSE, fig.width=3, fig.height=2, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[16],fixed=TRUE),'} populations. See Figure S3 caption for conventions.')}
+```{r, echo=FALSE, fig.width=3, fig.height=2, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[16],fixed=TRUE),'} populations. See Figure S36 caption for conventions.')}
 if (16 <= general.params.LST[[MODE]]$n.spp) plot.spp.pop.probs(16)
 ```
 
-```{r, echo=FALSE, fig.width=3, fig.height=2, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[17],fixed=TRUE),'} populations. See Figure S3 caption for conventions.')}
+```{r, echo=FALSE, fig.width=3, fig.height=2, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[17],fixed=TRUE),'} populations. See Figure S36 caption for conventions.')}
 if (17 <= general.params.LST[[MODE]]$n.spp) plot.spp.pop.probs(17)
 ```
 
-```{r, echo=FALSE, fig.width=3, fig.height=2, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[18],fixed=TRUE),'} populations. See Figure S3 caption for conventions.')}
+```{r, echo=FALSE, fig.width=3, fig.height=2, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[18],fixed=TRUE),'} populations. See Figure S36 caption for conventions.')}
 if (18 <= general.params.LST[[MODE]]$n.spp) plot.spp.pop.probs(18)
 ```
 
-```{r, echo=FALSE, fig.width=3, fig.height=2, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[19],fixed=TRUE),'} populations. See Figure S3 caption for conventions.')}
+```{r, echo=FALSE, fig.width=3, fig.height=2, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[19],fixed=TRUE),'} populations. See Figure S36 caption for conventions.')}
 if (19 <= general.params.LST[[MODE]]$n.spp) plot.spp.pop.probs(19)
 ```
 
-```{r, echo=FALSE, fig.width=3, fig.height=2, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[20],fixed=TRUE),'} populations. See Figure S3 caption for conventions.')}
+```{r, echo=FALSE, fig.width=3, fig.height=2, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[20],fixed=TRUE),'} populations. See Figure S36 caption for conventions.')}
 if (20 <= general.params.LST[[MODE]]$n.spp) plot.spp.pop.probs(20)
 ```
 
-```{r, echo=FALSE, fig.width=3, fig.height=2, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[21],fixed=TRUE),'} populations. See Figure S3 caption for conventions.')}
+```{r, echo=FALSE, fig.width=3, fig.height=2, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[21],fixed=TRUE),'} populations. See Figure S36 caption for conventions.')}
 if (21 <= general.params.LST[[MODE]]$n.spp) plot.spp.pop.probs(21)
 ```
 
-```{r, echo=FALSE, fig.width=3, fig.height=2, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[22],fixed=TRUE),'} populations. See Figure S3 caption for conventions.')}
+```{r, echo=FALSE, fig.width=3, fig.height=2, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[22],fixed=TRUE),'} populations. See Figure S36 caption for conventions.')}
 if (22 <= general.params.LST[[MODE]]$n.spp) plot.spp.pop.probs(22)
 ```
 
-```{r, echo=FALSE, fig.width=3, fig.height=2, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[23],fixed=TRUE),'} populations. See Figure S3 caption for conventions.')}
+```{r, echo=FALSE, fig.width=3, fig.height=2, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[23],fixed=TRUE),'} populations. See Figure S36 caption for conventions.')}
 if (23 <= general.params.LST[[MODE]]$n.spp) plot.spp.pop.probs(23)
 ```
 
-```{r, echo=FALSE, fig.width=3, fig.height=2, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[24],fixed=TRUE),'} populations. See Figure S3 caption for conventions.')}
+```{r, echo=FALSE, fig.width=3, fig.height=2, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[24],fixed=TRUE),'} populations. See Figure S36 caption for conventions.')}
 if (24 <= general.params.LST[[MODE]]$n.spp) plot.spp.pop.probs(24)
 ```
 
-```{r, echo=FALSE, fig.width=3, fig.height=2, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[25],fixed=TRUE),'} populations. See Figure S3 caption for conventions.')}
+```{r, echo=FALSE, fig.width=3, fig.height=2, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[25],fixed=TRUE),'} populations. See Figure S36 caption for conventions.')}
 if (25 <= general.params.LST[[MODE]]$n.spp) plot.spp.pop.probs(25)
 ```
 
-```{r, echo=FALSE, fig.width=3, fig.height=2, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[26],fixed=TRUE),'} populations. See Figure S3 caption for conventions.')}
+```{r, echo=FALSE, fig.width=3, fig.height=2, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[26],fixed=TRUE),'} populations. See Figure S36 caption for conventions.')}
 if (26 <= general.params.LST[[MODE]]$n.spp) plot.spp.pop.probs(26)
+```
+
+```{r, echo=FALSE, fig.width=3, fig.height=2, fig.cap=paste0('Distribution of \\textit{',gsub('_', ' ',unique(spp.samples.DF$species)[27],fixed=TRUE),'} populations. See Figure S36 caption for conventions.')}
+if (27 <= general.params.LST[[MODE]]$n.spp) plot.spp.pop.probs(27)
 ```
 
 # Tables
@@ -862,99 +869,100 @@ spp.nmds.summary.DF2 <- full_join(adaptive.spp.nmds.summary.DF, neutral.spp.nmds
 spp.nmds.summary.DF2$adaptive.Stress[which(spp.nmds.summary.DF2$adaptive.Converged)] <- paste0('\\bfseries{', spp.nmds.summary.DF2$adaptive.Stress[which(spp.nmds.summary.DF2$adaptive.Converged)],'}')
 spp.nmds.summary.DF2$neutral.Stress[which(spp.nmds.summary.DF2$neutral.Converged)] <- paste0('\\bfseries{', spp.nmds.summary.DF2$neutral.Stress[which(spp.nmds.summary.DF2$neutral.Converged)],'}')
 spp.nmds.summary.DF2 <- spp.nmds.summary.DF2 %>%
-	mutate(blank='') %>%
-	select(Species, adaptive.k:adaptive.Stress, neutral.k:neutral.Stress)
+  mutate(blank='') %>%
+  select(Species, adaptive.k:adaptive.Stress, neutral.k:neutral.Stress)
 curr.file <- tempfile(fileext='.tex')
 x <- spp.nmds.summary.DF2 %>%
-	latex(
-		file=curr.file,
-		rowname=NULL, first.hline.double=FALSE, booktabs=TRUE, col.just=rep('c', 5),
-		cgroup=c('', 'Adaptive', 'Neutral'), n.cgroup=c(1, 2, 2),
-		colheads=c('\\bfseries{Species}', 'K', 'Stress', 'K', 'Stress'), here=TRUE,
-		caption='Summary of non-metric multi-dimensional scaling (NMDS) analyses on genetic variation for each species. The analyses were used to identify the main graondients of variation in binary adaptive and neutral loci data. Bold stress values indicate NMDS analyses that have converged.'
-	)
+  latex(
+    file=curr.file,
+    rowname=NULL, first.hline.double=FALSE, booktabs=TRUE, col.just=rep('c', 5),
+    cgroup=c('', 'Adaptive', 'Neutral'), n.cgroup=c(1, 2, 2),
+    colheads=c('\\bfseries{Species}', 'K', 'Stress', 'K', 'Stress'), here=TRUE,
+    caption='Summary of non-metric multi-dimensional scaling (NMDS) analyses on genetic variation for each species. The analyses were used to identify the main graondients of variation in binary adaptive and neutral loci data. Bold stress values indicate NMDS analyses that have converged.'
+  )
 readLines(curr.file)[-1] %>% paste0(collapse='\n') %>% 
-	gsub(pattern='\\cline{1-', replacement='\\cline{3-4} \\cline{6-', fixed=TRUE) %>% 
-	gsub(pattern='toprule', replacement='toprule[1pt]', fixed=TRUE) %>%
-	gsub(pattern='bottomrule', replacement='bottomrule[1pt]', fixed=TRUE) %>%
-	cat()
+  gsub(pattern='\\cline{1-', replacement='\\cline{3-4} \\cline{6-', fixed=TRUE) %>% 
+  gsub(pattern='\\toprule', replacement='', fixed=TRUE) %>%
+  gsub(pattern='\\midrule', replacement='\\midrule', fixed=TRUE) %>%
+  gsub(pattern='\\bottomrule', replacement='\\midrule', fixed=TRUE) %>%
+  cat()
 ```
 
 ```{r, echo=FALSE, results='asis'}
 curr.file <- tempfile(fileext='.tex')
 x <- correlation.model.summary.DF %>%
-	select(-contains('raw')) %>%
-	mutate(
-		Environmental.corr.P=pvalString(Environmental.corr.P),
-		Geographic.corr.P=pvalString(Geographic.corr.P),
-		Geographic.Marginal.R2=pvalString(Geographic.Marginal.R2),
-		Geographic.Conditional.R2=pvalString(Geographic.Conditional.R2),
-		Environmental.Marginal.R2=pvalString(Environmental.Marginal.R2),
-		Environmental.Conditional.R2=pvalString(Environmental.Conditional.R2),
-		blank=rep('', length(Species)),
-		Species=paste0('\\textit{', gsub('\\ ', ' ', Species), '}')) %>%
-	mutate(Environmental.Chisq=sapply(round(Environmental.Chisq,2), as.character)) %>%
-	mutate(Geographic.Chisq=sapply(round(Geographic.Chisq,2), as.character)) %>%
-	select(Species:Environmental.corr.P, Geographic.Marginal.R2:Geographic.corr.P) %>%
-	latex(file=curr.file, 
-		cgroup=c('', 'Environmental', 'Geographic'), n.cgroup=c(1, 4, 4), col.just=rep('c', 9),
-		digits=2, rowname=NULL, first.hline.double=FALSE, booktabs=TRUE, here=TRUE,
-		colheads=c('\\bfseries{Species}', '$MR^2$', '$CR^2$', '$\\chi^2$', '\\textit{P}', '$MR^2$', '$CR^2$', '$\\chi^2$', '\\textit{P}'),
-		caption='Summary of maximum likelihood population-effects (MLPE) models. Briefly, for each species associated with potentially adaptive loci, a model was fit to correlate dissimilarities among planning units where the species in terms of the adaptive genetic characteristics of individuals in them with dissimilarities in terms of the environmental conditions inside the planning units (denoted in the environmental column group). Similarly, for each species, a model was fit to correlate dissimilarities among the planning units in terms of the neutral genetic characteristics of indiviudals in them with dissimilarities in terms of the geographic position of the planning units (denoted in the geographic column group). Data shows the results from comparing each model to its corresponding null model using $\\mathbf{\\chi^2}$ tests (1 degree of freedom), and the $\\mathbf{R^2}$ ($\\mathbf{MR^2}$) and conditional $\\mathbf{R^2}$ ($\\mathbf{CR^2}$) for each model.'
-	)
+  select(-contains('raw')) %>%
+  mutate(
+    Environmental.corr.P=pvalString(Environmental.corr.P),
+    Geographic.corr.P=pvalString(Geographic.corr.P),
+    Geographic.Marginal.R2=pvalString(Geographic.Marginal.R2),
+    Geographic.Conditional.R2=pvalString(Geographic.Conditional.R2),
+    Environmental.Marginal.R2=pvalString(Environmental.Marginal.R2),
+    Environmental.Conditional.R2=pvalString(Environmental.Conditional.R2),
+    blank=rep('', length(Species)),
+    Species=paste0('\\textit{', gsub('\\ ', ' ', Species), '}')) %>%
+  mutate(Environmental.Chisq=sapply(round(Environmental.Chisq,2), as.character)) %>%
+  mutate(Geographic.Chisq=sapply(round(Geographic.Chisq,2), as.character)) %>%
+  select(Species:Environmental.corr.P, Geographic.Marginal.R2:Geographic.corr.P) %>%
+  latex(file=curr.file, 
+    cgroup=c('', 'Environmental', 'Geographic'), n.cgroup=c(1, 4, 4), col.just=rep('c', 9),
+    digits=2, rowname=NULL, first.hline.double=FALSE, booktabs=TRUE, here=TRUE,
+    colheads=c('\\bfseries{Species}', '$MR^2$', '$CR^2$', '$\\chi^2$', '\\textit{P}', '$MR^2$', '$CR^2$', '$\\chi^2$', '\\textit{P}'),
+    caption='Summary of maximum likelihood population-effects (MLPE) models. Briefly, for each species associated with potentially adaptive loci, a model was fit to correlate dissimilarities among planning units where the species in terms of the adaptive genetic characteristics of individuals in them with dissimilarities in terms of the environmental conditions inside the planning units (denoted in the environmental column group). Similarly, for each species, a model was fit to correlate dissimilarities among the planning units in terms of the neutral genetic characteristics of indiviudals in them with dissimilarities in terms of the geographic position of the planning units (denoted in the geographic column group). Data shows the results from comparing each model to its corresponding null model using $\\chi^2$ tests (1 degree of freedom), and the $R^2$ ($MR^2$) and conditional $R^2$ ($CR^2$) for each model.'
+  )
 readLines(curr.file)[-1] %>% paste0(collapse='\n') %>% 
-	gsub(pattern='\\cline{1-', replacement='\\cline{2-6} \\cline{8-', fixed=TRUE) %>% 
-	gsub(pattern='{c}{\\textit{P}}\\tabularnewline', replacement='{c}{\\textit{P}}\\T\\B\\tabularnewline', fixed=TRUE) %>% 
-	gsub(pattern='\\toprule', replacement='', fixed=TRUE) %>%
-	gsub(pattern='\\midrule', replacement='\\midrule', fixed=TRUE) %>%
-	gsub(pattern='\\bottomrule', replacement='\\midrule', fixed=TRUE) %>%
-	cat()
+  gsub(pattern='\\cline{1-', replacement='\\cline{2-6} \\cline{8-', fixed=TRUE) %>% 
+  gsub(pattern='{c}{\\textit{P}}\\tabularnewline', replacement='{c}{\\textit{P}}\\T\\B\\tabularnewline', fixed=TRUE) %>% 
+  gsub(pattern='\\toprule', replacement='', fixed=TRUE) %>%
+  gsub(pattern='\\midrule', replacement='\\midrule', fixed=TRUE) %>%
+  gsub(pattern='\\bottomrule', replacement='\\midrule', fixed=TRUE) %>%
+  cat()
 ```
 
 ```{r, echo=FALSE, results='asis'}
 curr.file <- tempfile(fileext='.tex')
 x <- surrogate.spp.DF %>%
-	mutate(
-		Environmental.z = paste(round(Environmental.estimate,2), '$\\pm$', round(Environmental.std.error,2)),
-		Geographic.z = paste(round(Geographic.estimate,2), '$\\pm$', round(Geographic.std.error,2)),
-		Species = paste0('\\textit{', gsub('_', ' ', Species, fixed=TRUE), '}')) %>%
-	mutate(
-		Environmental.z=replace(Environmental.z, grepl('NA', Environmental.z, fixed=TRUE),''),
-		Geographic.z=replace(Geographic.z, grepl('NA', Geographic.z, fixed=TRUE),'')
-	) %>%
-	select(Species, Environmental.z, Environmental.p.value, Environmental.r2CU,
-		Geographic.z, Geographic.p.value, Geographic.r2CU) %>%
-	latex(file=curr.file, 
-		cgroup=c('', 'Environmental', 'Geographic'), n.cgroup=c(1, 3, 3), col.just=rep('c', 7),
-		digits=2, rowname=NULL, first.hline.double=FALSE, booktabs=TRUE, here=TRUE,
-		colheads=c('\\bfseries{Species}', '$\\textit{Z}$', '\\textit{P}', '$R^2$', '$\\textit{Z}$', '\\textit{P}', '$R^2$'),
-		caption='Summary of post-hoc analyses on generalized linear models. Briefly, two generalized linear models were fit to correlate the proportion of adaptive genetic variation and environmental variation secured, and the proportion of neutral genetic variation and geographic variation secured in a prioritization. These models also included a predictor variable indicating the species for which the prioritisations were generated, and an interaction term. Table shows the results from one-sided _post-hoc_ analyses that were conducted to determine if the slopes for each species were positive (using the alternative hypothesis that slopes were less than or equal to zero; tests used a single degree of freedom; results reported in the \\textit{Z} and \\textit{P} columns). The table also shows Cragg and Uhler\'s pseudo-$R^2$ values that were calculated to show the proportion of variation explained by the slopes for each species ($R^2$ column).'
-	)
+  mutate(
+    Environmental.z = paste(round(Environmental.estimate,2), '$\\pm$', round(Environmental.std.error,2)),
+    Geographic.z = paste(round(Geographic.estimate,2), '$\\pm$', round(Geographic.std.error,2)),
+    Species = paste0('\\textit{', gsub('_', ' ', Species, fixed=TRUE), '}')) %>%
+  mutate(
+    Environmental.z=replace(Environmental.z, grepl('NA', Environmental.z, fixed=TRUE),''),
+    Geographic.z=replace(Geographic.z, grepl('NA', Geographic.z, fixed=TRUE),'')
+  ) %>%
+  select(Species, Environmental.z, Environmental.p.value, Environmental.r2CU,
+    Geographic.z, Geographic.p.value, Geographic.r2CU) %>%
+  latex(file=curr.file, 
+    cgroup=c('', 'Environmental', 'Geographic'), n.cgroup=c(1, 3, 3), col.just=rep('c', 7),
+    digits=2, rowname=NULL, first.hline.double=FALSE, booktabs=TRUE, here=TRUE,
+    colheads=c('\\bfseries{Species}', '$\\textit{Z}$', '\\textit{P}', '$R^2$', '$\\textit{Z}$', '\\textit{P}', '$R^2$'),
+    caption='Summary of post-hoc analyses on generalized linear models. Briefly, two generalized linear models were fit to correlate the proportion of adaptive genetic variation and environmental variation secured, and the proportion of neutral genetic variation and geographic variation secured in a prioritization. These models also included a predictor variable indicating the species for which the prioritisations were generated, and an interaction term. Table shows the results from one-sided \\textit{post-hoc} analyses that were conducted to determine if the slopes for each species were positive (using the alternative hypothesis that slopes were less than or equal to zero; tests used a single degree of freedom; results reported in the \\textit{Z} and \\textit{P} columns). The table also shows Cragg and Uhler\'s pseudo-$R^2$ values that were calculated to show the proportion of variation explained by the slopes for each species ($R^2$ column).'
+  )
 readLines(curr.file)[-1] %>% paste0(collapse='\n') %>% 
-	gsub(pattern='\\cline{1-', replacement='\\cline{2-5} \\cline{7-', fixed=TRUE) %>% 
-	gsub(pattern='ulticolumn{1}{c}{$R^2$}\\tabularnewline', replacement='ulticolumn{1}{c}{$R^2$}\\T\\B\\tabularnewline', fixed=TRUE) %>% 
-	gsub(pattern='toprule', replacement='toprule[1pt]', fixed=TRUE) %>%
-	gsub(pattern='bottomrule', replacement='bottomrule[1pt]', fixed=TRUE) %>%
-	cat()
+  gsub(pattern='\\cline{1-', replacement='\\cline{2-5} \\cline{7-', fixed=TRUE) %>% 
+  gsub(pattern='ulticolumn{1}{c}{$R^2$}\\tabularnewline', replacement='ulticolumn{1}{c}{$R^2$}\\T\\B\\tabularnewline', fixed=TRUE) %>% 
+  gsub(pattern='\\toprule', replacement='', fixed=TRUE) %>%
+  gsub(pattern='\\midrule', replacement='\\midrule', fixed=TRUE) %>%
+  gsub(pattern='\\bottomrule', replacement='\\midrule', fixed=TRUE) %>%
+  cat()
 ```
 
 ```{r, echo=FALSE, results='asis'}
 ## make table showing pca resuls
 curr.file <- tempfile(fileext='.tex')
 x <- spp.pca.DF %>%
-	mutate(species=gsub('_', ' ', species, fixed=TRUE), percent_variation_explained=percent_variation_explained*100) %>%
-	latex(
-		file=curr.file,
-		rowname=NULL, first.hline.double=FALSE, booktabs=TRUE, col.just=rep('c', 2),
-		colheads=c('\\bfseries{Species}', '\\bfseries{Variation explained (\\%)}'), here=TRUE,
-		caption=paste0('Summary of principal component analyses fit to the climatic variation in the species\' ranges. Percentages correspond to the percent of variation described by the first ',as.character(as.english(surrogate.params.LST[[MODE]]$number.components)),' principle components.')
-	)
+  mutate(species=gsub('_', ' ', species, fixed=TRUE), percent_variation_explained=percent_variation_explained*100) %>%
+  latex(
+    file=curr.file,
+    rowname=NULL, first.hline.double=FALSE, booktabs=TRUE, col.just=rep('c', 2),
+    colheads=c('\\bfseries{Species}', '\\bfseries{Variation explained (\\%)}'), here=TRUE,
+    caption=paste0('Summary of principal component analyses fit to the climatic variation in the species\' ranges. Percentages correspond to the percent of variation described by the first ',as.character(as.english(surrogate.params.LST[[MODE]]$number.components)),' principle components.')
+  )
 readLines(curr.file)[-1] %>% paste0(collapse='\n') %>% 
-	gsub(pattern='\\cline{1-', replacement='\\cline{3-4} \\cline{6-', fixed=TRUE) %>% 
-	gsub(pattern='toprule', replacement='toprule[1pt]', fixed=TRUE) %>%
-	gsub(pattern='bottomrule', replacement='bottomrule[1pt]', fixed=TRUE) %>%
-	cat()
+  gsub(pattern='\\cline{1-', replacement='\\cline{3-4} \\cline{6-', fixed=TRUE) %>% 
+  gsub(pattern='\\toprule', replacement='', fixed=TRUE) %>%
+  gsub(pattern='\\midrule', replacement='\\midrule', fixed=TRUE) %>%
+  gsub(pattern='\\bottomrule', replacement='\\midrule', fixed=TRUE) %>%
+  cat()
 ```
-
-
 

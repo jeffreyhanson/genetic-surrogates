@@ -24,6 +24,7 @@ library(qvalue)
 
 # load CRAN packages
 library(stats)
+library(hexbin)
 library(DiagrammeR)
 library(DiagrammeRsvg)
 library(rsvg)
