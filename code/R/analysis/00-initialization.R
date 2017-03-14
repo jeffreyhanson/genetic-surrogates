@@ -125,6 +125,7 @@ set.seed(500)
 select <- dplyr::select
 rename<- dplyr::rename
 extract <- raster::extract
+pvalString <- lazyWeave::pvalString
 
 ### Load functions
 for (x in dir(file.path('code', 'R', 'functions'), full.names=TRUE)) source(x)

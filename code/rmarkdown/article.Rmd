@@ -54,7 +54,6 @@ knitr::opts_knit$set(root.dir=normalizePath('../..'))
 # load .rda file
 checkpoint::checkpoint('2016-11-26', R.version='3.3.2', scanForPackages=FALSE)
 try(session::restore.session('data/final/results.rda'))
-pvalString <- lazyWeave::pvalString
 
 # download basemap
 data(countriesHigh)
