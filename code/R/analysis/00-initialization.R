@@ -104,6 +104,11 @@ if (!'gurobi' %in% installed.packages()[,'Package']) {
 devtools::install_github('jeffreyhanson/ggplot2')
 library(ggplot2)
 
+# install version 3.0.2 of pcadapt
+if (!'pcaapt' %in% installed.packages()[,'Package'] || packageVersion("pcadapt") != "3.0.2")
+  install_version("pcadapt", version = "3.0.2", repos = "http://cran.us.r-project.org")
+
+
 ### set parameters
 if (!exists('MODE')) MODE <- 'debug'
 cat('MODE = ',MODE,'\n')

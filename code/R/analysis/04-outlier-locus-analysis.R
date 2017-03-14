@@ -33,7 +33,7 @@ spp.OutlierDetectionData.LST <- llply(
 		if (is.null(x))
 			return(NULL)
 		# else remove abundant or rare loci
-		freqs <- colMeans(x@matrix, na.rm=TRUE)	
+		freqs <- colMeans(x@matrix, na.rm=TRUE)
 		valid.loci <- which(freqs <= 1-(bayescan.params.LST[[MODE]]$freq) | freqs >= bayescan.params.LST[[MODE]]$freq)
 		return(bayescanr:::loci.subset(x, valid.loci))
 	}
@@ -49,11 +49,11 @@ spp.pcadapt.LST <- llply(
 			return(NULL)
 		## else run pcadapt
 		# init
-		curr.dir <- paste0('data/intermediate/pcadapt/', unique(spp.samples.DF$species)[i]) 
+		curr.dir <- paste0('data/intermediate/pcadapt/', unique(spp.samples.DF$species)[i])
 		dir.create(curr.dir, showWarnings=FALSE, recursive=TRUE)
 		inference.file.names1 <- paste0(unique(spp.samples.DF$species)[i], '_inference', c(".loadings", ".scores", ".zscores", ".maf", ".sigma"))
 		inference.file.names2 <- paste0(curr.dir, '/inference', c(".loadings", ".scores", ".zscores", ".maf", ".sigma"))
-		
+
 		# set missing values
 		curr.spp <- spp.OutlierDetectionData.LST[[i]]@matrix
 		curr.spp <- apply(curr.spp, 2, function(v) {
@@ -71,25 +71,25 @@ spp.pcadapt.LST <- llply(
 			initial.pca <- try(corpca(curr.spp, curr.K), silent=TRUE)
 		}
 		if (file.exists('tmp.pcadapt')) file.remove('tmp.pcadapt')
-		
+
 		# choose apropriate K
 		prop.var.explained <- initial.pca$singular.values/sum(initial.pca$singular.values)
 		curr.spp.K <- which(cumsum(prop.var.explained) > pcadapt.params.LST[[MODE]]$min.variance.explained)[1]
-		
-		# run second pica with minimum number of principle components needed to secure a acceptable level of variation
+
+		# run second pca with minimum number of principle components needed to secure a acceptable level of variation
 		inference.run <- pcadapt(curr.spp, K=as.numeric(curr.spp.K), ploidy=1, transpose=TRUE,
 			method='mahalanobis', data.type='genotype', min.maf=pcadapt.params.LST[[MODE]]$min.maf,
 			clean.files=FALSE, output.filename=paste0(unique(spp.samples.DF$species)[i],'_inference'))
 		file.copy(inference.file.names1, inference.file.names2, overwrite=TRUE)
 		file.remove(inference.file.names1)
 		if (file.exists('tmp.pcadapt')) file.remove('tmp.pcadapt')
-		
+
 		# calculate pvalues
 		pvalues.DBL <- inference.run$pvalues
 		qvalues.LST <- qvalue(pvalues.DBL)
 		outliers <- which(qvalues.LST$qvalues < pcadapt.params.LST[[MODE]]$alpha.level)
 
-		# return list 
+		# return list
 		return(
 			list(
 				K=curr.spp.K,
