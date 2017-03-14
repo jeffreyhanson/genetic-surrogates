@@ -21,13 +21,10 @@ knitr::opts_knit$set(root.dir=normalizePath('../..'))
 
 ```{r, include=FALSE}
 # load .rda file
-checkpoint::checkpoint('2016-08-03', R.version='3.3.1', scanForPackages=FALSE)
+checkpoint::checkpoint('2016-11-26', R.version='3.3.2', scanForPackages=FALSE)
 try(session::restore.session('data/final/results.rda'))
 
-# set options
-options(error=NULL)
-
-# download basemap
+# download basemappv
 data(countriesHigh)
 countries.FPLY <- countriesHigh[
   countriesHigh$ADMIN %in% c(
@@ -46,7 +43,7 @@ gg_color_hue <- function(n) {
 }
 ```
 
-# Figures 
+# Figures
 
 ```{r, echo=FALSE, include=FALSE}
 plot.spp.spaces <- function(i) {
@@ -81,7 +78,7 @@ plot.spp.spaces <- function(i) {
     ggplot() +
       geom_polygon(data=countries.FPLY, aes(x=long, y=lat, group=group),
         fill='grey85', color='grey70') +
-      geom_polygon(data=filter(curr.FPLY, d==x), aes_string(x='long', y='lat', 
+      geom_polygon(data=filter(curr.FPLY, d==x), aes_string(x='long', y='lat',
         group='group', fill='value'), color='grey10') +
       theme_classic() +
       theme(
@@ -111,7 +108,7 @@ calc.fig.height <- function(i) {
   env.col <- grepl(paste0(unique(spp.samples.DF$species)[i], '_env_d'), names(grid.FPLY), fixed=TRUE) %>%
     sum()
 
-  n.plots <- 0 
+  n.plots <- 0
   # count adaptive plot
   if (adapt.col %in% names(grid.FPLY))
     n.plots <- n.plots + spp.nmds.LST[[i]][['adaptive']]$ndim
@@ -132,7 +129,7 @@ calc.fig.width <- function(i) {
   neutral.col <- paste0(unique(spp.samples.DF$species)[i], '_neutral_d1')
   env.col <- grepl(paste0(unique(spp.samples.DF$species)[i], '_env_d'), names(grid.FPLY), fixed=TRUE) %>%
     sum()
-  n.plots <- 0 
+  n.plots <- 0
   # count adaptive plot
   if (adapt.col %in% names(grid.FPLY))
     n.plots <- n.plots + spp.nmds.LST[[i]][['adaptive']]$ndim
@@ -351,7 +348,7 @@ grid.sub.FPLY <- grid.sub.FPLY %>% gather(
 ggplot() +
   geom_polygon(data=countries.FPLY, aes(x=long, y=lat, group=group),
     fill='grey85', color='grey70') +
-  geom_polygon(data=grid.sub.FPLY, aes_string(x='long', y='lat', 
+  geom_polygon(data=grid.sub.FPLY, aes_string(x='long', y='lat',
     group='group', fill='Selection.Frequency'),
     alpha=0.8, color=NA) +
   theme_classic() +
@@ -389,7 +386,7 @@ spp.grid.FPLY <- ldply(unique(spp.samples.DF$species), function(x) {
 ggplot() +
   geom_polygon(data=countries.FPLY, aes(x=long, y=lat, group=group),
     fill='grey85', color='grey70') +
-  geom_polygon(data=spp.grid.FPLY, aes(x=long, y=lat, 
+  geom_polygon(data=spp.grid.FPLY, aes(x=long, y=lat,
     group=group, fill=presence), alpha=0.8, color='grey10') +
   theme_classic() +
   theme(
@@ -418,25 +415,25 @@ render_gvis <- function(x) {
 render_gvis("
 digraph main {
   graph [layout = dot]
-  
+
   node [shape = rectangle, style = filled, color = darkslategray, fillcolor = white]
-  
+
   meirmans_data [label = <Plant data<BR></BR>(Meirmans <I>et al. </I> 2011)>]
   bioclimatic_data [label = <Bioclimatic data<BR></BR>(Hijmans <I> et al. </I> 2005)>]
   sample_location_data [label = 'Sample location data']
   grid_data [label = 'Grid cell data']
   sample_aflp_data [label = 'Sample AFLP data']
-  
-  geo_as [label = 'Geographic attribute spaces'] 
+
+  geo_as [label = 'Geographic attribute spaces']
   env_as [label = 'Environmental attribute spaces']
   neutral_as [label = 'Neutral genetic attribute spaces']
   adaptive_as [label = 'Adaptive genetic attribute spaces']
-  
+
   node[shape = ellipse, style = filled, color = darkslategray, fillcolor = white]
-  calc_geo_as [label = 'Processing\n(Figure S60)'] 
+  calc_geo_as [label = 'Processing\n(Figure S60)']
   calc_env_as [label = 'Processing\n(Figure S61)']
   calc_genetic_as [label = 'Processing\n(Figure S62)']
-  
+
   edge [color = grey]
   meirmans_data -> {sample_aflp_data grid_data sample_location_data}
   bioclimatic_data -> calc_env_as
@@ -458,34 +455,34 @@ digraph main {
 render_gvis("
 digraph geo_as {
   graph [layout = dot]
-  
+
   node [shape = rectangle, style = filled, color = darkslategray, fillcolor = white]
-    
+
   # input
   sample_location_data [label = 'Sample location data']
   grid_data [label = 'Grid cell data']
   species_name [label = 'Species name']
   {rank = same; sample_location_data; grid_data; species_name}
-  
+
   # intermediate
   spp_samples [label = 'Locations of samples for species']
   spp_grids [label = 'Grid cells occupied by species']
   spp_proj_data [label = 'Projected grid cells']
   spp_centriod_data [label = 'Centroids of grid cells']
-  
+
   # output
   geographic_space [label = 'Geographic attribute space']
 
   edge [color = grey]
-  
-  species_name -> spp_samples 
+
+  species_name -> spp_samples
   sample_location_data -> spp_samples [label = ' subset data']
   spp_samples -> spp_grids [label = ' overlay data']
-  grid_data -> spp_grids 
+  grid_data -> spp_grids
   spp_grids -> spp_proj_data [label = ' reproject data to\nequi-distant CRS']
   spp_proj_data -> spp_centriod_data [label = ' compute centroids']
   spp_centriod_data -> geographic_space [label =' extract coordinates and use them\nto represent demand points and\nplanning unit coordinates']
-  
+
 }
 ")
 ```
@@ -494,16 +491,16 @@ digraph geo_as {
 render_gvis("
 digraph env_as {
   graph [layout = dot]
-  
+
   node[shape = rectangle, style = filled, color = darkslategray, fillcolor = white]
-  
+
   # input
   sample_location_data [label = 'Sample location data']
   grid_data [label = 'Grid cell data']
   species_name [label = 'Species name']
   bioclimatic_data [label = <Bioclimatic data<BR></BR>(Hijmans <I> et al. </I> 2005)>]
   {rank = same; sample_location_data; grid_data; species_name; bioclimatic_data}
-  
+
   # intermediate
   spp_samples [label = 'Locations of samples for species']
   spp_grids [label = 'Grid cells occupied by species']
@@ -513,16 +510,16 @@ digraph env_as {
   clipped_bioclimatic_data [label = 'Bioclimatic data clipped to species distribution']
   pca_scores_data [label = 'Main axes of bioclimatic variation\nacross species distribution']
   grid_pca_data [label = 'Environmental conditions inside each grid cell']
-  
+
   # output
   environmental_space [label = 'Environmental attribute space']
-  
+
   # analyses
-  node[shape = ellipse, style = filled, color = darkslategray, fillcolor = white]  
+  node[shape = ellipse, style = filled, color = darkslategray, fillcolor = white]
   pca [label = 'Principal components analysis']
-  
+
   edge [color = grey]
-  species_name -> spp_samples 
+  species_name -> spp_samples
   sample_location_data -> spp_samples [label = ' subset data']
   grid_data -> spp_grids
   bioclimatic_data -> bioclimatic_proj_data [label = ' reproject data to\nequal-area CRS']
@@ -544,21 +541,21 @@ digraph env_as {
 render_gvis("
 digraph genetic_as {
   graph [layout = dot]
-  
+
   node[shape = rectangle, style = filled, color = darkslategray, fillcolor = white]
-  
+
   # input
   sample_location_data [label = 'Sample location data']
   sample_aflp_data [label = 'Sample AFLP data']
   grid_data [label = 'Grid cell data']
   species_name [label = 'Species name']
   {rank = same; sample_location_data; grid_data; species_name; sample_aflp_data}
-  
+
   # intermediate
   spp_aflp_samples [label = 'Species AFLP data']
   spp_location_samples [label = 'Species location data']
   spp_grids [label = 'Grid cells occupied by species']
-  
+
   population_data [label = 'Samples grouped into populations']
   subset_data [label = 'Samples with reliable population designations']
   rare_alleles [label = 'AFLP data for\nrare alleles']
@@ -573,11 +570,11 @@ digraph genetic_as {
   neutral_ordinations [label = '  Ordinations showing main\ngradients of variation\nin neutral loci']
   grid_adaptive_ordinations [label = ' Typical adaptive genetic characteristics of individuals in grid cells']
   grid_neutral_ordinations [label = ' Typical neutral genetic characteristics of individuals in grid cells']
-  
+
   # output
   adaptive_genetic_space [label = 'Adaptive genetic space']
   neutral_genetic_space  [label = 'Neutral genetic space']
-  
+
   # analyses
   node[shape = ellipse, style = filled, color = darkslategray, fillcolor = white]
   bayescan_analysis [label = 'BayeScan analysis']
@@ -587,10 +584,10 @@ digraph genetic_as {
   neutral_nmds_analysis [label = 'NMDS analyses']
   adaptive_nmds_analysis [label = 'NMDS analyses']
   combine_results [label = 'Combine results from all analyses.\nLoci classified as adaptive in both analyses are treated as adaptive,\notherwise treated as neutral']
-  
+
   edge [color = grey]
   sample_location_data -> spp_location_samples [label = ' subset data']
-  species_name -> spp_location_samples 
+  species_name -> spp_location_samples
   sample_aflp_data -> spp_aflp_samples [label = ' subset data']
   species_name -> spp_aflp_samples
   spp_location_samples -> spp_grids
@@ -613,7 +610,7 @@ digraph genetic_as {
   pcadapt_neutral_alleles -> combine_results [label = ' treat loci\nas neutral']
   rare_alleles -> combine_results [label = ' treat loci\nas neutral']
   combine_results -> adaptive_alleles
-  combine_results -> neutral_alleles 
+  combine_results -> neutral_alleles
   neutral_alleles  -> neutral_nmds_analysis
   adaptive_alleles -> adaptive_nmds_analysis
   adaptive_nmds_analysis -> adaptive_ordinations [label = ' extract']
@@ -639,7 +636,7 @@ pop.probs.DF <- llply(
       species==unique(spp.samples.DF$species)[i]
     ) %>% mutate(
       Individual=seq_along(species)
-    )   
+    )
     curr.probs <- structurer:::sample.membership(spp.StructureCollection.LST[[i]]) %>%
       as.data.frame() %>%
       mutate(
@@ -667,7 +664,7 @@ plot.spp.pop.probs <- function(i) {
   curr.GROB <- ggplot(data=curr.spp.DF) +
     geom_polygon(data=countries.FPLY, aes(x=long, y=lat, group=group),
       fill='grey85', color='grey75') +
-    geom_polygon(data=grid.FPLY, aes_string(x='long', y='lat', 
+    geom_polygon(data=grid.FPLY, aes_string(x='long', y='lat',
       group='group'), fill='grey70', color='grey10') +
     guides(fill=guide_legend(title=''), color=guide_legend(title='')) +
     theme_classic() +
@@ -680,7 +677,7 @@ plot.spp.pop.probs <- function(i) {
       strip.background = element_rect(fill='grey20'),
       strip.text = element_text(color='white', face='italic', size=20),
       legend.text= element_text(size=20)
-    ) + 
+    ) +
     coord_cartesian(
       xlim=buffered.range(grid.FPLY$long, 0),
       ylim=buffered.range(grid.FPLY$lat, 0)
@@ -716,10 +713,10 @@ plot.spp.pop.probs <- function(i) {
   # add in pies
   for (j in unique(curr.spp.DF$cell)) {
     # init
-    curr.cell.DF <- filter(curr.spp.DF, cell==j) %>% 
+    curr.cell.DF <- filter(curr.spp.DF, cell==j) %>%
       group_by(cell, Population) %>%
       summarize(
-        grid.longitude=mean(grid.longitude), 
+        grid.longitude=mean(grid.longitude),
         grid.latitude=mean(grid.latitude),
         Probability=mean(Probability)
       ) %>% data.frame()
@@ -730,7 +727,7 @@ plot.spp.pop.probs <- function(i) {
       geom_bar(width=0.75, color='grey20', stat='identity') +
       coord_polar(theta='y') +
       theme(
-        line = element_blank(), rect = element_blank(), 
+        line = element_blank(), rect = element_blank(),
         text = element_blank(), axis.ticks.length = unit(0, "cm"),
         legend.position = "none", panel.margin = unit(0, "lines"),
         plot.margin = unit(c(0, 0, 0, 0), "lines"), complete = TRUE
@@ -880,8 +877,8 @@ x <- spp.nmds.summary.DF2 %>%
     colheads=c('\\bfseries{Species}', 'K', 'Stress', 'K', 'Stress'), here=TRUE,
     caption='Summary of non-metric multi-dimensional scaling (NMDS) analyses on genetic variation for each species. The analyses were used to identify the main graondients of variation in binary adaptive and neutral loci data. Bold stress values indicate NMDS analyses that have converged.'
   )
-readLines(curr.file)[-1] %>% paste0(collapse='\n') %>% 
-  gsub(pattern='\\cline{1-', replacement='\\cline{3-4} \\cline{6-', fixed=TRUE) %>% 
+readLines(curr.file)[-1] %>% paste0(collapse='\n') %>%
+  gsub(pattern='\\cline{1-', replacement='\\cline{3-4} \\cline{6-', fixed=TRUE) %>%
   gsub(pattern='\\toprule', replacement='', fixed=TRUE) %>%
   gsub(pattern='\\midrule', replacement='\\midrule', fixed=TRUE) %>%
   gsub(pattern='\\bottomrule', replacement='\\midrule', fixed=TRUE) %>%
@@ -904,15 +901,15 @@ x <- correlation.model.summary.DF %>%
   mutate(Environmental.Chisq=sapply(round(Environmental.Chisq,2), as.character)) %>%
   mutate(Geographic.Chisq=sapply(round(Geographic.Chisq,2), as.character)) %>%
   select(Species:Environmental.corr.P, Geographic.Marginal.R2:Geographic.corr.P) %>%
-  latex(file=curr.file, 
+  latex(file=curr.file,
     cgroup=c('', 'Environmental', 'Geographic'), n.cgroup=c(1, 4, 4), col.just=rep('c', 9),
     digits=2, rowname=NULL, first.hline.double=FALSE, booktabs=TRUE, here=TRUE,
     colheads=c('\\bfseries{Species}', '$MR^2$', '$CR^2$', '$\\chi^2$', '\\textit{P}', '$MR^2$', '$CR^2$', '$\\chi^2$', '\\textit{P}'),
     caption='Summary of maximum likelihood population-effects (MLPE) models. Briefly, for each species associated with potentially adaptive loci, a model was fit to correlate dissimilarities among planning units where the species in terms of the adaptive genetic characteristics of individuals in them with dissimilarities in terms of the environmental conditions inside the planning units (denoted in the environmental column group). Similarly, for each species, a model was fit to correlate dissimilarities among the planning units in terms of the neutral genetic characteristics of indiviudals in them with dissimilarities in terms of the geographic position of the planning units (denoted in the geographic column group). Data shows the results from comparing each model to its corresponding null model using $\\chi^2$ tests (1 degree of freedom), and the $R^2$ ($MR^2$) and conditional $R^2$ ($CR^2$) for each model.'
   )
-readLines(curr.file)[-1] %>% paste0(collapse='\n') %>% 
-  gsub(pattern='\\cline{1-', replacement='\\cline{2-6} \\cline{8-', fixed=TRUE) %>% 
-  gsub(pattern='{c}{\\textit{P}}\\tabularnewline', replacement='{c}{\\textit{P}}\\T\\B\\tabularnewline', fixed=TRUE) %>% 
+readLines(curr.file)[-1] %>% paste0(collapse='\n') %>%
+  gsub(pattern='\\cline{1-', replacement='\\cline{2-6} \\cline{8-', fixed=TRUE) %>%
+  gsub(pattern='{c}{\\textit{P}}\\tabularnewline', replacement='{c}{\\textit{P}}\\T\\B\\tabularnewline', fixed=TRUE) %>%
   gsub(pattern='\\toprule', replacement='', fixed=TRUE) %>%
   gsub(pattern='\\midrule', replacement='\\midrule', fixed=TRUE) %>%
   gsub(pattern='\\bottomrule', replacement='\\midrule', fixed=TRUE) %>%
@@ -932,15 +929,15 @@ x <- surrogate.spp.DF %>%
   ) %>%
   select(Species, Environmental.z, Environmental.p.value, Environmental.r2CU,
     Geographic.z, Geographic.p.value, Geographic.r2CU) %>%
-  latex(file=curr.file, 
+  latex(file=curr.file,
     cgroup=c('', 'Environmental', 'Geographic'), n.cgroup=c(1, 3, 3), col.just=rep('c', 7),
     digits=2, rowname=NULL, first.hline.double=FALSE, booktabs=TRUE, here=TRUE,
     colheads=c('\\bfseries{Species}', '$\\textit{Z}$', '\\textit{P}', '$R^2$', '$\\textit{Z}$', '\\textit{P}', '$R^2$'),
     caption='Summary of post-hoc analyses on generalized linear models. Briefly, two generalized linear models were fit to correlate the proportion of adaptive genetic variation and environmental variation secured, and the proportion of neutral genetic variation and geographic variation secured in a prioritization. These models also included a predictor variable indicating the species for which the prioritisations were generated, and an interaction term. Table shows the results from one-sided \\textit{post-hoc} analyses that were conducted to determine if the slopes for each species were positive (using the alternative hypothesis that slopes were less than or equal to zero; tests used a single degree of freedom; results reported in the \\textit{Z} and \\textit{P} columns). The table also shows Cragg and Uhler\'s pseudo-$R^2$ values that were calculated to show the proportion of variation explained by the slopes for each species ($R^2$ column).'
   )
-readLines(curr.file)[-1] %>% paste0(collapse='\n') %>% 
-  gsub(pattern='\\cline{1-', replacement='\\cline{2-5} \\cline{7-', fixed=TRUE) %>% 
-  gsub(pattern='ulticolumn{1}{c}{$R^2$}\\tabularnewline', replacement='ulticolumn{1}{c}{$R^2$}\\T\\B\\tabularnewline', fixed=TRUE) %>% 
+readLines(curr.file)[-1] %>% paste0(collapse='\n') %>%
+  gsub(pattern='\\cline{1-', replacement='\\cline{2-5} \\cline{7-', fixed=TRUE) %>%
+  gsub(pattern='ulticolumn{1}{c}{$R^2$}\\tabularnewline', replacement='ulticolumn{1}{c}{$R^2$}\\T\\B\\tabularnewline', fixed=TRUE) %>%
   gsub(pattern='\\toprule', replacement='', fixed=TRUE) %>%
   gsub(pattern='\\midrule', replacement='\\midrule', fixed=TRUE) %>%
   gsub(pattern='\\bottomrule', replacement='\\midrule', fixed=TRUE) %>%
@@ -958,11 +955,10 @@ x <- spp.pca.DF %>%
     colheads=c('\\bfseries{Species}', '\\bfseries{Variation explained (\\%)}'), here=TRUE,
     caption=paste0('Summary of principal component analyses fit to the climatic variation in the species\' ranges. Percentages correspond to the percent of variation described by the first ',as.character(as.english(surrogate.params.LST[[MODE]]$number.components)),' principle components.')
   )
-readLines(curr.file)[-1] %>% paste0(collapse='\n') %>% 
-  gsub(pattern='\\cline{1-', replacement='\\cline{3-4} \\cline{6-', fixed=TRUE) %>% 
+readLines(curr.file)[-1] %>% paste0(collapse='\n') %>%
+  gsub(pattern='\\cline{1-', replacement='\\cline{3-4} \\cline{6-', fixed=TRUE) %>%
   gsub(pattern='\\toprule', replacement='', fixed=TRUE) %>%
   gsub(pattern='\\midrule', replacement='\\midrule', fixed=TRUE) %>%
   gsub(pattern='\\bottomrule', replacement='\\midrule', fixed=TRUE) %>%
   cat()
 ```
-
