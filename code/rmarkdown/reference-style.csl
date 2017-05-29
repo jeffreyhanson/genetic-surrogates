@@ -116,7 +116,7 @@
           <group delimiter=", " suffix=".">
             <text variable="container-title"/>
             <text variable="note"/>
-            <text variable="url"/>
+            <!-- <text variable="url"/> -->
           </group>
         </else-if>
         <else-if type="chapter paper-conference" match="any">

@@ -1,3 +1,4 @@
+
 ## load .rda
 checkpoint::checkpoint('2016-11-26', R.version='3.3.2', scanForPackages=FALSE)
 session::restore.session('data/intermediate/11-multi-species-prioritisations-with-cost.rda')
@@ -241,7 +242,7 @@ single.spp.SDF <- single.spp.DF %>%
 	mutate(Context='single-species (equal costs)')
 
 # single species prioritisations with cost
-single.spp.with.cost.SDF <- single.spp.DF %>%
+single.spp.with.cost.SDF <- single.spp.with.cost.DF %>%
 	gather(Metric, genetic.held, amount.held:neutral.held) %>%
 	filter(Metric %in% c('adaptive.held', 'neutral.held')) %>%
 	mutate(Context='single-species (opportunity costs)')
