@@ -34,7 +34,7 @@ spp.OutlierDetectionData.LST <- llply(
 			return(NULL)
 		# else remove abundant or rare loci
 		freqs <- colMeans(x@matrix, na.rm=TRUE)
-		valid.loci <- which(freqs <= 1-(bayescan.params.LST[[MODE]]$freq) | freqs >= bayescan.params.LST[[MODE]]$freq)
+		valid.loci <- which((freqs <= 1-(bayescan.params.LST[[MODE]]$freq)) & freqs >= bayescan.params.LST[[MODE]]$freq)
 		return(bayescanr:::loci.subset(x, valid.loci))
 	}
 )
