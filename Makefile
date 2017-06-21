@@ -1,8 +1,8 @@
 ## global variables
 # set parameters for inference 
-# MODE=release 
+MODE=release 
 # set parameters for debugging code
-MODE=debug
+# MODE=debug
 
 # main operations
 all: analysis manuscript

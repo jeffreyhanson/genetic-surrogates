@@ -2,14 +2,15 @@
 #' Format .tex file to follow PNAS style
 #'
 #' This function formats a .tex file to follow PNAS conventions.
-#' @param input_file \code{character} file path for input .tex file 
-#' @param output_file \code{character} file path for input .tex file 
+#' @param input_file \code{character} file path for input .tex file
+#' @param output_file \code{character} file path for input .tex file
 #' @return \code{invisible()}
 format_pnas <- function(input_file, output_file) {
 	## initialization
 	# load tex file
 	input_file <- readLines(input_file)
-	
+	# input_file <- gsub("documentclass[9pt,twocolumn,twoside]", "documentclass[9pt,twocolumn,twoside,lineno]", input_file, fixed = TRUE)
+
 	## main processing
 	# parse bibliography
 	input_file <- gsub('\\hypertarget{refs}{}', '\\begin{thebibliography}{100}', input_file, fixed=TRUE)
