@@ -77,7 +77,7 @@ plot.spp.spaces <- function(i) {
   curr.GROBS <- llply(unique(curr.FPLY$d), function(x) {
     ggplot() +
       geom_polygon(data=countries.FPLY, aes(x=long, y=lat, group=group),
-        fill='grey85', color='grey70') +
+        fill='grey85', color='grey70', size=0.01) +
       geom_polygon(data=filter(curr.FPLY, d==x), aes_string(x='long', y='lat',
         group='group', fill='value'), color='grey10') +
       theme_classic() +
@@ -151,111 +151,111 @@ is.speciesPlottable <- function(i) {
 }
 ```
 
-```{r, echo=FALSE, fig.width=calc.fig.width(1), fig.height=calc.fig.height(1), fig.cap=paste0('Distribution of environmental variation found across the geographic range of \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[1]),'}, and the distribution of its adaptive and neutral genetic variation in the study area. Each panel shows a different dimension of variation as indicated by its title. Squares represent planning units. Samples collected from the species were subject to NMDS to ordinate the main axes of adaptive (if detected) and neutral genetic variation. The bioclimatic data were clipped to planning units where the species was found, and subject to a principal components analysis to summarise the main gradients of environmental variation. The panels show the spatial distribution of the ordinated environmental and genetic data averaged to the planning-unit level. Planning units where individuals were not observed are shown in gray.')}
+```{r, echo=FALSE, fig.width=calc.fig.width(1), fig.height=calc.fig.height(1), fig.cap=paste0('Distribution of environmental variation found across the geographic range of \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[1]),'}, and the distribution of its adaptive (if detected) and neutral genetic variation in the study area. Each panel shows a different dimension of variation as indicated by its title. Squares represent planning units. Samples collected from the species were subject to NMDS to ordinate the main axes of adaptive (if detected) and neutral genetic variation. The bioclimatic data were clipped to planning units where the species was found, and subject to a principal components analysis to summarise the main gradients of environmental variation. The panels show the spatial distribution of the ordinated environmental and genetic data averaged to the planning-unit level. Planning units where individuals were not observed are shown in gray.')}
 if (is.speciesPlottable(1)) plot.spp.spaces(1)
 ```
 
-```{r, echo=FALSE, fig.width=calc.fig.width(2), fig.height=calc.fig.height(2), fig.cap=paste0('Distribution of environmental variation found across the geographic range of \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[2]),'}, and the distribution of its adaptive and neutral genetic variation in the study area. See Figure S1 caption for conventions.')}
+```{r, echo=FALSE, fig.width=calc.fig.width(2), fig.height=calc.fig.height(2), fig.cap=paste0('Distribution of intra-specific variation for \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[2]),'}. See Figure S1 caption for conventions.')}
 if (is.speciesPlottable(2)) plot.spp.spaces(2)
 ```
 
-```{r, echo=FALSE, fig.width=calc.fig.width(3), fig.height=calc.fig.height(3), fig.cap=paste0('Distribution of environmental variation found across the geographic range of \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[3]),'}, and the distribution of its adaptive and neutral genetic variation in the study area. See Figure S1 caption for conventions.')}
+```{r, echo=FALSE, fig.width=calc.fig.width(3), fig.height=calc.fig.height(3), fig.cap=paste0('Distribution of intra-specific variation for \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[3]),'}. See Figure S1 caption for conventions.')}
 if (is.speciesPlottable(3)) plot.spp.spaces(3)
 ```
 
-```{r, echo=FALSE, fig.width=calc.fig.width(4), fig.height=calc.fig.height(4), fig.cap=paste0('Distribution of environmental variation found across the geographic range of \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[4]),'}, and the distribution of its adaptive and neutral genetic variation in the study area. See Figure S1 caption for conventions.')}
+```{r, echo=FALSE, fig.width=calc.fig.width(4), fig.height=calc.fig.height(4), fig.cap=paste0('Distribution of intra-specific variation for \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[4]),'}. See Figure S1 caption for conventions.')}
 if (is.speciesPlottable(4)) plot.spp.spaces(4)
 ```
 
-```{r, echo=FALSE, fig.width=calc.fig.width(5), fig.height=calc.fig.height(5), fig.cap=paste0('Distribution of environmental variation found across the geographic range of \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[5]),'}, and the distribution of its adaptive and neutral genetic variation in the study area. See Figure S1 caption for conventions.')}
+```{r, echo=FALSE, fig.width=calc.fig.width(5), fig.height=calc.fig.height(5), fig.cap=paste0('Distribution of intra-specific variation for \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[5]),'}. See Figure S1 caption for conventions.')}
 if (is.speciesPlottable(5)) plot.spp.spaces(5)
 ```
 
-```{r, echo=FALSE, fig.width=calc.fig.width(6), fig.height=calc.fig.height(6), fig.cap=paste0('Distribution of environmental variation found across the geographic range of \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[6]),'}, and the distribution of its adaptive and neutral genetic variation in the study area. See Figure S1 caption for conventions.')}
+```{r, echo=FALSE, fig.width=calc.fig.width(6), fig.height=calc.fig.height(6), fig.cap=paste0('Distribution of intra-specific variation for \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[6]),'}. See Figure S1 caption for conventions.')}
 if (is.speciesPlottable(6)) plot.spp.spaces(6)
 ```
 
-```{r, echo=FALSE, fig.width=calc.fig.width(7), fig.height=calc.fig.height(7), fig.cap=paste0('Distribution of environmental variation found across the geographic range of \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[7]),'}, and the distribution of its adaptive and neutral genetic variation in the study area. See Figure S1 caption for conventions.')}
+```{r, echo=FALSE, fig.width=calc.fig.width(7), fig.height=calc.fig.height(7), fig.cap=paste0('Distribution of intra-specific variation for \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[7]),'}. See Figure S1 caption for conventions.')}
 if (is.speciesPlottable(7)) plot.spp.spaces(7)
 ```
 
-```{r, echo=FALSE, fig.width=calc.fig.width(8), fig.height=calc.fig.height(8), fig.cap=paste0('Distribution of environmental variation found across the geographic range of \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[8]),'}, and the distribution of its adaptive and neutral genetic variation in the study area. See Figure S1 caption for conventions.')}
+```{r, echo=FALSE, fig.width=calc.fig.width(8), fig.height=calc.fig.height(8), fig.cap=paste0('Distribution of intra-specific variation for \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[8]),'}. See Figure S1 caption for conventions.')}
 if (is.speciesPlottable(8)) plot.spp.spaces(8)
 ```
 
-```{r, echo=FALSE, fig.width=calc.fig.width(9), fig.height=calc.fig.height(9), fig.cap=paste0('Distribution of environmental variation found across the geographic range of \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[9]),'}, and the distribution of its adaptive and neutral genetic variation in the study area. See Figure S1 caption for conventions.')}
+```{r, echo=FALSE, fig.width=calc.fig.width(9), fig.height=calc.fig.height(9), fig.cap=paste0('Distribution of intra-specific variation for \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[9]),'}. See Figure S1 caption for conventions.')}
 if (is.speciesPlottable(9)) plot.spp.spaces(9)
 ```
 
-```{r, echo=FALSE, fig.width=calc.fig.width(10), fig.height=calc.fig.height(10), fig.cap=paste0('Distribution of environmental variation found across the geographic range of \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[10]),'}, and the distribution of its adaptive and neutral genetic variation in the study area. See Figure S1 caption for conventions.')}
+```{r, echo=FALSE, fig.width=calc.fig.width(10), fig.height=calc.fig.height(10), fig.cap=paste0('Distribution of intra-specific variation for \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[10]),'}. See Figure S1 caption for conventions.')}
 if (is.speciesPlottable(10)) plot.spp.spaces(10)
 ```
 
-```{r, echo=FALSE, fig.width=calc.fig.width(11), fig.height=calc.fig.height(11), fig.cap=paste0('Distribution of environmental variation found across the geographic range of \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[11]),'}, and the distribution of its adaptive and neutral genetic variation in the study area. See Figure S1 caption for conventions.')}
+```{r, echo=FALSE, fig.width=calc.fig.width(11), fig.height=calc.fig.height(11), fig.cap=paste0('Distribution of intra-specific variation for \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[11]),'}. See Figure S1 caption for conventions.')}
 if (is.speciesPlottable(11)) plot.spp.spaces(11)
 ```
 
-```{r, echo=FALSE, fig.width=calc.fig.width(12), fig.height=calc.fig.height(12), fig.cap=paste0('Distribution of environmental variation found across the geographic range of \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[12]),'}, and the distribution of its adaptive and neutral genetic variation in the study area. See Figure S1 caption for conventions.')}
+```{r, echo=FALSE, fig.width=calc.fig.width(12), fig.height=calc.fig.height(12), fig.cap=paste0('Distribution of intra-specific variation for \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[12]),'}. See Figure S1 caption for conventions.')}
 if (is.speciesPlottable(12)) plot.spp.spaces(12)
 ```
 
-```{r, echo=FALSE, fig.width=calc.fig.width(13), fig.height=calc.fig.height(13), fig.cap=paste0('Distribution of environmental variation found across the geographic range of \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[13]),'}, and the distribution of its adaptive and neutral genetic variation in the study area. See Figure S1 caption for conventions.')}
+```{r, echo=FALSE, fig.width=calc.fig.width(13), fig.height=calc.fig.height(13), fig.cap=paste0('Distribution of intra-specific variation for \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[13]),'}. See Figure S1 caption for conventions.')}
 if (is.speciesPlottable(13)) plot.spp.spaces(13)
 ```
 
-```{r, echo=FALSE, fig.width=calc.fig.width(14), fig.height=calc.fig.height(14), fig.cap=paste0('Distribution of environmental variation found across the geographic range of \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[14]),'}, and the distribution of its adaptive and neutral genetic variation in the study area. See Figure S1 caption for conventions.')}
+```{r, echo=FALSE, fig.width=calc.fig.width(14), fig.height=calc.fig.height(14), fig.cap=paste0('Distribution of intra-specific variation for \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[14]),'}. See Figure S1 caption for conventions.')}
 if (is.speciesPlottable(14)) plot.spp.spaces(14)
 ```
 
-```{r, echo=FALSE, fig.width=calc.fig.width(15), fig.height=calc.fig.height(15), fig.cap=paste0('Distribution of environmental variation found across the geographic range of \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[15]),'}, and the distribution of its adaptive and neutral genetic variation in the study area. See Figure S1 caption for conventions.')}
+```{r, echo=FALSE, fig.width=calc.fig.width(15), fig.height=calc.fig.height(15), fig.cap=paste0('Distribution of intra-specific variation for \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[15]),'}. See Figure S1 caption for conventions.')}
 if (is.speciesPlottable(15)) plot.spp.spaces(15)
 ```
 
-```{r, echo=FALSE, fig.width=calc.fig.width(16), fig.height=calc.fig.height(16), fig.cap=paste0('Distribution of environmental variation found across the geographic range of \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[16]),'}, and the distribution of its adaptive and neutral genetic variation in the study area. See Figure S1 caption for conventions.')}
+```{r, echo=FALSE, fig.width=calc.fig.width(16), fig.height=calc.fig.height(16), fig.cap=paste0('Distribution of intra-specific variation for \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[16]),'}. See Figure S1 caption for conventions.')}
 if (is.speciesPlottable(16)) plot.spp.spaces(16)
 ```
 
-```{r, echo=FALSE, fig.width=calc.fig.width(17), fig.height=calc.fig.height(17), fig.cap=paste0('Distribution of environmental variation found across the geographic range of \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[17]),'}, and the distribution of its adaptive and neutral genetic variation in the study area. See Figure S1 caption for conventions.')}
+```{r, echo=FALSE, fig.width=calc.fig.width(17), fig.height=calc.fig.height(17), fig.cap=paste0('Distribution of intra-specific variation for \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[17]),'}. See Figure S1 caption for conventions.')}
 if (is.speciesPlottable(17)) plot.spp.spaces(17)
 ```
 
-```{r, echo=FALSE, fig.width=calc.fig.width(18), fig.height=calc.fig.height(18), fig.cap=paste0('Distribution of environmental variation found across the geographic range of \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[18]),'}, and the distribution of its adaptive and neutral genetic variation in the study area. See Figure S1 caption for conventions.')}
+```{r, echo=FALSE, fig.width=calc.fig.width(18), fig.height=calc.fig.height(18), fig.cap=paste0('Distribution of intra-specific variation for \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[18]),'}. See Figure S1 caption for conventions.')}
 if (is.speciesPlottable(18)) plot.spp.spaces(18)
 ```
 
-```{r, echo=FALSE, fig.width=calc.fig.width(19), fig.height=calc.fig.height(19), fig.cap=paste0('Distribution of environmental variation found across the geographic range of \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[19]),'}, and the distribution of its adaptive and neutral genetic variation in the study area. See Figure S1 caption for conventions.')}
+```{r, echo=FALSE, fig.width=calc.fig.width(19), fig.height=calc.fig.height(19), fig.cap=paste0('Distribution of intra-specific variation for \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[19]),'}. See Figure S1 caption for conventions.')}
 if (is.speciesPlottable(19)) plot.spp.spaces(19)
 ```
 
-```{r, echo=FALSE, fig.width=calc.fig.width(20), fig.height=calc.fig.height(20), fig.cap=paste0('Distribution of environmental variation found across the geographic range of \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[20]),'}, and the distribution of its adaptive and neutral genetic variation in the study area. See Figure S1 caption for conventions.')}
+```{r, echo=FALSE, fig.width=calc.fig.width(20), fig.height=calc.fig.height(20), fig.cap=paste0('Distribution of intra-specific variation for \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[20]),'}. See Figure S1 caption for conventions.')}
 if (is.speciesPlottable(20)) plot.spp.spaces(20)
 ```
 
-```{r, echo=FALSE, fig.width=calc.fig.width(21), fig.height=calc.fig.height(21), fig.cap=paste0('Distribution of environmental variation found across the geographic range of \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[21]),'}, and the distribution of its adaptive and neutral genetic variation in the study area. See Figure S1 caption for conventions.')}
+```{r, echo=FALSE, fig.width=calc.fig.width(21), fig.height=calc.fig.height(21), fig.cap=paste0('Distribution of intra-specific variation for \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[21]),'}. See Figure S1 caption for conventions.')}
 if (is.speciesPlottable(21)) plot.spp.spaces(21)
 ```
 
-```{r, echo=FALSE, fig.width=calc.fig.width(22), fig.height=calc.fig.height(22), fig.cap=paste0('Distribution of environmental variation found across the geographic range of \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[22]),'}, and the distribution of its adaptive and neutral genetic variation in the study area. See Figure S1 caption for conventions.')}
+```{r, echo=FALSE, fig.width=calc.fig.width(22), fig.height=calc.fig.height(22), fig.cap=paste0('Distribution of intra-specific variation for \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[22]),'}. See Figure S1 caption for conventions.')}
 if (is.speciesPlottable(22)) plot.spp.spaces(22)
 ```
 
-```{r, echo=FALSE, fig.width=calc.fig.width(23), fig.height=calc.fig.height(23), fig.cap=paste0('Distribution of environmental variation found across the geographic range of \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[23]),'}, and the distribution of its adaptive and neutral genetic variation in the study area. See Figure S1 caption for conventions.')}
+```{r, echo=FALSE, fig.width=calc.fig.width(23), fig.height=calc.fig.height(23), fig.cap=paste0('Distribution of intra-specific variation for \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[23]),'}. See Figure S1 caption for conventions.')}
 if (is.speciesPlottable(23)) plot.spp.spaces(23)
 ```
 
-```{r, echo=FALSE, fig.width=calc.fig.width(24), fig.height=calc.fig.height(24), fig.cap=paste0('Distribution of environmental variation found across the geographic range of \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[24]),'}, and the distribution of its adaptive and neutral genetic variation in the study area. See Figure S1 caption for conventions.')}
+```{r, echo=FALSE, fig.width=calc.fig.width(24), fig.height=calc.fig.height(24), fig.cap=paste0('Distribution of intra-specific variation for \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[24]),'}. See Figure S1 caption for conventions.')}
 if (is.speciesPlottable(24)) plot.spp.spaces(24)
 ```
 
-```{r, echo=FALSE, fig.width=calc.fig.width(25), fig.height=calc.fig.height(25), fig.cap=paste0('Distribution of environmental variation found across the geographic range of \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[25]),'}, and the distribution of its adaptive and neutral genetic variation in the study area. See Figure S1 caption for conventions.')}
+```{r, echo=FALSE, fig.width=calc.fig.width(25), fig.height=calc.fig.height(25), fig.cap=paste0('Distribution of intra-specific variation for \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[25]),'}. See Figure S1 caption for conventions.')}
 if (is.speciesPlottable(25)) plot.spp.spaces(25)
 ```
 
-```{r, echo=FALSE, fig.width=calc.fig.width(26), fig.height=calc.fig.height(26), fig.cap=paste0('Distribution of environmental variation found across the geographic range of \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[26]),'}, and the distribution of its adaptive and neutral genetic variation in the study area. See Figure S1 caption for conventions.')}
+```{r, echo=FALSE, fig.width=calc.fig.width(26), fig.height=calc.fig.height(26), fig.cap=paste0('Distribution of intra-specific variation for \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[26]),'}. See Figure S1 caption for conventions.')}
 if (is.speciesPlottable(26)) plot.spp.spaces(26)
 ```
 
-```{r, echo=FALSE, fig.width=calc.fig.width(27), fig.height=calc.fig.height(27), fig.cap=paste0('Distribution of environmental variation found across the geographic range of \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[27]),'}, and the distribution of its adaptive and neutral genetic variation in the study area. See Figure S1 caption for conventions.')}
+```{r, echo=FALSE, fig.width=calc.fig.width(27), fig.height=calc.fig.height(27), fig.cap=paste0('Distribution of intra-specific variation for \\textit{',gsub('\\_', ' ', unique(spp.samples.DF$species)[27]),'}. See Figure S1 caption for conventions.')}
 if (is.speciesPlottable(27)) plot.spp.spaces(27)
 ```
 
@@ -347,7 +347,7 @@ grid.sub.FPLY <- grid.sub.FPLY %>% gather(
 # make maps
 ggplot() +
   geom_polygon(data=countries.FPLY, aes(x=long, y=lat, group=group),
-    fill='grey85', color='grey70') +
+    fill='grey85', color='grey70', size=0.01) +
   geom_polygon(data=grid.sub.FPLY, aes_string(x='long', y='lat',
     group='group', fill='Selection.Frequency'),
     alpha=0.8, color=NA) +
@@ -371,7 +371,7 @@ ggplot() +
   )
 ```
 
-```{r, echo=FALSE, fig.width=9.5, fig.height=10, out.width='7.5in', out.height='8.5in', fig.cap=paste0('Species distributions. Squares represent planning units. For a given species, planning units that it was found in are shown in bright blue.')}
+```{r, echo=FALSE, fig.width=9.5, fig.height=10, out.width='7.5in', out.height='8.5in', fig.cap=paste0('Species distributions. Squares represent planning units. For a given species, planning units that it was found in are shown in green.')}
 ## plot map of species distributions
 # fortify data
 spp.grid.FPLY <- ldply(unique(spp.samples.DF$species), function(x) {
@@ -385,7 +385,7 @@ spp.grid.FPLY <- ldply(unique(spp.samples.DF$species), function(x) {
 # plot species data
 ggplot() +
   geom_polygon(data=countries.FPLY, aes(x=long, y=lat, group=group),
-    fill='grey85', color='grey70') +
+    fill='grey85', color='grey70', size=0.01) +
   geom_polygon(data=spp.grid.FPLY, aes(x=long, y=lat,
     group=group, fill=presence), alpha=0.8, color='grey10') +
   theme_classic() +
@@ -430,9 +430,9 @@ digraph main {
   adaptive_as [label = 'Adaptive genetic attribute spaces']
 
   node[shape = ellipse, style = filled, color = darkslategray, fillcolor = white]
-  calc_geo_as [label = 'Processing\n(Figure S60)']
-  calc_env_as [label = 'Processing\n(Figure S61)']
-  calc_genetic_as [label = 'Processing\n(Figure S62)']
+  calc_geo_as [label = 'Processing\n(Figure S33)']
+  calc_env_as [label = 'Processing\n(Figure S34)']
+  calc_genetic_as [label = 'Processing\n(Figure S35)']
 
   edge [color = grey]
   meirmans_data -> {sample_aflp_data grid_data sample_location_data}
@@ -663,7 +663,7 @@ plot.spp.pop.probs <- function(i) {
   # create base map grob
   curr.GROB <- ggplot(data=curr.spp.DF) +
     geom_polygon(data=countries.FPLY, aes(x=long, y=lat, group=group),
-      fill='grey85', color='grey75') +
+      fill='grey85', color='grey75', size=0.01) +
     geom_polygon(data=grid.FPLY, aes_string(x='long', y='lat',
       group='group'), fill='grey70', color='grey10') +
     guides(fill=guide_legend(title=''), color=guide_legend(title='')) +
@@ -710,6 +710,9 @@ plot.spp.pop.probs <- function(i) {
   pushViewport(viewport(layout=grid.layout(2,1, heights=unit(c(1-prop, prop), "npc"))))
   print(curr.GROBH, vp=viewport(layout.pos.row=1, layout.pos.col=1))
   print(curr.GROB, vp=viewport(layout.pos.row=2, layout.pos.col=1))
+  # define colors for species
+  spp.cols <- legend.CHR[seq_len(n_distinct(curr.spp.DF$Population))]
+  names(spp.cols) <- as.character(unique(curr.spp.DF$Population))
   # add in pies
   for (j in unique(curr.spp.DF$cell)) {
     # init
@@ -722,7 +725,6 @@ plot.spp.pop.probs <- function(i) {
       ) %>% data.frame()
     curr.lon <- (curr.cell.DF$grid.longitude[1]-bbox['ll.lon'])/abs(bbox['ur.lon']-bbox['ll.lon'])
     curr.lat <- ((curr.cell.DF$grid.latitude[1]-bbox['ll.lat'])/abs(bbox['ur.lat']-bbox['ll.lat']))*prop
-    # create pie chart for individual
     curr.pie <- ggplot(curr.cell.DF, aes(x="", y=Probability, fill=factor(Population))) +
       geom_bar(width=0.75, color='grey20', stat='identity') +
       coord_polar(theta='y') +
@@ -734,7 +736,7 @@ plot.spp.pop.probs <- function(i) {
       ) +
       scale_fill_manual(
         name='',
-        values=legend.CHR[seq_len(n_distinct(curr.spp.DF$Population))]
+        values=spp.cols
       )
     # render pie
     print(curr.pie, vp=viewport(x=curr.lon, y=curr.lat, width=0.075, height=0.075))
@@ -875,7 +877,7 @@ x <- spp.nmds.summary.DF2 %>%
     rowname=NULL, first.hline.double=FALSE, booktabs=TRUE, col.just=rep('c', 5),
     cgroup=c('', 'Adaptive', 'Neutral'), n.cgroup=c(1, 2, 2),
     colheads=c('\\bfseries{Species}', 'K', 'Stress', 'K', 'Stress'), here=TRUE,
-    caption='Summary of non-metric multi-dimensional scaling (NMDS) analyses on genetic variation for each species. The analyses were used to identify the main graondients of variation in binary adaptive and neutral loci data. Bold stress values indicate NMDS analyses that have converged.'
+    caption='Summary of non-metric multi-dimensional scaling (NMDS) analyses on genetic variation for each species. The analyses were used to identify the main gradients of variation in binary adaptive and neutral loci data. Bold stress values indicate NMDS analyses that have converged.'
   )
 readLines(curr.file)[-1] %>% paste0(collapse='\n') %>%
   gsub(pattern='\\cline{1-', replacement='\\cline{3-4} \\cline{6-', fixed=TRUE) %>%
@@ -905,7 +907,7 @@ x <- correlation.model.summary.DF %>%
     cgroup=c('', 'Environmental', 'Geographic'), n.cgroup=c(1, 4, 4), col.just=rep('c', 9),
     digits=2, rowname=NULL, first.hline.double=FALSE, booktabs=TRUE, here=TRUE,
     colheads=c('\\bfseries{Species}', '$MR^2$', '$CR^2$', '$\\chi^2$', '\\textit{P}', '$MR^2$', '$CR^2$', '$\\chi^2$', '\\textit{P}'),
-    caption='Summary of maximum likelihood population-effects (MLPE) models. Briefly, for each species associated with potentially adaptive loci, a model was fit to correlate dissimilarities among planning units where the species in terms of the adaptive genetic characteristics of individuals in them with dissimilarities in terms of the environmental conditions inside the planning units (denoted in the environmental column group). Similarly, for each species, a model was fit to correlate dissimilarities among the planning units in terms of the neutral genetic characteristics of indiviudals in them with dissimilarities in terms of the geographic position of the planning units (denoted in the geographic column group). Data shows the results from comparing each model to its corresponding null model using $\\chi^2$ tests (1 degree of freedom), and the $R^2$ ($MR^2$) and conditional $R^2$ ($CR^2$) for each model.'
+    caption='Summary of maximum likelihood population-effects (MLPE) models. Briefly, for each species associated with potentially adaptive loci, a model was fit to correlate dissimilarities among planning units where the species in terms of the adaptive genetic characteristics of individuals in them with dissimilarities in terms of the environmental conditions inside the planning units (denoted in the environmental column group). Similarly, for each species, a model was fit to correlate dissimilarities among the planning units in terms of the neutral genetic characteristics of individuals in them with dissimilarities in terms of the geographic position of the planning units (denoted in the geographic column group). Data shows the results from comparing each model to its corresponding null model using $\\chi^2$ tests (1 degree of freedom), and the $R^2$ ($MR^2$) and conditional $R^2$ ($CR^2$) for each model.'
   )
 readLines(curr.file)[-1] %>% paste0(collapse='\n') %>%
   gsub(pattern='\\cline{1-', replacement='\\cline{2-6} \\cline{8-', fixed=TRUE) %>%
@@ -949,6 +951,7 @@ readLines(curr.file)[-1] %>% paste0(collapse='\n') %>%
 curr.file <- tempfile(fileext='.tex')
 x <- spp.pca.DF %>%
   mutate(species=gsub('_', ' ', species, fixed=TRUE), percent_variation_explained=percent_variation_explained*100) %>%
+  mutate(species=paste0("\\textit{", species, "}")) %>%
   latex(
     file=curr.file,
     rowname=NULL, first.hline.double=FALSE, booktabs=TRUE, col.just=rep('c', 2),
