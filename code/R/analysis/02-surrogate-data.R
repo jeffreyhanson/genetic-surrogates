@@ -37,8 +37,8 @@ centroids.DF <- grid.PPLY %>%
 	as.data.frame() %>%
 	`names<-`(paste0('geo_d',1:2))
 # zscore it
-centroids.DF <- sweep(centroids.DF, 2, MARGIN=2, FUN='-', colMeans(centroids.DF))
-centroids.DF <- sweep(centroids.DF, 2, MARGIN=2, FUN='/', apply(centroids.DF, 2, sd))
+centroids.DF <- sweep(centroids.DF, MARGIN=2, FUN='-', colMeans(centroids.DF))
+centroids.DF <- sweep(centroids.DF, MARGIN=2, FUN='/', apply(centroids.DF, 2, sd))
 # append to main data.frame
 grid.DF <- cbind(grid.DF, centroids.DF)
 

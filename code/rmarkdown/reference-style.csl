@@ -103,10 +103,11 @@
       <choose>
         <if type="bill graphic legal_case legislation motion_picture report song" match="any">
           <group prefix=" ">
-            <text variable="title" font-style="italic"/>
-            <text macro="editor"/>
+            <text variable="title" font-style="italic" suffix=". "/>
+            <!-- <text macro="editor"/>
             <text macro="publisher"/>
-            <text macro="edition" prefix=". "/>
+            <text macro="edition"> -->
+            <text variable="note"/>
           </group>
         </if>
         <else-if type="book" match="any">

@@ -21,7 +21,7 @@ spp.StructureCollection.LST <- llply(
 				spp.StructureData.LST[[i]], MAXPOPS = curr.maxpops, NUMRUNS = structure.params.LST[[MODE]]$numruns, 
 				BURNIN = structure.params.LST[[MODE]]$burnin, NUMREPS = structure.params.LST[[MODE]]$numreps, NOADMIX = structure.params.LST[[MODE]]$noadmix, 
 				FREQSCORR = structure.params.LST[[MODE]]$freqscorr, ADMBURNIN = structure.params.LST[[MODE]]$admburnin, UPDATEFREQ=structure.params.LST[[MODE]]$updatefreq,
-				M = clumpp.params.LST[[MODE]]$M, W = clumpp.params.LST[[MODE]]$W, S = clumpp.params.LST[[MODE]]$S,  REPEATS = clumpp.params.LST[[MODE]]$repeats, 
+				M = clumpp.params.LST[[MODE]]$M, W = clumpp.params.LST[[MODE]]$W, S = clumpp.params.LST[[MODE]]$S, REPEATS = clumpp.params.LST[[MODE]]$repeats, 
 				dir = curr.spp.dir, clean = FALSE, verbose = FALSE, threads=general.params.LST[[MODE]]$threads 
 			)
 		)

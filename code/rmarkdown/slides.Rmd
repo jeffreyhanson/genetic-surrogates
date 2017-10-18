@@ -1,0 +1,640 @@
+---
+fontsize: 11pt
+documentclass: article
+output:
+  rmarkdown::pdf_document
+---
+
+# Slides
+
+```{r, include=FALSE}
+# set wd
+knitr::opts_knit$set(root.dir=normalizePath('../..'))
+knitr::opts_chunk$set(dev = "png", dev.args = list(type = "cairo"), dpi = 500)
+
+```
+
+```{r,include=FALSE}
+# load .rda file
+checkpoint::checkpoint('2016-11-26', R.version='3.3.2', scanForPackages=FALSE)
+try(session::restore.session('data/final/results.rda'))
+
+# download basemap
+data(countriesHigh)
+countries.FPLY <- countriesHigh[
+  countriesHigh$ADMIN %in% c(
+    'Italy', 'Switzerland', 'France', 'Austria',
+    'Germany', 'Slovenia', 'Croatia', 'Hungary',
+    'Monaco', 'Germany', 'Slovakia', 'Czech Republic'
+  )
+,] %>% spFortify
+grid.FPLY <- spFortify(grid.PLY)
+grid.sub.FPLY <- spFortify(grid.sub.PLY)
+
+# define ggplot2 color wheel function
+gg_color_hue <- function(n) {
+  hues <- seq(15, 375, length=n+1)
+  hcl(h=hues, l=65, c=100)[1:n]
+}
+```
+
+```{r, echo=FALSE, fig.align='center', fig.width=6, fig.height=1.5, out.width='3.42in', height='2.5in', fig.cap="Map of the study area showing (a) the pattern of species richness, and (b) the distribution of acquisition cost, both plotted on a quantile-based color ramp. Squares denote planning units."}
+
+# calculate species richness
+grid.PLY$Species_richness <- grid.PLY@data %>%
+  select(5:(4+n_distinct(spp.samples.DF$species))) %>% as.matrix() %>% rowSums()
+
+panel.DF <- grid.sub.FPLY %>%
+  summarize(lat=min(lat)+(diff(range(lat))*0.96),
+    long=min(long)+(diff(range(long))*0.04))
+
+# plot species richness
+p1 <- ggplot() +
+  geom_polygon(data=countries.FPLY, aes(x=long, y=lat, group=group),
+    fill='grey85', color='grey70', size=0.001) +
+  geom_polygon(data=spFortify(grid.PLY), aes(x=long, y=lat,
+    group=group, fill=Species_richness), color=NA) +
+  scale_fill_gradientn(name='Richness',
+    colors=brewer.pal(5, 'YlGn'),
+    guide=guide_colorbar(ticks=element_line(color='black'), border=element_line(color='black'))
+  ) +
+  theme_classic() +
+  theme(
+    axis.ticks=element_blank(), axis.text=element_blank(), axis.line=element_blank(), plot.margin = unit(c(0, 0, 0, 0), "lines"), axis.title=element_blank(),
+    panel.border=element_rect(color='black', fill=NA, size=1),
+    panel.background=element_rect(color='black', fill='black'),
+    plot.background=element_rect(color='black', fill='black'),
+    legend.key=element_rect(color='black', fill='black'),
+    legend.background=element_rect(color='black', fill='black'),
+    legend.title=element_text(color='white'),
+    legend.text=element_text(color='white')
+  ) +
+  coord_cartesian(
+    xlim=buffered.range(grid.FPLY$long, 0),
+    ylim=buffered.range(grid.FPLY$lat, 0)
+  )
+
+qn01 <- scales::rescale(quantile(grid.PLY@data$pop.density, seq(0,1,length.out=9), na.rm=TRUE))
+p2 <- ggplot() +
+  geom_polygon(data=countries.FPLY, aes(x=long, y=lat, group=group),
+    fill='grey85', color='grey70', size=0.001) +
+  geom_polygon(data=spFortify(grid.PLY), aes(x=long, y=lat,
+    group=group, fill=pop.density), color=NA) +
+  scale_fill_gradientn(name='Cost',
+    colors=brewer.pal(5,'YlOrRd'),
+    values=qn01,
+    guide=guide_colorbar(ticks=element_line(color='black'), border=element_line(color='black'))
+  ) +
+  theme_classic() +
+  theme(
+    axis.ticks=element_blank(), axis.text=element_blank(), axis.line=element_blank(), plot.margin = unit(c(0, 0, 0, 0), "lines"), axis.title=element_blank(),
+    panel.border=element_rect(color='black', fill=NA, size=1),
+    panel.background=element_rect(color='black', fill='black'),
+    plot.background=element_rect(color='black', fill='black'),
+    legend.key=element_rect(color='black', fill='black'),
+    legend.background=element_rect(color='black', fill='black'),
+    legend.title=element_text(color='white'),
+    legend.text=element_text(color='white')
+  ) +
+  coord_cartesian(
+    xlim=buffered.range(grid.FPLY$long, 0),
+    ylim=buffered.range(grid.FPLY$lat, 0)
+  )
+
+grid.arrange(p1,p2,nrow=1)
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE, fig.align='center', fig.width=6, fig.height=4.5, out.width='3.42in', out.height='2.5in', fig.cap=paste0('The proportion of adaptive (a; ',sum(!is.na(correlation.model.summary.DF$Environmental.corr.P)),' species) and neutral (b; ',sum(!is.na(correlation.model.summary.DF$Geographic.corr.P)),' species) genetic variation represented in a suite of randomly generated prioritizations for different species as a function of the surrogate variation they also secured (lines). Panels (c) and (d) show the distribution of $R^2$ values for the ',sum(!is.na(correlation.model.summary.DF$Environmental.corr.P)) + sum(!is.na(correlation.model.summary.DF$Geographic.corr.P)),' models shown in panels (a) and (b).')}
+# make figure
+p1 <- ggplot(aes(x=surrogate.held,y=genetic.held), data=env.surrogacy.DF) +
+  xlab('Environmental variation\nsecured (%)') +
+  ylab('Adaptive genetic\nvariation secured (%)') +
+  theme_classic() +
+  theme(axis.line.x=element_line(color='white'),
+        axis.line.y=element_line(color='white'),
+        axis.title=element_text(color='white'),
+        axis.text=element_text(color='white'),
+        axis.ticks=element_line(color='white'),
+        panel.background=element_rect(color='black',fill='black'),
+        plot.background=element_rect(color='black',fill='black')) +
+  coord_cartesian(xlim=c(0, 1)) +
+  scale_x_continuous(limits=c(0,1), labels=function(x) {x*100}) +
+  scale_y_continuous(limits=c(0,1), labels=function(x) {x*100})
+for (i in seq_along(env.surrogacy.LST))
+  p1 <- p1 + stat_smooth(method='glm', method.args=list(family='binomial'),
+    data=filter(env.surrogacy.DF, Species==unique(Species)[i]),
+    fullrange=TRUE, se=FALSE, colour='white')
+# p1 <- p1 + geom_text(x=-Inf, y=Inf, hjust=-0.25, vjust=1.5, label='(a)')
+
+p2 <- ggplot(aes(x=surrogate.held,y=genetic.held), data=geo.surrogacy.DF) +
+  xlab('Geographic variation\nsecured (%)') +
+  ylab('Neutral genetic\nvariation secured (%)') +
+  theme_classic() +
+  theme(axis.line.x=element_line(color='white'),
+        axis.line.y=element_line(color='white'),
+        axis.title=element_text(color='white'),
+        axis.text=element_text(color='white'),
+        axis.ticks=element_line(color='white'),
+        panel.background=element_rect(color='black',fill='black'),
+        plot.background=element_rect(color='black',fill='black')) +
+  coord_cartesian(xlim=c(0, 1)) +
+  scale_x_continuous(limits=c(0,1), labels=function(x) {x*100}) +
+  scale_y_continuous(limits=c(0,1), labels=function(x) {x*100})
+for (i in seq_along(geo.surrogacy.LST))
+  p2 <- p2 + stat_smooth(method='glm', method.args=list(family='binomial'),
+    data=filter(geo.surrogacy.DF, Species==unique(Species)[i]),
+    fullrange=TRUE, se=FALSE, colour='white')
+# p2 <- p2 + geom_text(x=-Inf, y=Inf, hjust=-0.25, vjust=1.5, label='(b)')
+
+p1.hist <- ggplot(aes(r2CU),
+    data=filter(env.surrogate.spp.DF, !is.na(r2CU))) +
+  geom_histogram(fill='white', bins=12) +
+  ylab('\nFrequency') + xlab(expression(Environmental~variables~(R^2))) +
+  theme_classic() +
+  theme(axis.line.x=element_line(color='white'),
+        axis.line.y=element_line(color='white'),
+        axis.title=element_text(color='white'),
+        axis.text=element_text(color='white'),
+        axis.ticks=element_line(color='white'),
+        panel.background=element_rect(color='black',fill='black'),
+        plot.background=element_rect(color='black',fill='black')) +
+  # geom_text(x=-Inf, y=Inf, hjust=-0.25, vjust=1.5, label='(c)') +
+  scale_y_continuous(labels=function(x) {formatC(x, digits=2, format='f')}) +
+  scale_x_continuous(limits=c(0, 1), labels=function(x) {formatC(x, digits=2, format='f')})
+
+p2.hist <- ggplot(aes(r2CU),
+    data=filter(geo.surrogate.spp.DF, !is.na(r2CU))) +
+  geom_histogram(fill='white', bins=12) +
+  ylab('\nFrequency') + xlab(expression(Geographic~variables~(R^2))) +
+  theme_classic() +
+  theme(axis.line.x=element_line(color='white'),
+        axis.line.y=element_line(color='white'),
+        axis.title=element_text(color='white'),
+        axis.text=element_text(color='white'),
+        axis.ticks=element_line(color='white'),
+        panel.background=element_rect(color='black',fill='black'),
+        plot.background=element_rect(color='black',fill='black')) +
+  # geom_text(x=-Inf, y=Inf, hjust=-0.25, vjust=1.5, label='(d)') +
+  scale_y_continuous(labels=function(x) {formatC(x, digits=2, format='f')}) +
+  scale_x_continuous(limits=c(0, 1), labels=function(x) {formatC(x, digits=2, format='f')})
+
+# render figure
+grid.arrange(p1,p2,p1.hist,p2.hist,nrow=2)
+```
+
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.align='center', fig.width=4.5, fig.height=3.5, out.width='4in', out.height='3.5in', fig.cap='The proportion of adaptive and neutral genetic variation secured for each species in solutions based on different targets and scenarios. Box plots show the median, and the 25th and 75th percentiles. Whiskers show the data at 1.5 times the inter-quantile range. Points show data outside the whiskers. Red lines show the target proportion of genetic variation.'}
+# prepare data for plotting
+scenario.SDF <- scenario.DF %>%
+  group_by(Prioritisation, Context, Metric, Species) %>%
+  summarize(genetic.held=mean(genetic.held, na.rm=TRUE)) %>%
+  data.frame() %>%
+  filter(Context == 'Multi-species\n(equal costs)')
+
+# make plot
+suppressWarnings({
+  ggplot(aes(x=Prioritisation,y=genetic.held),
+    data=scenario.SDF) +
+    geom_boxplot(position=position_dodge(0.9), color='white', fill='black') +
+    scale_fill_manual(name='Prioritization',
+      values=c('grey80','grey50','grey20')) +
+    geom_abline(slope=0, color='red', linetype='dashed',
+      intercept=raptr.params.LST[[MODE]]$scenario.analysis$genetic.target) +
+    ylab('Genetic variation secured (%)') +
+    xlab('') +
+    scale_y_continuous(breaks=c(0,0.25,0.5,0.75,1)) +
+    theme_classic() +
+    theme(
+         axis.line.x=element_line(color='white'),
+         axis.line.y=element_line(color='white'),
+         axis.title=element_text(color='white'),
+         axis.ticks=element_line(color='white'),
+         panel.background=element_rect(color='black',fill='black'),
+         plot.background=element_rect(color='black',fill='black'),
+         strip.background = element_rect(fill='grey20'),
+         strip.text = element_text(color='white', size=9),
+         panel.border = element_rect(color='white', fill=NA),
+         axis.text.x=element_text(color='white',angle=45, hjust=1, vjust=1,
+                                  size=8),
+         axis.text.y=element_text(color='white',size=8)) +
+    facet_grid(Context ~ Metric)
+})
+```
+
+```{r, echo=FALSE, fig.width=9.5, fig.height=10, out.width='7.5in', out.height='8.5in', fig.cap=paste0('Species distributions. Squares represent planning units. For a given species, planning units that it was found in are shown in bright blue.')}
+## plot map of species distributions
+# fortify data
+spp.grid.FPLY <- ldply(unique(spp.samples.DF$species), function(x) {
+    z <- grid.FPLY[,c('long', 'lat', 'group', x),drop=FALSE]
+    names(z)[4] <- 'presence'
+    z$species <- gsub('\\_', ' ', x)
+    return(z)
+  }
+) %>% mutate(presence=factor(c('absent', 'present')[presence+1]))
+
+# plot species data
+ggplot() +
+  geom_polygon(data=countries.FPLY, aes(x=long, y=lat, group=group),
+    fill='grey85', color='grey70', size=0.001) +
+  geom_polygon(data=spp.grid.FPLY, aes(x=long, y=lat,
+    group=group, fill=presence), alpha=0.8, color='grey10') +
+  theme_classic() +
+  theme(
+    axis.ticks=element_blank(), axis.text=element_blank(), axis.line=element_blank(), plot.margin = unit(c(0, 0, 0, 0), "lines"),
+    strip.background = element_rect(fill='grey20'),
+    strip.text = element_text(color='white', face='italic'),
+    axis.title=element_blank(),
+    panel.background=element_rect(color='black',fill='black'),
+    plot.background=element_rect(color='black',fill='black'),
+    legend.text=element_text(color='white'),
+    legend.title=element_text(color='white'),
+    legend.key=element_rect(fill='black'),
+    legend.background=element_rect(fill='black')
+  ) +
+    scale_fill_manual(name='Occupancy', values=c('absent'='#FC8D59', 'present'='#91CF60')) +
+  coord_cartesian(
+    xlim=buffered.range(grid.FPLY$long, 0),
+    ylim=buffered.range(grid.FPLY$lat, 0)
+  ) +
+  facet_wrap(~ species, ncol=4)
+```
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.align='center', fig.width=(5*0.9), fig.height=(6.5*0.8), out.width='3.42in', height='3.9in', fig.cap='Planning unit selection frequencies. Squares represent planning units, and their colors indicate their selection frequency. Each column of panels shows solutions generated using different targets. Each row of panels shows solutions generated under different scenarios. Note that the selection frequencies for the single-species prioritizations are based on their frequency among prioritizations generated for each species. The selection frequencies for the multi-species prioritizations are each based on a single optimal prioritization for all species and so are binary.'}
+# prepare data for plotting
+grid.sub.FPLY <- grid.sub.PLY
+for (i in seq_along(single.spp.prioritisations[[1]]))
+  grid.sub.FPLY@data[[paste0('Single-species (equal costs).', c('Amount', 'Surrogate', 'Genetic')[i])]] <- rowMeans(sapply(single.spp.prioritisations, function(x){colMeans(x[[i]]@results@selections)}))
+for (i in seq_along(single.spp.prioritisations.with.cost[[1]]))
+  grid.sub.FPLY@data[[paste0('Single-species (opportunity costs).', c('Amount', 'Surrogate', 'Genetic')[i])]] <- rowMeans(sapply(single.spp.prioritisations.with.cost, function(x){colMeans(x[[i]]@results@selections)}))
+for (i in seq_along(multi.spp.prioritisations))
+  grid.sub.FPLY@data[[paste0('Multi-species (equal costs).', c('Amount', 'Surrogate', 'Genetic')[i])]] <- colMeans(multi.spp.prioritisations[[i]]@results@selections)
+for (i in seq_along(multi.spp.prioritisations.with.cost))
+  grid.sub.FPLY@data[[paste0('Multi-species (opportunity costs).', c('Amount', 'Surrogate', 'Genetic')[i])]] <- colMeans(multi.spp.prioritisations.with.cost[[i]]@results@selections)
+grid.sub.FPLY <- spFortify(grid.sub.FPLY)
+grid.sub.FPLY <- grid.sub.FPLY %>% gather(
+    Combination,
+    `Selection.Frequency`,
+    `Single-species (equal costs).Amount`:`Multi-species (opportunity costs).Genetic`
+  ) %>% mutate(
+    Context=sapply(strsplit(as.character(Combination), '.', fixed=TRUE), `[[`, 1),
+    Prioritization=sapply(strsplit(as.character(Combination), '.', fixed=TRUE), `[[`, 2)
+  ) %>% mutate(
+    Prioritization=revalue(Prioritization, c('Amount'='Amount targets', 'Surrogate'='Amount & surrogate\ntargets', 'Genetic'='Amount & genetic\ntargets')),
+    Prioritization=factor(as.character(Prioritization), levels=c('Amount targets', 'Amount & surrogate\ntargets', 'Amount & genetic\ntargets')),
+    Context=factor(
+      gsub(' (', '\n(', Context, fixed=TRUE),
+      levels=c("Single-species\n(equal costs)", "Single-species\n(opportunity costs)",
+        "Multi-species\n(equal costs)", "Multi-species\n(opportunity costs)"))
+  )
+
+# make maps
+ggplot() +
+  geom_polygon(data=countries.FPLY, aes(x=long, y=lat, group=group),
+    fill='grey85', color='grey70', size=0.001) +
+  geom_polygon(data=grid.sub.FPLY, aes_string(x='long', y='lat',
+    group='group', fill='Selection.Frequency'),
+    alpha=0.8, color=NA) +
+  theme_classic() +
+  theme(axis.ticks=element_blank(), axis.text=element_blank(),
+    plot.margin=unit(c(0,0,0,0),'cm'), axis.line=element_blank(),
+    strip.background = element_rect(fill='grey20'),
+    strip.text = element_text(color='white', size=8),
+    legend.position='bottom', legend.key.width=unit(1.8, 'cm'),
+    legend.title=element_text(vjust=-5),
+    legend.margin=unit(c(0.1), 'cm'),
+    axis.title=element_blank(),
+    legend.title=element_text(color='white'),
+    legend.text=element_text(color='white'),
+    legend.key=element_rect(fill='black'),
+    legend.background=element_rect(fill='black'),
+    panel.background=element_rect(fill='black'),
+    plot.background=element_rect(fill='black')
+  ) +
+  coord_cartesian(
+    xlim=buffered.range(grid.sub.FPLY$long, 0),
+    ylim=buffered.range(grid.sub.FPLY$lat, 0)
+  ) +
+  facet_grid(Context ~ Prioritization) +
+  scale_fill_gradient(name='Selection Frequency (%)',
+    guide=guide_colorbar(title.position='bottom', title.hjust=0.5,
+      ticks=element_line(color='black'), border=element_line(color='black'))
+  )
+```
+
+```{r, include = FALSE}
+plot.spp.spaces <- function(i) {
+  ## prepare data
+  # get vector of adaptive and neutral column names
+  adapt.col <- grep(
+    paste0(unique(spp.samples.DF$species)[i], '_adaptive_d'),
+    names(grid.FPLY), value=TRUE, fixed=TRUE
+  )
+  neutral.col <- grep(
+    paste0(unique(spp.samples.DF$species)[i], '_neutral_d'),
+    names(grid.FPLY), value=TRUE, fixed=TRUE
+  )
+  env.col <- grep(
+    paste0(unique(spp.samples.DF$species)[i], '_env_d'),
+    names(grid.FPLY), value=TRUE, fixed=TRUE
+  )
+  # skip species if not used in analysis
+  curr.FPLY <- grid.FPLY %>%
+    select(one_of(adapt.col, neutral.col, env.col), group, long, lat) %>%
+    mutate_each(funs(unname), one_of(adapt.col, neutral.col, env.col)) %>%
+    filter(!is.na(.[[1]])) %>%
+    gather(d, value, contains('adaptive'), contains('neutral'), contains('env')) %>%
+    mutate(d=as.character(d)) %>%
+    mutate(d=gsub(paste0(unique(spp.samples.DF$species)[i], '_'), '', d, fixed=TRUE)) %>%
+    mutate(d=gsub('_', ' ', d, fixed=TRUE)) %>%
+    mutate(d=gsub('env', 'environmental', d, fixed=TRUE))
+  for (j in seq_len(max(length(adapt.col),length(neutral.col),length(env.col))))
+    curr.FPLY$d <- gsub(paste0('d', as.character(j)), paste0('(', j, ')'), curr.FPLY$d, fixed=TRUE)
+  # make plot
+  curr.GROBS <- llply(unique(curr.FPLY$d), function(x) {
+    ggplot() +
+      geom_polygon(data=countries.FPLY, aes(x=long, y=lat, group=group),
+        fill='grey85', color='grey70', size=0.001) +
+      geom_polygon(data=filter(curr.FPLY, d==x), aes_string(x='long', y='lat',
+        group='group', fill='value'), color='grey10') +
+      theme_classic() +
+      theme(
+        axis.ticks=element_blank(), axis.text=element_blank(), axis.line=element_blank(), plot.margin = unit(c(0, 0, 0, 0), "lines"), axis.title=element_blank(),
+        panel.border=element_rect(color='black', fill=NA, size=1),
+        strip.background = element_rect(fill='grey20'),
+        strip.text = element_text(color='white', size=20),
+        legend.title=element_text(color='white'),
+        legend.text=element_text(color='white'),
+        legend.key=element_rect(fill='black'),
+        legend.background=element_rect(fill='black'),
+        panel.background=element_rect(fill='black'),
+        plot.background=element_rect(fill='black')
+      ) +
+      coord_cartesian(
+        xlim=buffered.range(grid.FPLY$long, 0),
+        ylim=buffered.range(grid.FPLY$lat, 0)
+      ) +
+      scale_fill_gradientn(name='',
+        colors=brewer.pal(9, 'RdYlBu'),
+        guide=guide_colorbar(ticks=element_line(color='black'),
+          border=element_line(color='black'), barheight=unit(3.0, 'cm')),
+        labels=function(x) {formatC(x, format='f', digits=2)}
+      ) + facet_wrap(~d)
+  })
+  do.call(grid.arrange, append(curr.GROBS, list(ncol=3)))
+  invisible()
+}
+
+calc.fig.height <- function(i) {
+  # init
+  adapt.col <- paste0(unique(spp.samples.DF$species)[i], '_adaptive_d1')
+  neutral.col <- paste0(unique(spp.samples.DF$species)[i], '_neutral_d1')
+  env.col <- grepl(paste0(unique(spp.samples.DF$species)[i], '_env_d'), names(grid.FPLY), fixed=TRUE) %>%
+    sum()
+
+  n.plots <- 0
+  # count adaptive plot
+  if (adapt.col %in% names(grid.FPLY))
+    n.plots <- n.plots + spp.nmds.LST[[i]][['adaptive']]$ndim
+  # count neutral plot
+  if (neutral.col %in% names(grid.FPLY))
+    n.plots <- n.plots + spp.nmds.LST[[i]][['neutral']]$ndim
+  # count env plot
+  n.plots <- n.plots + env.col
+  # exports
+  if (n.plots == 0) return(1)
+  if (n.plots >= 3) return((((n.plots-1) %/% 3)+1) * 2)
+  return(1.85)
+}
+
+calc.fig.width <- function(i) {
+  # init
+  adapt.col <- paste0(unique(spp.samples.DF$species)[i], '_adaptive_d1')
+  neutral.col <- paste0(unique(spp.samples.DF$species)[i], '_neutral_d1')
+  env.col <- grepl(paste0(unique(spp.samples.DF$species)[i], '_env_d'), names(grid.FPLY), fixed=TRUE) %>%
+    sum()
+  n.plots <- 0
+  # count adaptive plot
+  if (adapt.col %in% names(grid.FPLY))
+    n.plots <- n.plots + spp.nmds.LST[[i]][['adaptive']]$ndim
+  # count neutral plot
+  if (neutral.col %in% names(grid.FPLY))
+    n.plots <- n.plots + spp.nmds.LST[[i]][['neutral']]$ndim
+  # count env plot
+  n.plots <- n.plots + env.col
+  # exports
+  if (n.plots == 0) return(1)
+  if (n.plots >= 3) return(10)
+  return(4 * n.plots)
+}
+is.speciesPlottable <- function(i) {
+  if (i > general.params.LST[[MODE]]$n.spp)
+    return(FALSE)
+  return(!is.na(unique(spp.samples.DF$species)[i]))
+}
+```
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.align='center', fig.width=4.5, fig.height=4.5, fig.cap='Qvalues from PCadapt for \textit{Arabis alpina}'}
+# prepare data
+alpha_value <- pcadapt.params.LST[[MODE]]$alpha.level
+outlier_data <- data.frame(qvalue = spp.pcadapt.LST[[2]]$qvalues$qvalues) %>%
+                mutate(id = factor(seq_len(nrow(.)))) %>%
+                mutate(type = case_when(.$qvalue < alpha_value ~ 'adaptive',
+                                        .$qvalue >= alpha_value ~ 'neutral'))
+
+# make plot
+ggplot(data = outlier_data, aes(x = id, y = qvalue, fill = type)) +
+  geom_bar(stat='identity', color = 'black') +
+  geom_hline(yintercept = alpha_value, color = "red", linetype = "dashed") +
+  xlab('Loci') +
+  ylab('Q-value') +
+  scale_fill_manual(values = c('adaptive' = 'red', 'neutral' = 'white')) +
+  theme_classic() +
+  theme(axis.line.x=element_line(color='white'),
+        axis.line.y=element_line(color='white'),
+        axis.title=element_text(color='white'),
+        axis.text=element_text(color='white'),
+        axis.ticks=element_line(color='white'),
+        legend.text=element_text(color='white'),
+        legend.title=element_text(color='white'),
+        legend.background=element_rect(color='black', fill = 'black'),
+        legend.key=element_rect(color='black', fill = 'black'),
+        panel.background=element_rect(color='black',fill='black'),
+        plot.background=element_rect(color='black',fill='black'))
+```
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.align='center', fig.width=4.5, fig.height=4.5, fig.cap='Qvalues from BayeScan for \textit{Arabis alpina}'}
+# prepare data
+outlier_data <- spp.BayeScan.LST[[2]]$bayescan@results@summary %>%
+                mutate(id = factor(seq_len(nrow(.))))
+# make plot
+ggplot(data = outlier_data, aes(x = id, y = mean_qval, fill = type)) +
+  geom_bar(stat = 'identity', color = 'black') +
+  xlab('Loci') +
+  ylab('Q-value') +
+  theme_classic() +
+  scale_fill_manual(values = c('adaptive' = 'red', 'neutral' = 'white')) +
+  theme(axis.line.x=element_line(color='white'),
+        axis.line.y=element_line(color='white'),
+        axis.title=element_text(color='white'),
+        axis.text=element_text(color='white'),
+        axis.ticks=element_line(color='white'),
+        legend.text=element_text(color='white'),
+        legend.title=element_text(color='white'),
+        legend.background=element_rect(color='black', fill = 'black'),
+        legend.key=element_rect(color='black', fill = 'black'),
+        panel.background=element_rect(color='black',fill='black'),
+        plot.background=element_rect(color='black',fill='black'))
+```
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.align='center', fig.width=4.5, fig.height=4.5, fig.cap='NMDS for neutral alleles for \textit{Arabis alpina}'}
+# prepare data
+nmds <- as.data.frame(spp.nmds.LST[[2]]$neutral$points)
+# make plot
+ggplot(data = nmds, aes(x = MDS1, y = MDS2)) +
+  geom_point(color = 'white') +
+  xlab('NMDS 1') +
+  ylab('NMDS 2') +
+  theme_classic() +
+  theme(axis.line.x=element_line(color='white'),
+        axis.line.y=element_line(color='white'),
+        axis.title=element_text(color='white'),
+        axis.text=element_text(color='white'),
+        axis.ticks=element_line(color='white'),
+        panel.background=element_rect(color='black',fill='black'),
+        plot.background=element_rect(color='black',fill='black'))
+```
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.align='center', fig.width=4.5, fig.height=4.5, fig.cap='NMDS for adaptive alleles for \textit{Arabis alpina}'}
+# prepare data
+nmds <- as.data.frame(spp.nmds.LST[[2]]$adaptive$points)
+# make plot
+ggplot(data = nmds, aes(x = MDS1, y = MDS2)) +
+  geom_point(color = 'white') +
+  xlab('NMDS 1') +
+  ylab('NMDS 2') +
+  theme_classic() +
+  theme(axis.line.x=element_line(color='white'),
+        axis.line.y=element_line(color='white'),
+        axis.title=element_text(color='white'),
+        axis.text=element_text(color='white'),
+        axis.ticks=element_line(color='white'),
+        panel.background=element_rect(color='black',fill='black'),
+        plot.background=element_rect(color='black',fill='black'))
+```
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.align='center', fig.width=4.5, fig.height=4.5, fig.cap='Population memberships for \textit{Arabis alpina}'}
+# prepare data
+pop.probs.DF <- llply(
+  seq_along(unique(spp.samples.DF$species)),
+  function(i) {
+    curr.pts <- filter(
+      spp.sample.PTS@data,
+      species==unique(spp.samples.DF$species)[i]
+    ) %>% mutate(
+      Individual=seq_along(species)
+    )
+    curr.probs <- structurer:::sample.membership(spp.StructureCollection.LST[[i]]) %>%
+      as.data.frame() %>%
+      mutate(
+        species=unique(spp.samples.DF$species)[i],
+        Individual=seq_along(species)) %>%
+      gather(Population,Probability,-species,-Individual) %>%
+      mutate(Population=as.numeric(gsub('V', '', Population, fixed=TRUE))) %>%
+      left_join(curr.pts, by=c('species','Individual')) %>%
+      mutate(species=gsub('_', ' ', species, fixed=TRUE)) %>%
+      arrange(species,Individual,Population)
+    return(curr.probs)
+  }
+) %>% do.call(what=rbind)
+# create legend colors
+legend.CHR <- `names<-`(
+  gg_color_hue(n_distinct(pop.probs.DF$Population)),
+  as.character(unique(pop.probs.DF$Population))
+)
+plot.spp.pop.probs <- function(i) {
+  # init spp.samples
+  prop <- 0.85
+  curr.spp.DF <- filter(pop.probs.DF, species==unique(pop.probs.DF$species)[i])
+  # create base map grob
+  curr.GROB <- ggplot(data=curr.spp.DF) +
+    geom_polygon(data=countries.FPLY, aes(x=long, y=lat, group=group),
+      fill='grey85', color='grey75') +
+    geom_polygon(data=grid.FPLY, aes_string(x='long', y='lat',
+      group='group'), fill='grey70', color='grey10') +
+    guides(fill=guide_legend(title=''), color=guide_legend(title='')) +
+    theme_classic() +
+    theme(
+      axis.title=element_blank(), axis.text=element_blank(),
+      axis.line=element_blank(), axis.ticks=element_blank(),
+      plot.background=element_rect(fill='black'),
+      axis.ticks.length = unit(0, "cm"),
+      legend.position = "none", panel.margin = unit(0, "lines"),
+      plot.margin = unit(c(0, 0, 0, 0), "lines"),
+      strip.background = element_rect(fill='grey20'),
+      strip.text = element_text(color='white', face='italic', size=20),
+      legend.text= element_text(size=20)
+    ) +
+    coord_cartesian(
+      xlim=buffered.range(grid.FPLY$long, 0),
+      ylim=buffered.range(grid.FPLY$lat, 0)
+    ) +
+    scale_fill_manual(
+      name='',
+      values=legend.CHR[seq_len(n_distinct(curr.spp.DF$Population))]
+    )
+  # create header grob
+  curr.GROBH <- ggplot() +
+      geom_text(aes(x=0,y=0,label=species),
+        data=curr.spp.DF[1,,drop=FALSE],
+        color='white', fontface='italic', size=4) +
+    theme_classic() +
+    theme(
+      axis.title=element_blank(), axis.text=element_blank(),
+      axis.line=element_blank(), axis.ticks=element_blank(),
+      axis.ticks.length = unit(0, "cm"),
+      legend.position = "none", panel.margin = unit(0, "lines"),
+      plot.margin = unit(c(0, 0, 0, 0), "lines"),
+      panel.background=element_rect(fill='grey20')
+    ) +
+    coord_cartesian(xlim=c(-1,1), ylim=c(-1,1))
+  # create bbox object
+  bbox <- c(ggplot_build(curr.GROB)$panel$ranges[[1]]$x.range,
+    ggplot_build(curr.GROB)$panel$ranges[[1]]$y.range)
+    names(bbox) <- c('ll.lon', 'ur.lon', 'll.lat', 'ur.lat')
+  # render grob
+  grid.newpage()
+  pushViewport(viewport(layout=grid.layout(2,1, heights=unit(c(1-prop, prop), "npc"))))
+  print(curr.GROBH, vp=viewport(layout.pos.row=1, layout.pos.col=1))
+  print(curr.GROB, vp=viewport(layout.pos.row=2, layout.pos.col=1))
+  # add in pies
+  for (j in unique(curr.spp.DF$cell)) {
+    # init
+    curr.cell.DF <- filter(curr.spp.DF, cell==j) %>%
+      group_by(cell, Population) %>%
+      summarize(
+        grid.longitude=mean(grid.longitude),
+        grid.latitude=mean(grid.latitude),
+        Probability=mean(Probability)
+      ) %>% data.frame()
+    curr.lon <- (curr.cell.DF$grid.longitude[1]-bbox['ll.lon'])/abs(bbox['ur.lon']-bbox['ll.lon'])
+    curr.lat <- ((curr.cell.DF$grid.latitude[1]-bbox['ll.lat'])/abs(bbox['ur.lat']-bbox['ll.lat']))*prop
+    # create pie chart for individual
+    curr.pie <- ggplot(curr.cell.DF, aes(x="", y=Probability, fill=factor(Population))) +
+      geom_bar(width=0.75, color='grey20', stat='identity') +
+      coord_polar(theta='y') +
+      theme(
+        line = element_blank(), rect = element_blank(),
+        text = element_blank(), axis.ticks.length = unit(0, "cm"),
+        legend.position = "none", panel.margin = unit(0, "lines"),
+        plot.margin = unit(c(0, 0, 0, 0), "lines"), complete = TRUE
+      ) +
+      scale_fill_manual(
+        name='',
+        values=legend.CHR[seq_len(n_distinct(curr.spp.DF$Population))]
+      )
+    # render pie
+    print(curr.pie, vp=viewport(x=curr.lon, y=curr.lat, width=0.075, height=0.075))
+  }
+}
+plot.spp.pop.probs(2)
+```

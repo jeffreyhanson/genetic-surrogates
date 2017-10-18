@@ -1,5 +1,5 @@
 % load packages
-\usepackage{amsmath,amsfonts,makecell,tocloft,titling,natbib,hyperref,booktabs}
+\usepackage{amsmath,amsfonts,makecell,tocloft,titling,natbib,hyperref,booktabs,caption}
 \usepackage[T1]{fontenc}
 \usepackage{lmodern}
 \usepackage[utf8]{inputenc}
@@ -17,4 +17,5 @@
 \pagenumbering{gobble}
 \renewcommand{\thefigure}{S\arabic{figure}}
 \renewcommand{\thetable}{S\arabic{table}}
-\setcounter{table}{1}
+\captionsetup[figure]{labelfont={bf},labelformat={default},labelsep=period,name={Fig.}}
+\captionsetup[table]{labelfont={bf},labelformat={default},labelsep=period,name={Table}}

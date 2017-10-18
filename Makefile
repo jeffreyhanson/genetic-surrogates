@@ -1,6 +1,6 @@
 ## global variables
-# set parameters for inference 
-MODE=release 
+# set parameters for inference
+MODE=release
 # set parameters for debugging code
 # MODE=debug
 
@@ -27,16 +27,19 @@ clean:
 
 pull_ms:
 	@scp -P 443 uqjhans4@cbcs-comp01.server.science.uq.edu.au:/home/uqjhans4/GitHub/genetic-surrogates/article/* article
+	@scp -P 443 uqjhans4@cbcs-comp01.server.science.uq.edu.au:/home/uqjhans4/GitHub/genetic-surrogates/code/rmarkdown/article_files/figure-latex/*.pdf article
 
 push_ms:
 	@scp -P 443 code/rmarkdown/* uqjhans4@cbcs-comp01.server.science.uq.edu.au:/home/uqjhans4/GitHub/genetic-surrogates/code/rmarkdown
-	
+
 # commands for generating manuscript
 manuscript: article si
 
 article: article/article.pdf article/article.docx
 
 si: article/supporting_information.pdf
+
+slides: article/slides.pdf
 
 article/article.docx: code/rmarkdown/article.Rmd code/rmarkdown/references.bib code/rmarkdown/preamble.tex code/rmarkdown/reference-style.csl
 	R -e "rmarkdown::render('code/rmarkdown/article.Rmd', clean=FALSE)"
@@ -54,7 +57,7 @@ article/article.pdf: code/rmarkdown/article.Rmd code/rmarkdown/references.bib co
 	R -e "source('code/R/functions/format_pnas.R');format_pnas('code/rmarkdown/article.tex','code/rmarkdown/article.tex')"
 	cd code/rmarkdown && pdflatex article.tex
 	mv code/rmarkdown/article.pdf article/
-	mv code/rmarkdown/article.tex article/
+	R -e "x<-paste(readLines('code/rmarkdown/article.tex'),collapse='\n');x<-gsub('\\\\section*{Materials and Methods}\\\\label{materials-and-methods}\n\\\\addcontentsline{toc}{section}{Materials and Methods}\n','\\\\matmethods{\\\\subsection*{Study system}\n',x,fixed=TRUE);x<-gsub('\n\\\\showmatmethods\n','}\n\\\\showmatmethods\n',x,fixed=TRUE);x<-gsub('\\\\correspondingauthor{\\\\textsuperscript{1} }','\\\\correspondingauthor{\\\\textsuperscript{1}To whom correspondence should be addressed. E-mail: jeffrey.hanson@uqconnect.edu.au.}',x,fixed=TRUE);x<-gsub(']{pnas-new}',',lineno]{pnas-new}',x,fixed=TRUE);x<-gsub('\n\\\\subsection*{Study system}\\\\label{study-system}\n\\\\addcontentsline{toc}{subsection}{Study system}\n','',x,fixed=TRUE);writeLines(x,'article/article.tex')"
 	rm article/article.md -f
 	rm article/article.utf8.md -f
 
@@ -63,6 +66,12 @@ article/supporting_information.pdf: code/rmarkdown/supporting_information.Rmd co
 	mv code/rmarkdown/supporting_information.pdf article/
 	rm code/rmarkdown/supporting_information.tex -f
 	rm code/rmarkdown/supporting_information.md -f
+
+article/slides.pdf: code/rmarkdown/slides.Rmd
+	R -e "rmarkdown::render('code/rmarkdown/slides.Rmd', clean=F)"
+	mv code/rmarkdown/slides.pdf article/
+	rm code/rmarkdown/slides.tex -f
+	rm code/rmarkdown/slides.md -f
 
 # commands for running analysis
 analysis: data/final/results.rda
@@ -90,7 +99,7 @@ data/intermediate/09-*.rda: data/intermediate/06-*.rda code/R/analysis/09-*.R co
 data/intermediate/08-*.rda: data/intermediate/06-*.rda code/R/analysis/08-*.R code/parameters/raptr.toml code/parameters/gurobi.toml
 	R CMD BATCH --no-restore --no-save code/R/analysis/08-*.R
 	mv *.Rout data/intermediate/
-	
+
 data/intermediate/07-*.rda: data/intermediate/06-*.rda code/R/analysis/07-*.R code/parameters/raptr.toml code/parameters/gurobi.toml
 	R CMD BATCH --no-restore --no-save code/R/analysis/07-*.R
 	mv *.Rout data/intermediate/
@@ -122,6 +131,3 @@ data/intermediate/01-*.rda: data/intermediate/00-*.rda code/R/analysis/01-*.R
 data/intermediate/00-*.rda: code/R/analysis/00-*.R code/parameters/general.toml data/raw/*
 	R CMD BATCH --no-restore --no-save '--args MODE=$(MODE)' code/R/analysis/00-*.R
 	mv *.Rout data/intermediate/
-
-
-
