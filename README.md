@@ -1,6 +1,6 @@
 ## Environmental and geographic variables are effective surrogates for genetic variation in conservation planning
 
-[![Status](https://img.shields.io/badge/status-in%20press-brightgreen.svg?style=flat-square)]()
+[![Status](https://img.shields.io/badge/status-In%20press-brightgreen.svg?style=flat-square)]()
 [![License (GPL version 3)](https://img.shields.io/badge/license-GNU%20GPL%20version%203-brightgreen.svg?style=flat-square)](http://opensource.org/licenses/GPL-3.0)
 [![DOI](https://img.shields.io/badge/doi-10.5281/zenodo.843625-blue.svg?style=flat-square)](https://doi.org/10.5281/zenodo.843625)
 
