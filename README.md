@@ -4,7 +4,7 @@
 [![License (GPL version 3)](https://img.shields.io/badge/license-GNU%20GPL%20version%203-brightgreen.svg?style=flat-square)](http://opensource.org/licenses/GPL-3.0)
 [![DOI](https://img.shields.io/badge/doi-10.5281/zenodo.843625-blue.svg?style=flat-square)](https://doi.org/10.5281/zenodo.843625)
 
-[Jeffrey O. Hanson](wwww.jeffrey-hanson.com), Jonathan R. Rhodes, Cynthia Riginos, Richard A. Fuller
+[Jeffrey O. Hanson](wwww.jeffrey-hanson.com), [Jonathan R. Rhodes](https://rhodesconservation.com/people/jonathan-rhodes/), [Cynthia Riginos](http://www.cynthiariginos.org/Lab_People/Cynthia_Riginos.html), [Richard A. Fuller](https://www.fullerlab.org/drrichardfuller/)
 
 Correspondence should be addressed to [jeffrey.hanson@uqconnect.edu.au](mailto:jeffrey.hanson@uqconnect.edu.au)
 
