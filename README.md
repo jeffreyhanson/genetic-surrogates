@@ -2,6 +2,7 @@
 
 [![Status](https://img.shields.io/badge/status-in%20press-brightgreen.svg?style=flat-square)]()
 [![License (GPL version 3)](https://img.shields.io/badge/license-GNU%20GPL%20version%203-brightgreen.svg?style=flat-square)](http://opensource.org/licenses/GPL-3.0)
+[![DOI](https://img.shields.io/badge/doi-10.5281/zenodo.843625-blue.svg?style=flat-square)](https://doi.org/10.5281/zenodo.843625)
 
 [Jeffrey O. Hanson](wwww.jeffrey-hanson.com), Jonathan R. Rhodes, Cynthia Riginos, Richard A. Fuller
 
@@ -27,8 +28,6 @@ To rerun all computational analyses, run `make clean && make all`.
 	+ _raw_: raw data used to run the analysis
 	+ _intermediate_: results generated during processing
 	+ _final_: results used in the paper
-* packrat
-	+ _R_ packages used for analysis
 
 ### Software required
 
