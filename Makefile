@@ -27,7 +27,6 @@ clean:
 
 pull_ms:
 	@scp -P 443 uqjhans4@cbcs-comp01.server.science.uq.edu.au:/home/uqjhans4/GitHub/genetic-surrogates/article/* article
-	@scp -P 443 uqjhans4@cbcs-comp01.server.science.uq.edu.au:/home/uqjhans4/GitHub/genetic-surrogates/code/rmarkdown/article_files/figure-latex/*.pdf article
 
 push_ms:
 	@scp -P 443 code/rmarkdown/* uqjhans4@cbcs-comp01.server.science.uq.edu.au:/home/uqjhans4/GitHub/genetic-surrogates/code/rmarkdown
@@ -57,7 +56,7 @@ article/article.pdf: code/rmarkdown/article.Rmd code/rmarkdown/references.bib co
 	R -e "source('code/R/functions/format_pnas.R');format_pnas('code/rmarkdown/article.tex','code/rmarkdown/article.tex')"
 	cd code/rmarkdown && pdflatex article.tex
 	mv code/rmarkdown/article.pdf article/
-	R -e "x<-paste(readLines('code/rmarkdown/article.tex'),collapse='\n');x<-gsub('\\\\section*{Materials and Methods}\\\\label{materials-and-methods}\n\\\\addcontentsline{toc}{section}{Materials and Methods}\n','\\\\matmethods{\\\\subsection*{Study system}\n',x,fixed=TRUE);x<-gsub('\n\\\\showmatmethods\n','}\n\\\\showmatmethods\n',x,fixed=TRUE);x<-gsub('\\\\correspondingauthor{\\\\textsuperscript{1} }','\\\\correspondingauthor{\\\\textsuperscript{1}To whom correspondence should be addressed. E-mail: jeffrey.hanson@uqconnect.edu.au.}',x,fixed=TRUE);x<-gsub(']{pnas-new}',',lineno]{pnas-new}',x,fixed=TRUE);x<-gsub('\n\\\\subsection*{Study system}\\\\label{study-system}\n\\\\addcontentsline{toc}{subsection}{Study system}\n','',x,fixed=TRUE);writeLines(x,'article/article.tex')"
+	mv code/rmarkdown/article.tex article/
 	rm article/article.md -f
 	rm article/article.utf8.md -f
 
